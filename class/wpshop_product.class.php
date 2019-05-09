@@ -128,8 +128,13 @@ class wpshop_product extends CommonObject
 	}
 
 	public function create( User $user, $notrigger = false ) {
-		$this->sync_date = dol_now( 'tzserver' );
-		$this->last_sync_date = dol_now( 'tzserver' );
+		if ( empty( $this->sync_date ) ) {
+			$this->sync_date = dol_now( 'tzserver' );
+		}
+		
+		if ( empty( $this->last_sync_date ) ) {
+			$this->last_sync_date = dol_now( 'tzserver' );
+		}
 		$this->createCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}

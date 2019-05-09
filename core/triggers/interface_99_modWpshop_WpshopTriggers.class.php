@@ -98,6 +98,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
 	{
 			global $conf;
+			global $db;
         if (empty($conf->wpshop->enabled)) return 0;     // Module not active, we do nothing
 
 	    // Put here code you want to execute when a Dolibarr business events occurs.
@@ -136,12 +137,32 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 		    //case 'CONTACT_ENABLEDISABLE':
 
 		    // Products
-		    //case 'PRODUCT_CREATE':
-		    case 'PRODUCT_MODIFY':
+		    case 'PRODUCT_CREATE':
 					dol_include_once('/wpshop/class/wp_api.class.php');
 					dol_include_once('/wpshop/class/wpshop_product.class.php');
 					
-				
+					$sync_date = dol_now( 'tzserver' );
+					
+					$api = new WPAPI();
+					$request = $api->request( '/wp-json/wpshop/v1/product/', array(), array( 
+						'title' => $object->label,
+						'price' => $object->price,
+						'price_ttc' => $object->price_ttc,
+						'tva_tx' => $object->tva_tx,
+						'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+						'external_id' => (string) $object->id,
+					), Requests::POST );
+					
+					$wpshop_product = new wpshop_product($this->db);
+					$wpshop_product->wp_product = $request['data']['id'];
+					$wpshop_product->fk_product = $object->id;
+					$wpshop_product->sync_date = $sync_date;
+					$wpshop_product->last_sync_date = $sync_date;
+					$wpshop_product->create($user);
+					
+		    case 'PRODUCT_MODIFY':
+					dol_include_once('/wpshop/class/wp_api.class.php');
+					dol_include_once('/wpshop/class/wpshop_product.class.php');
 					
 					$wpshop_product = new wpshop_product($this->db);
 					$product = $wpshop_product->fetch( (int) $object->id );
