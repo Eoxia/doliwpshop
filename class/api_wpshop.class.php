@@ -41,9 +41,7 @@ class WpshopApi extends DolibarrApi
 		/**
 		 * @var array   $FIELDS     Mandatory fields, checked when create and update object
 		 */
-		static $FIELDS = array(
-				'wp_product'
-		);
+		static $FIELDS = array();
 	
 		public $wpshop_object;
 		
@@ -74,6 +72,7 @@ class WpshopApi extends DolibarrApi
 				throw new RestException(401);
 			}
 			
+			
 			$result = $this->_validate($request_data);
 			
 			foreach($request_data as $field => $value) {
@@ -83,13 +82,8 @@ class WpshopApi extends DolibarrApi
 			// Le produit existe pas sur Dolibarr le créer
 			$products = new Products();
 			$product = $products->post($request_data);
-			$this->wpshop_object->fk_product = $product;
-			
-			$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
-			
 			$product = $products->get($product);
 			$product->last_sync_date = $last_sync_date;
-			
 			
 			return $product;
     }

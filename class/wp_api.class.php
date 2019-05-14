@@ -66,8 +66,6 @@ class WPAPI {
 	public function handleOauth() {
 		if (!isset($_GET['code'])) {
 			$authorizationUrl = $this->provider->getAuthorizationUrl();
-			header('Location: ' . $authorizationUrl);
-			exit;
 		} elseif (empty($_GET['state'])) {
 				exit('Invalid state');
 		} else {

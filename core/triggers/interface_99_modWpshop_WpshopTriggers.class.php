@@ -138,23 +138,26 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 
 		    // Products
 		    case 'PRODUCT_CREATE':
-					dol_include_once('/wpshop/class/wp_api.class.php');
-					dol_include_once('/wpshop/class/wpshop_product.class.php');
-					
-					$sync_date = dol_now( 'tzserver' );
-					
-					$api = new WPAPI();
-					$request = $api->request( '/wp-json/wpshop/v1/product/', array(), array( 
-						'title' => $object->label,
-						'price' => $object->price,
-						'price_ttc' => $object->price_ttc,
-						'tva_tx' => $object->tva_tx,
-						'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
-						'external_id' => (string) $object->id,
-					), Requests::POST );
+					if ( empty( $object->wp_product ) ) {
+						dol_include_once('/wpshop/class/wp_api.class.php');
+						dol_include_once('/wpshop/class/wpshop_product.class.php');
+						
+						$sync_date = dol_now( 'tzserver' );
+						
+						$api = new WPAPI();
+											
+						$request = $api->request( '/wp-json/wpshop/v1/product/', array(), array( 
+							'title' => $object->label,
+							'price' => $object->price,
+							'price_ttc' => $object->price_ttc,
+							'tva_tx' => $object->tva_tx,
+							'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+							'external_id' => (int) $object->id,
+						), Requests::POST );
+					}
 					
 					$wpshop_product = new wpshop_product($this->db);
-					$wpshop_product->wp_product = $request['data']['id'];
+					$wpshop_product->wp_product = isset( $request ) ? $request['data']['id'] : $object->wp_product;
 					$wpshop_product->fk_product = $object->id;
 					$wpshop_product->sync_date = $sync_date;
 					$wpshop_product->last_sync_date = $sync_date;
@@ -166,7 +169,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					
 					$wpshop_product = new wpshop_product($this->db);
 					$product = $wpshop_product->fetch( (int) $object->id );
-					$product->update($user);
+					$product->update( $user );
 					
 					$api = new WPAPI();
 					$request = $api->request( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array(), array( 

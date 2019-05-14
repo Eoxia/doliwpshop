@@ -135,6 +135,7 @@ class wpshop_product extends CommonObject
 		if ( empty( $this->last_sync_date ) ) {
 			$this->last_sync_date = dol_now( 'tzserver' );
 		}
+		
 		$this->createCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
