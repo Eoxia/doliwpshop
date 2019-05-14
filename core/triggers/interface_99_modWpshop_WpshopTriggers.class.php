@@ -1,4 +1,4 @@
-<?php
+ <?php
 /* Copyright (C) 2019 SuperAdmin
  *
  * This program is free software: you can redistribute it and/or modify
@@ -167,18 +167,20 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					dol_include_once('/wpshop/class/wp_api.class.php');
 					dol_include_once('/wpshop/class/wpshop_product.class.php');
 					
-					$wpshop_product = new wpshop_product($this->db);
+					$wpshop_product = new wpshop_product( $this->db );
 					$product = $wpshop_product->fetch( (int) $object->id );
-					$product->update( $user );
-					
-					$api = new WPAPI();
-					$request = $api->request( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array(), array( 
-						'title' => $object->label,
-						'price' => $object->price,
-						'price_ttc' => $object->price_ttc,
-						'tva_tx' => $object->tva_tx,
-						'date_last_synchro' => date( 'Y-m-d H:i:s', $product->last_sync_date ),
-					), Requests::POST );
+					if ( ! empty( $product ) ) {
+						$product->update( $user );
+						
+						$api = new WPAPI();
+						$request = $api->request( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array(), array( 
+							'title' => $object->label,
+							'price' => $object->price,
+							'price_ttc' => $object->price_ttc,
+							'tva_tx' => $object->tva_tx,
+							'date_last_synchro' => date( 'Y-m-d H:i:s', $product->last_sync_date ),
+						), Requests::POST );
+					}
 					break;
 		    //case 'PRODUCT_DELETE':
 		    //case 'PRODUCT_PRICE_MODIFY':
