@@ -138,13 +138,14 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 
 		    // Products
 		    case 'PRODUCT_CREATE':
-					if ( empty( $object->wp_product ) ) {
+					if ( empty( $object->wp_product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
 						dol_include_once('/wpshop/class/wp_api.class.php');
 						dol_include_once('/wpshop/class/wpshop_product.class.php');
 						
 						$sync_date = dol_now( 'tzserver' );
 						
 						$api = new WPAPI();
+					
 											
 						$request = $api->request( '/wp-json/wpshop/v1/product/', array(), array( 
 							'title' => $object->label,
@@ -169,7 +170,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					
 					$wpshop_product = new wpshop_product( $this->db );
 					$product = $wpshop_product->fetch( (int) $object->id );
-					if ( ! empty( $product ) ) {
+					if ( ! empty( $product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
 						$product->update( $user );
 						
 						$api = new WPAPI();
