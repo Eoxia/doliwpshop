@@ -140,9 +140,9 @@ class wpshop_product extends CommonObject
 		return $this->last_sync_date;
 	}
 	
-	public function update(User $user, $notrigger = false) {
+	public function update(User $user, $notrigger = false, &$statut = false) {
 		$this->last_sync_date = dol_now( 'tzserver' );
-		$this->updateCommon($user, $notrigger);
+		$statut = $this->updateCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
 	

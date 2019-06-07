@@ -111,7 +111,12 @@ class WpshopApi extends DolibarrApi
 			$products = new Products();
 			$product = $products->put($id, $request_data);
 			
-			$last_sync_date = $this->wpshop_object->update(DolibarrApiAccess::$user);
+			$last_sync_date = $this->wpshop_object->update(DolibarrApiAccess::$user, false, $statut );
+
+			if ( $statut == -1 ) {
+				$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
+			}
+			
 			$product->last_sync_date = $last_sync_date;
 			return $product;
 		}
