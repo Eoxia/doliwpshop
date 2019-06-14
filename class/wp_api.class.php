@@ -52,31 +52,36 @@ class WPAPI {
 		$this->provider = new \League\OAuth2\Client\Provider\GenericProvider([
 			'clientId'                => $conf->global->WPSHOP_CLIENT_ID,    // The client ID assigned to you by the provider
 			'clientSecret'            => $conf->global->WPSHOP_CLIENT_SECRET,   // The client password assigned to you by the provider
-			'redirectUri'             => '',
+			'redirectUri'             => 'http://127.0.0.1/dolibarr/custom/wpshop/admin/setup.php?check=true',
 			'urlAuthorize'            => $this->base . '/oauth/authorize',
 			'urlAccessToken'          => $this->base . '/oauth/token',
 			'urlResourceOwnerDetails' => $this->base . '/oauth/me'
 		]);
 		
-		if (empty($_SESSION['oauth_token'])) {
+		if ( $_GET['check'] == true ) {
 			$this->handleOauth();
 		}
 	}
 	
 	public function handleOauth() {
 		if (!isset($_GET['code'])) {
-			$authorizationUrl = $this->provider->getAuthorizationUrl();
-		} elseif (empty($_GET['state'])) {
-				exit('Invalid state');
+				$authorizationUrl = $this->provider->getAuthorizationUrl();
+				$_SESSION['oauth2state'] = $this->provider->getState();
+				header('Location: ' . $authorizationUrl);
+		} elseif (empty($_GET['state']) || (isset($_SESSION['oauth2state']) && $_GET['state'] !== $_SESSION['oauth2state'])) {
+
+    if (isset($_SESSION['oauth2state'])) {
+        unset($_SESSION['oauth2state']);
+    }
+    
+    exit('Invalid state');
 		} else {
-			if (empty($_SESSION['oauth_token'])) {
-				try {
-					$accessToken = $this->provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
-					$_SESSION['oauth_token'] = $accessToken->getToken();
-				} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-					// Failed to get the access token or user details.
-					exit($e->getMessage());
-				}
+			try {
+				$accessToken = $this->provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
+				$_SESSION['oauth_token'] = $accessToken->getToken();
+			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+				// Failed to get the access token or user details.
+				unset( $_SESSION['oauth_token'] );
 			}
 		}
 	}
@@ -138,7 +143,7 @@ class WPAPI {
 		$url = $this->base . $endpoint;
 		$options = array_merge($this->getDefaultOptions(), $options);
 		$options['body'] = json_encode( $data );
-		$request = $this->provider->getAuthenticatedRequest( 'POST', $url, $_SESSION['oauth_token'], $options );
+		$request = $this->provider->getAuthenticatedRequest( $type, $url, $_SESSION['oauth_token'], $options );
 		return $this->provider->getParsedResponse($request);
 	}
 	/**#@-*/
