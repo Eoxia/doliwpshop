@@ -18,20 +18,20 @@
  */
 
 /**
- * 	\defgroup   wpshop     Module Wpshop
- *  \brief      Wpshop module descriptor.
+ * 	\defgroup   wpshop     Module WPshop
+ *  \brief      WPshop module descriptor.
  *
- *  \file       htdocs/wpshop/core/modules/modWpshop.class.php
+ *  \file       htdocs/wpshop/core/modules/modWPshop.class.php
  *  \ingroup    wpshop
- *  \brief      Description and activation file for module Wpshop
+ *  \brief      Description and activation file for module WPshop
  */
 include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *  Description and activation class for module Wpshop
+ *  Description and activation class for module WPshop
  */
-class modWpshop extends DolibarrModules
+class modWPshop extends DolibarrModules
 {
 	/**
 	 * Constructor. Define names, constants, directories, boxes, permissions
@@ -48,9 +48,9 @@ class modWpshop extends DolibarrModules
 		$this->rights_class = 'wpshop';
 		$this->family = "other";
 		$this->module_position = '90';
-		$this->name = preg_replace('/^mod/i','',get_class($this));
-		$this->description = "WPshopDescription";
-		$this->descriptionlong = "WPshop description (Long)";
+		$this->name = 'WPshop';
+		$this->description = "Gestion de la synchronisation multidirectionnelle avec WordPress";
+		$this->descriptionlong = "Gestion de la synchronisation multidirectionnelle avec WordPress";
 		$this->editor_name = 'Eoxia';
 		$this->editor_url = 'https://eoxia.com';
 		$this->version = '0.1.0';
@@ -88,7 +88,7 @@ class modWpshop extends DolibarrModules
 		$this->need_dolibarr_version = array(4,0);		// Minimum version of Dolibarr required by module
 		$this->warnings_activation = array();			// Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();		// Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
-		//$this->automatic_activation = array('FR'=>'WpshopWasAutomaticallyActivatedBecauseOfYourCountryChoice');
+		//$this->automatic_activation = array('FR'=>'WPshopWasAutomaticallyActivatedBecauseOfYourCountryChoice');
 		//$this->always_enabled = true;								// If true, can't be disabled
 
 		if (! isset($conf->wpshop) || ! isset($conf->wpshop->enabled))
@@ -106,21 +106,21 @@ class modWpshop extends DolibarrModules
 
 		$r=0;
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read myobject of Wpshop';	// Permission label
+		$this->rights[$r][1] = 'Read myobject of WPshop';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update myobject of Wpshop';	// Permission label
+		$this->rights[$r][1] = 'Create/Update myobject of WPshop';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'write';				// In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete myobject of Wpshop';	// Permission label
+		$this->rights[$r][1] = 'Delete myobject of WPshop';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'delete';				// In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)

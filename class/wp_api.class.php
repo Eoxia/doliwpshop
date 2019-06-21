@@ -52,7 +52,7 @@ class WPAPI {
 		$this->provider = new \League\OAuth2\Client\Provider\GenericProvider([
 			'clientId'                => $conf->global->WPSHOP_CLIENT_ID,    // The client ID assigned to you by the provider
 			'clientSecret'            => $conf->global->WPSHOP_CLIENT_SECRET,   // The client password assigned to you by the provider
-			'redirectUri'             => 'http://127.0.0.1/dolibarr/custom/wpshop/admin/setup.php?check=true',
+			'redirectUri'             => DOL_MAIN_URL_ROOT . '/custom/wpshop/admin/setup.php?check=true',
 			'urlAuthorize'            => $this->base . '/oauth/authorize',
 			'urlAccessToken'          => $this->base . '/oauth/token',
 			'urlResourceOwnerDetails' => $this->base . '/oauth/me'
@@ -79,6 +79,8 @@ class WPAPI {
 			try {
 				$accessToken = $this->provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
 				$_SESSION['oauth_token'] = $accessToken->getToken();
+				header('Location: ' . DOL_MAIN_URL_ROOT . '/custom/wpshop/admin/setup.php');
+				
 			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 				// Failed to get the access token or user details.
 				unset( $_SESSION['oauth_token'] );

@@ -124,9 +124,9 @@ else
 		print '<tr class="oddevent"><td>Communication avec WordPress</td><td>';
 		
 		if ( $connected === true ) {
-			echo '💚';
+			echo '🥦 Connecté à WordPress';
 		} else {
-			echo '❤️';
+			echo '❌ Echec de la connexion';
 		}
 		print '</td></tr>';
 		print '</table>';
