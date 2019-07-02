@@ -29,8 +29,7 @@ WpshopSetup = Wpshop setup
 Settings = Settings
 WpshopSetupPage = Wpshop setup page
 WPSHOP_URL_WORDPRESS = WordPress URL
-WPSHOP_CLIENT_ID = OAuth2 Client ID
-WPSHOP_CLIENT_SECRET = OAuth2 Client Secret
+WPSHOP_TOKEN = WordPress Token
 
 #
 # About page

@@ -1,94 +1,40 @@
 <?php
 /**
- * API client for the WordPress JSON REST API
+ * Gestion des requêtes.
  *
- * @package WordPress API Client
+ * @author    Eoxia <dev@eoxia.com>
+ * @copyright (c) 2011-2019 Eoxia <dev@eoxia.com>.
+ *
+ * @license   AGPLv3 <https://spdx.org/licenses/AGPL-3.0-or-later.html>
+ *
+ * @package   doli_wpshop
+ *
+ * @since     0.2.0
  */
 
 dol_include_once('wpshop/vendor/autoload.php');
 
+
 /**
- * API client for the WordPress JSON REST API
- *
- * @package WordPress API Client
+ * Gestion des requêtes.
  */
 class WPAPI {
-	/**
-	 * API base URL
-	 *
-	 * @var string
-	 */
-	public $base = '';
-
-	/**
-	 * Available collections
-	 *
-	 * @var array
-	 */
-	protected $collections = array();
-
-	/**
-	 * Authentication bits
-	 * @var array
-	 */
-	protected $auth = array();
 	
-	private $provider;
-
-	// This is very un-HATEOAS, but it also means one less request
-	const ROUTE_INDEX = '/';
+	public static $base = '';
 
 	/**
-	 * Constructor
-	 * @param string $base Base URL for the API
-	 * @param string|null $username Username to connect as, empty to skip authentication
-	 * @param string|null $password Password for the user
+	 * Le constructeur
+	 *
+	 * @since 0.2.0
 	 */
-	public function __construct() {
-		global $conf;
+	 public function __construct() {
+			global $conf;
 		
-		$this->base = $conf->global->WPSHOP_URL_WORDPRESS;
+			self::$base = $conf->global->WPSHOP_URL_WORDPRESS;
 		
-		$this->provider = new \League\OAuth2\Client\Provider\GenericProvider([
-			'clientId'                => $conf->global->WPSHOP_CLIENT_ID,    // The client ID assigned to you by the provider
-			'clientSecret'            => $conf->global->WPSHOP_CLIENT_SECRET,   // The client password assigned to you by the provider
-			'redirectUri'             => DOL_MAIN_URL_ROOT . '/custom/wpshop/admin/setup.php?check=true',
-			'urlAuthorize'            => $this->base . '/oauth/authorize',
-			'urlAccessToken'          => $this->base . '/oauth/token',
-			'urlResourceOwnerDetails' => $this->base . '/oauth/me'
-		]);
-		
-		if ( $_GET['check'] == true ) {
-			$this->handleOauth();
-		}
-	}
-	
-	public function handleOauth() {
-		if (!isset($_GET['code'])) {
-				$authorizationUrl = $this->provider->getAuthorizationUrl();
-				$_SESSION['oauth2state'] = $this->provider->getState();
-				header('Location: ' . $authorizationUrl);
-		} elseif (empty($_GET['state']) || (isset($_SESSION['oauth2state']) && $_GET['state'] !== $_SESSION['oauth2state'])) {
-
-    if (isset($_SESSION['oauth2state'])) {
-        unset($_SESSION['oauth2state']);
-    }
-    
-    exit('Invalid state');
-		} else {
-			try {
-				$accessToken = $this->provider->getAccessToken('authorization_code', ['code' => $_GET['code']]);
-				$_SESSION['oauth_token'] = $accessToken->getToken();
-				header('Location: ' . DOL_MAIN_URL_ROOT . '/custom/wpshop/admin/setup.php');
-				
-			} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-				// Failed to get the access token or user details.
-				unset( $_SESSION['oauth_token'] );
-			}
-		}
-	}
-
-	/**
+	 }
+		 
+	 /**
 	 * Autoload a WPAPI class
 	 *
 	 * @param string $class Class name
@@ -98,13 +44,11 @@ class WPAPI {
 		if (strpos($class, 'WPAPI') !== 0) {
 			return;
 		}
-
 		$file = str_replace('_', '/', $class);
 		if (file_exists(dirname(__FILE__) . '/' . $file . '.php')) {
 			require_once(dirname(__FILE__) . '/' . $file . '.php');
 		}
 	}
-
 	/**
 	 * Register the standard WPAPI autoloader
 	 */
@@ -113,40 +57,80 @@ class WPAPI {
 	}
 
 	/**
-	 * Get the default Requests options
+	 * Requête POST.
 	 *
-	 * @return array Options to pass to Requests
+	 * @since 0.2.0
+	 *
+	 * @param  string $end_point L'url a appeler.
+	 * @param  array  $data      Les données du formulaire.
+	 * @param  string $method    le type de la méthode.
+	 *
+	 * @return array|boolean   Retournes les données de la requête ou false.
 	 */
-	public function getDefaultOptions() {
-		$options = array(
-			'headers' => array(
-				'Content-Type' => 'application/json',
-				'Accept' => 'application/json',
-			)
-			
-		);
-		if ( ! empty( $this->auth ) )
-			$options['auth'] = $this->auth;
-
-		return $options;
+	public static function post( $end_point, $data = array(), $method = 'POST' ) {
+		$data = json_encode( $data );
+		global $conf;
+		
+		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
+		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $api_url); 
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
+			'Content-Length: ' . strlen( $data ),
+		) ); 
+		
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
+		$output = curl_exec($ch); 
+		curl_close($ch); 
+		
+		$output = json_decode( $output, true );
+		return $output;
 	}
 
 	/**
-	 * Set authentication parameter
+	 * Appel la méthode PUT
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param  string $end_point L'url a appeler.
+	 * @param  array  $data      Les données du formulaire.
+	 *
+	 * @return array|boolean   Retournes les données de la requête ou false.
 	 */
-	public function setAuth( $auth ) {
-		$this->auth = $auth;
+	public static function put( $end_point, $data ) {
+		return Request_Util::post( $end_point, $data, 'PUT' );
 	}
 
 	/**
-	 * Send a HTTP request
+	 * Requête GET.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $end_point L'url a appeler.
+	 *
+	 * @return array|boolean    Retournes les données de la requête ou false.
 	 */
-	public function request($endpoint, $headers = array(), $data = array(), $type = Requests::GET, $options = array()) {
-		$url = $this->base . $endpoint;
-		$options = array_merge($this->getDefaultOptions(), $options);
-		$options['body'] = json_encode( $data );
-		$request = $this->provider->getAuthenticatedRequest( $type, $url, $_SESSION['oauth_token'], $options );
-		return $this->provider->getParsedResponse($request);
+	public static function get( $end_point ) {
+		global $conf;
+		
+		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
+		
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $api_url); 
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
+		) ); 
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
+		$output = curl_exec($ch); 
+		curl_close($ch); 
+		
+		$output = json_decode( $output );
+		
+		return $output;
 	}
-	/**#@-*/
 }

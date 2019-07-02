@@ -57,17 +57,6 @@ if (isset($user->societe_id) && $user->societe_id > 0)
 $max=5;
 $now=dol_now();
 
-/*
- * Actions
- */
-
- if (empty($_SESSION['oauth_token'])) {
-	 dol_include_once('/wpshop/class/wp_api.class.php');
-	 
-	 $wp_api = new WPAPI();
- 	$wp_api->handleOauth();
- }
-
 // None
 
 

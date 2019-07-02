@@ -45,8 +45,7 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 $arrayofparameters=array(
 	'WPSHOP_URL_WORDPRESS'=>array('css'=>'minwidth500','enabled'=>1),
-	'WPSHOP_CLIENT_ID'=>array('css'=>'minwidth500','enabled'=>1),
-	'WPSHOP_CLIENT_SECRET'=>array('css'=>'minwidth500','enabled'=>1)
+	'WPSHOP_TOKEN'=>array('css'=>'minwidth500','enabled'=>1)
 );
 
 
@@ -58,9 +57,7 @@ if ((float) DOL_VERSION >= 6)
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 }
 
-$api = new WPAPI();
-
-$connected = $api->request( '/wp-json/wpshop/v2/statut' );
+$connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
 /*
  * View
  */

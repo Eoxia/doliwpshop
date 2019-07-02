@@ -144,10 +144,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 						
 						$sync_date = dol_now( 'tzserver' );
 						
-						$api = new WPAPI();
-					
-											
-						$request = $api->request( '/wp-json/wpshop/v1/product/', array(), array( 
+						$request = WPAPI::post( '/wp-json/wpshop/v1/product/', array( 
 							'title' => $object->label,
 							'price' => $object->price,
 							'price_ttc' => $object->price_ttc,
@@ -173,8 +170,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					if ( ! empty( $product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
 						$product->update( $user );
 						
-						$api = new WPAPI();
-						$request = $api->request( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array(), array( 
+						$request = WPAPI::post( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array( 
 							'title' => $object->label,
 							'price' => $object->price,
 							'price_ttc' => $object->price_ttc,

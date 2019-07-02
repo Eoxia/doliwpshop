@@ -18,7 +18,7 @@
 #
 
 # Module label 'ModuleWpshopName'
-ModuleWpshopName = Wpshop
+ModuleWpshopName = WPshop
 # Module description 'ModuleWpshopDesc'
 ModuleWpshopDesc = Description de Wpshop
 
