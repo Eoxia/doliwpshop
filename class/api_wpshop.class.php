@@ -18,10 +18,10 @@
 
 use Luracast\Restler\RestException;
 
-dol_include_once('/wpshop/class/wpshop_product.class.php');
+dol_include_once('/wpshop/class/wpshop_object.class.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
-
-
+require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
+require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
 
 /**
  * \file    wpshop/class/api_wpshop.class.php
@@ -36,7 +36,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
  * @access protected
  * @class  DolibarrApiAccess {@requires user,external}
  */
-class WpshopApi extends DolibarrApi
+class Wpshop extends DolibarrApi
 {
 		/**
 		 * @var array   $FIELDS     Mandatory fields, checked when create and update object
@@ -55,7 +55,7 @@ class WpshopApi extends DolibarrApi
     {
 			global $db, $conf;
 			$this->db = $db;
-			$this->wpshop_object = new wpshop_product($this->db);
+			$this->wpshop_object = new wpshop_object($this->db);
     }
 
     /**
@@ -64,7 +64,7 @@ class WpshopApi extends DolibarrApi
      * @param array $request_data   Request datas
      * @return int  ID of myobject
      *
-     * @url	POST associate/product
+     * @url	POST object
      */
     function post($request_data = null)
     {
@@ -79,15 +79,43 @@ class WpshopApi extends DolibarrApi
 				$this->wpshop_object->$field = $value;
 			}
 			
-			// Le produit existe pas sur Dolibarr le créer
-			$products = new Products();
-			$request_data['array_options']['web'] = 1;
-			$product = $products->post($request_data);
-			$product = $products->get($product);
-			$product->last_sync_date = $last_sync_date;
+			$class = null;
 			
-			return $product;
-    }
+			switch( $request_data['type'] ) {
+				case 'product':
+					$class = new Products();
+					$request_data['array_options']['web'] = 1;
+					break;
+				case 'proposal':
+					$class = new Proposals();
+					break;
+				case 'order':
+					$class = new Orders();
+					$request_data['date_commande'] = dol_now();
+					break;
+				default:
+					break;
+			}
+			
+			if ( empty( $class ) ) {
+				return null;
+			}
+			
+			unset( $request_data['type'] );
+			
+			
+			if ( empty( $request_data['doli_id'] ) ) {
+				$this->wpshop_object->doli_id = $class->post( $request_data );
+			}
+			
+			$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
+			
+			
+			$object = $class->get( $this->wpshop_object->doli_id );
+			$object->last_sync_data = $last_sync_date;
+			
+			return $object;
+		}
 
 		/**
 		 * Update product and sync date
@@ -95,7 +123,7 @@ class WpshopApi extends DolibarrApi
 		 * @param  int $id             ID of product
 		 * @param  array $request_data [description]
 		 *
-		 * @url PUT update/product/{id}
+		 * @url PUT object/{id}
 		 */
 		function put($id, $request_data = null) {
 			if (! DolibarrApiAccess::$user->rights->wpshop->write) {
@@ -135,7 +163,7 @@ class WpshopApi extends DolibarrApi
      * @param  string $sqlfilters Other criteria to filter answers separated by a comma. Syntax example "(t.tobuy:=:0) and (t.tosell:=:1)"
      * @return array                Array of product objects
      *
-		 * @url GET product/get/web
+		 * @url GET object/get/web
      */
     function index($sortfield = "t.ref", $sortorder = 'ASC', $limit = 100, $page = 0, $mode = 0, $category = 0, $sqlfilters = '')
     {
@@ -239,4 +267,5 @@ class WpshopApi extends DolibarrApi
         }
         return $myobject;
     }
+		
 }

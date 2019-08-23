@@ -32,7 +32,15 @@
  * - The name property name must be MyTrigger
  */
 
+require_once DOL_DOCUMENT_ROOT.'/api/class/api_access.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
+
+dol_include_once('/wpshop/class/wp_api.class.php');
+dol_include_once('/wpshop/class/wpshop_object.class.php');
+
 
 
 /**
@@ -99,51 +107,48 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 	{
 			global $conf;
 			global $db;
-        if (empty($conf->wpshop->enabled)) return 0;     // Module not active, we do nothing
 
-	    // Put here code you want to execute when a Dolibarr business events occurs.
-		// Data and type of action are stored into $object and $action
-
-        switch ($action) {
-
-            // Users
-		    //case 'USER_CREATE':
-		    //case 'USER_MODIFY':
-		    //case 'USER_NEW_PASSWORD':
-		    //case 'USER_ENABLEDISABLE':
-		    //case 'USER_DELETE':
-		    //case 'USER_SETINGROUP':
-		    //case 'USER_REMOVEFROMGROUP':
-
-		    // Actions
-		    //case 'ACTION_MODIFY':
-		    //case 'ACTION_CREATE':
-		    //case 'ACTION_DELETE':
-
-		    // Groups
-		    //case 'GROUP_CREATE':
-		    //case 'GROUP_MODIFY':
-		    //case 'GROUP_DELETE':
-
-		    // Companies
-		    //case 'COMPANY_CREATE':
-		    //case 'COMPANY_MODIFY':
-		    //case 'COMPANY_DELETE':
-
-		    // Contacts
-		    //case 'CONTACT_CREATE':
-		    //case 'CONTACT_MODIFY':
-		    //case 'CONTACT_DELETE':
-		    //case 'CONTACT_ENABLEDISABLE':
-
-		    // Products
+			if (empty($conf->wpshop->enabled)) return 0;
+				
+			switch ($action) {
+				case 'ECMFILES_CREATE':
+				case 'ECMFILES_MODIFY':
+				if ( $_REQUEST['action'] != 'confirm_paiement' ) {
+					$object_class = null;
+					$type = '';
+					switch ( $object->src_object_type ) {
+						case 'propal':
+							$object_class = new Propal($this->db);
+							$type = 'propal';
+							break;
+						case 'commande':
+							$object_class = new Commande($this->db);
+							$type = 'order';
+							break;
+						case 'facture':
+							$object_class = new Facture($this->db);
+							$type = 'invoice';
+							break;
+					}
+					
+					$object_class->fetch( $object->src_object_id );
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->src_object_id, $type );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+						$request = WPAPI::post( '/wp-json/wpshop/v2/sync', array(
+							'wp_id' => $propal->wp_id,
+							'doli_id' => $propal->doli_id,
+						), 'POST' );
+						
+					}
+				}
+					break;
 		    case 'PRODUCT_CREATE':
-					if ( empty( $object->wp_product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
-						dol_include_once('/wpshop/class/wp_api.class.php');
-						dol_include_once('/wpshop/class/wpshop_product.class.php');
-						
+					if ( empty( $object->wp_id ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
 						$sync_date = dol_now( 'tzserver' );
-						
+					
 						$request = WPAPI::post( '/wp-json/wpshop/v1/product/', array( 
 							'title' => $object->label,
 							'price' => $object->price,
@@ -151,200 +156,416 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 							'tva_tx' => $object->tva_tx,
 							'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
 							'external_id' => (int) $object->id,
-						), Requests::POST );
+						), 'POST' );
+					
+						$wpshop_object = new wpshop_object($this->db);
+						$wpshop_object->wp_id = $request['data']['id'];
+						$wpshop_object->doli_id = $object->id;
+						$wpshop_object->type = "product";
+						$wpshop_object->sync_date = $sync_date;
+						$wpshop_object->last_sync_date = $sync_date;
+						$wpshop_object->create($user);
 					}
-					
-					$wpshop_product = new wpshop_product($this->db);
-					$wpshop_product->wp_product = isset( $request ) ? $request['data']['id'] : $object->wp_product;
-					$wpshop_product->fk_product = $object->id;
-					$wpshop_product->sync_date = $sync_date;
-					$wpshop_product->last_sync_date = $sync_date;
-					$wpshop_product->create($user);
-					
+					break;
 		    case 'PRODUCT_MODIFY':
-					dol_include_once('/wpshop/class/wp_api.class.php');
-					dol_include_once('/wpshop/class/wpshop_product.class.php');
+					$wpshop_product = new wpshop_object( $this->db );
+					$product = $wpshop_product->fetch( (int) $object->id, 'product' );
 					
-					$wpshop_product = new wpshop_product( $this->db );
-					$product = $wpshop_product->fetch( (int) $object->id );
 					if ( ! empty( $product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
 						$product->update( $user );
-						
-						$request = WPAPI::post( '/wp-json/wpshop/v1/product/' . (int) $product->wp_product, array( 
+						$request = WPAPI::post( '/wp-json/wpshop/v1/product/' . (int) $product->wp_id, array( 
 							'title' => $object->label,
 							'price' => $object->price,
 							'price_ttc' => $object->price_ttc,
 							'tva_tx' => $object->tva_tx,
 							'date_last_synchro' => date( 'Y-m-d H:i:s', $product->last_sync_date ),
-						), Requests::POST );
+						), 'PUT' );
 					}
 					break;
-		    //case 'PRODUCT_DELETE':
-		    //case 'PRODUCT_PRICE_MODIFY':
-		    //case 'PRODUCT_SET_MULTILANGS':
-		    //case 'PRODUCT_DEL_MULTILANGS':
-
-		    //Stock mouvement
-		    //case 'STOCK_MOVEMENT':
-
-		    //MYECMDIR
-		    //case 'MYECMDIR_CREATE':
-		    //case 'MYECMDIR_MODIFY':
-		    //case 'MYECMDIR_DELETE':
-
-		    // Customer orders
-		    //case 'ORDER_CREATE':
-		    //case 'ORDER_MODIFY':
-		    //case 'ORDER_VALIDATE':
-		    //case 'ORDER_DELETE':
-		    //case 'ORDER_CANCEL':
-		    //case 'ORDER_SENTBYMAIL':
-		    //case 'ORDER_CLASSIFY_BILLED':
-		    //case 'ORDER_SETDRAFT':
-		    //case 'LINEORDER_INSERT':
-		    //case 'LINEORDER_UPDATE':
-		    //case 'LINEORDER_DELETE':
-
-		    // Supplier orders
-		    //case 'ORDER_SUPPLIER_CREATE':
-		    //case 'ORDER_SUPPLIER_MODIFY':
-		    //case 'ORDER_SUPPLIER_VALIDATE':
-		    //case 'ORDER_SUPPLIER_DELETE':
-		    //case 'ORDER_SUPPLIER_APPROVE':
-		    //case 'ORDER_SUPPLIER_REFUSE':
-		    //case 'ORDER_SUPPLIER_CANCEL':
-		    //case 'ORDER_SUPPLIER_SENTBYMAIL':
-		    //case 'ORDER_SUPPLIER_DISPATCH':
-		    //case 'LINEORDER_SUPPLIER_DISPATCH':
-		    //case 'LINEORDER_SUPPLIER_CREATE':
-		    //case 'LINEORDER_SUPPLIER_UPDATE':
-		    //case 'LINEORDER_SUPPLIER_DELETE':
-
-		    // Proposals
-		    //case 'PROPAL_CREATE':
-		    //case 'PROPAL_MODIFY':
-		    //case 'PROPAL_VALIDATE':
-		    //case 'PROPAL_SENTBYMAIL':
-		    //case 'PROPAL_CLOSE_SIGNED':
-		    //case 'PROPAL_CLOSE_REFUSED':
-		    //case 'PROPAL_DELETE':
-		    //case 'LINEPROPAL_INSERT':
-		    //case 'LINEPROPAL_UPDATE':
-		    //case 'LINEPROPAL_DELETE':
-
-		    // SupplierProposal
-		    //case 'SUPPLIER_PROPOSAL_CREATE':
-		    //case 'SUPPLIER_PROPOSAL_MODIFY':
-		    //case 'SUPPLIER_PROPOSAL_VALIDATE':
-		    //case 'SUPPLIER_PROPOSAL_SENTBYMAIL':
-		    //case 'SUPPLIER_PROPOSAL_CLOSE_SIGNED':
-		    //case 'SUPPLIER_PROPOSAL_CLOSE_REFUSED':
-		    //case 'SUPPLIER_PROPOSAL_DELETE':
-		    //case 'LINESUPPLIER_PROPOSAL_INSERT':
-		    //case 'LINESUPPLIER_PROPOSAL_UPDATE':
-		    //case 'LINESUPPLIER_PROPOSAL_DELETE':
-
-		    // Contracts
-		    //case 'CONTRACT_CREATE':
-		    //case 'CONTRACT_MODIFY':
-		    //case 'CONTRACT_ACTIVATE':
-		    //case 'CONTRACT_CANCEL':
-		    //case 'CONTRACT_CLOSE':
-		    //case 'CONTRACT_DELETE':
-		    //case 'LINECONTRACT_INSERT':
-		    //case 'LINECONTRACT_UPDATE':
-		    //case 'LINECONTRACT_DELETE':
-
+				case 'PRODUCT_PRICE_MODIFY':
+					$wpshop_product = new wpshop_object( $this->db );
+					$product = $wpshop_product->fetch( (int) $object->id, 'product' );
+					
+					if ( ! empty( $product ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
+						$product->update( $user );
+						$request = WPAPI::post( '/wp-json/wpshop/v1/product/' . (int) $product->wp_id, array( 
+							'price' => $object->price,
+							'price_ttc' => $object->price_ttc,
+							'tva_tx' => $object->tva_tx,
+							'date_last_synchro' => date( 'Y-m-d H:i:s', $product->last_sync_date ),
+						), 'PUT' );
+					}
+					break;
+				case 'ORDER_CREATE':
+					if ( ! empty( $_REQUEST['action'] ) ) {
+						$sync_date = dol_now( 'tzserver' );
+						
+						$wpshop_product = new wpshop_object( $this->db );
+						$product = $wpshop_product->fetch( (int) $object->id, 'order' );
+						
+						if ( empty( $product ) ) {
+							$request = WPAPI::post( '/wp-json/wpshop/v2/create/order/', array( 
+								'title' => $object->ref,
+								'total_ht' => $object->total_ht,
+								'total_ttc' => $object->total_ttc,
+								'tva_tx' => $object->total_tva,
+								'socid' => $object->socid,
+								'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+								'external_id' => (int) $object->id,
+							), 'POST' );
+												
+							$wpshop_object = new wpshop_object($this->db);
+							$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+							$wpshop_object->doli_id = $object->id;
+							$wpshop_object->type = "order";
+							$wpshop_object->sync_date = $sync_date;
+							$wpshop_object->last_sync_date = $sync_date;
+							$wpshop_object->create($user);
+						}
+					}
+					break;
+				case 'ORDER_MODIFY':
+					break;
+				case 'ORDER_CLOSE':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'wps-delivered',
+						), 'PUT' );
+					}
+					break;
+				case 'ORDER_VALIDATE':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'title' => $object->newref,
+							'status' => 'publish',
+							'total_ht' => $object->total_ht,
+							'total_ttc' => $object->total_ttc,
+							'tva_amount' => $object->total_tva,
+						), 'PUT' );
+					}
+					break;
+				case 'ORDER_UNVALIDATE':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'draft',
+						), 'PUT' );
+					
+					}
+					break;
+		    case 'ORDER_DELETE':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'trash',
+						), 'PUT' );
+					}
+					break;
+		    case 'ORDER_CANCEL':					
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'wps-canceled',
+						), 'PUT' );
+					}
+					break;
+		    case 'ORDER_CLASSIFY_BILLED':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'wps-billed',
+							'billed' => 1,
+						), 'PUT' );
+					}
+					break;
+				case 'ORDER_CLASSIFY_UNBILLED':
+					 $wpshop_object = new wpshop_object( $this->db );
+					 $order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					 
+					 if ( ! empty( $order ) ) {
+						 $order->update( $user );
+					 
+						 $request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							 'status' => 'publish',
+							 'billed' => 0,
+						 ), 'PUT' );
+					 }
+					 break;
+		    case 'ORDER_SETDRAFT':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'draft',
+						), 'PUT' );
+					}
+					break;
+				case 'ORDER_REOPEN':
+					$wpshop_object = new wpshop_object( $this->db );
+					$order = $wpshop_object->fetch( (int) $object->id, 'order' );
+					
+					if ( ! empty( $order ) ) {
+						$order->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/order/' . (int) $order->wp_id, array(
+							'status' => 'publish',
+						), 'PUT' );
+					
+					}
+					break;
+				// Proposals
+				case 'PROPAL_CREATE':
+				if ( ! empty( $_REQUEST['action'] ) ) {
+				
+						$sync_date = dol_now( 'tzserver' );
+						
+						$data = array( 
+							'title' => $object->ref,
+							'total_ht' => $object->total_ht,
+							'total_ttc' => $object->total_ttc,
+							'tva_tx' => $object->total_tva,
+							'socid' => $object->socid,
+							'datec' => $object->date,
+							'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+							'external_id' => (int) $object->id,
+						);
+						
+						$request = WPAPI::post( '/wp-json/wpshop/v2/create/propal/', $data, 'POST' );
+						
+						$wpshop_object = new wpshop_object($this->db);
+						$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+						$wpshop_object->doli_id = $object->id;
+						$wpshop_object->type = "propal";
+						$wpshop_object->sync_date = $sync_date;
+						$wpshop_object->last_sync_date = $sync_date;
+						$wpshop_object->create($user);
+					}
+				break;
+				case 'PROPAL_CLASSIFY_BILLED':
+					 $wpshop_object = new wpshop_object( $this->db );
+					 $propal = $wpshop_object->fetch( (int) $object->id, 'propal' );
+					 
+					 if ( ! empty( $propal ) ) {
+						 $propal->update( $user );
+					 
+						 $request = WPAPI::post( '/wp-json/wpshop/v1/proposal/' . (int) $propal->wp_id, array(
+							 'status' => 'wps-billed',
+							 'billed' => 1,
+						 ), 'PUT' );
+					 }
+					 break;
+				case 'PROPAL_CLASSIFY_UNBILLED':
+					 $wpshop_object = new wpshop_object( $this->db );
+					 $propal = $wpshop_object->fetch( (int) $object->id, 'propal' );
+					 
+					 if ( ! empty( $propal ) ) {
+						 $propal->update( $user );
+					 
+						 $request = WPAPI::post( '/wp-json/wpshop/v1/proposal/' . (int) $propal->wp_id, array(
+							 'status' => 'publish',
+							 'billed' => 0,
+						 ), 'PUT' );
+					 }
+					 break;
+		
+					case 'PROPAL_REOPEN':
+						$wpshop_object = new wpshop_object( $this->db );
+						$order = $wpshop_object->fetch( (int) $object->id, 'propal' );
+						
+						if ( ! empty( $order ) ) {
+							$order->update( $user );
+						
+							$request = WPAPI::post( '/wp-json/wpshop/v1/proposal/' . (int) $order->wp_id, array(
+								'status' => 'publish',
+							), 'PUT' );
+						
+						}
+						break;
+				//case 'PROPAL_SENTBYMAIL':
+				case 'PROPAL_CLOSE_SIGNED':
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->id, 'propal' );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/proposal/' . (int) $propal->wp_id, array(
+							'status' => 'wps-accepted',
+						), 'PUT' );
+					}
+					break;
+				case 'PROPAL_CLOSE_REFUSED':
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->id, 'propal' );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/proposal/' . (int) $propal->wp_id, array(
+							'status' => 'wps-refused',
+						), 'PUT' );
+					}
+					break;
 		    // Bills
-		    //case 'BILL_CREATE':
-		    //case 'BILL_MODIFY':
-		    //case 'BILL_VALIDATE':
-		    //case 'BILL_UNVALIDATE':
-		    //case 'BILL_SENTBYMAIL':
-		    //case 'BILL_CANCEL':
-		    //case 'BILL_DELETE':
-		    //case 'BILL_PAYED':
-		    //case 'LINEBILL_INSERT':
-		    //case 'LINEBILL_UPDATE':
-		    //case 'LINEBILL_DELETE':
-
-		    //Supplier Bill
-		    //case 'BILL_SUPPLIER_CREATE':
-		    //case 'BILL_SUPPLIER_UPDATE':
-		    //case 'BILL_SUPPLIER_DELETE':
-		    //case 'BILL_SUPPLIER_PAYED':
-		    //case 'BILL_SUPPLIER_UNPAYED':
-		    //case 'BILL_SUPPLIER_VALIDATE':
-		    //case 'BILL_SUPPLIER_UNVALIDATE':
-		    //case 'LINEBILL_SUPPLIER_CREATE':
-		    //case 'LINEBILL_SUPPLIER_UPDATE':
-		    //case 'LINEBILL_SUPPLIER_DELETE':
-
+		    case 'BILL_CREATE':
+					$sync_date = dol_now( 'tzserver' );
+					
+					$request = WPAPI::post( '/wp-json/wpshop/v2/create/invoice/', array( 
+						'title' => $object->ref,
+						'total_ht' => $object->total_ht,
+						'total_ttc' => $object->total_ttc,
+						'tva_tx' => $object->total_tva,
+						'socid' => $object->socid,
+						'datec' => $object->date,
+						'linked_object' => $object->linked_objects,
+						'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+						'external_id' => (int) $object->id,
+					), 'POST' );
+					
+					$wpshop_object = new wpshop_object($this->db);
+					$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+					$wpshop_object->doli_id = $object->id;
+					$wpshop_object->type = "invoice";
+					$wpshop_object->sync_date = $sync_date;
+					$wpshop_object->last_sync_date = $sync_date;
+					$wpshop_object->create($user);
+					break;
+					case 'BILL_MODIFY':
+						break;
+		    case 'BILL_VALIDATE':
+					// $wpshop_object = new wpshop_object( $this->db );
+					// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+					// 
+					// if ( ! empty( $propal ) ) {
+					// 	$propal->update( $user );
+					// 
+					// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+					// 		'title' => $object->newref,
+					// 		'status' => 'publish',
+					// 		'total_ht' => $object->total_ht,
+					// 		'total_ttc' => $object->total_ttc,
+					// 		'tva_amount' => $object->total_tva,
+					// 	), 'PUT' );
+					// }
+					break;
+		    case 'BILL_UNVALIDATE':
+					// $wpshop_object = new wpshop_object( $this->db );
+					// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+					// 
+					// if ( ! empty( $propal ) ) {
+					// 	$propal->update( $user );
+					// 
+					// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+					// 		'status' => 'draft',
+					// 	), 'PUT' );
+					// }
+					break;
+		    case 'BILL_CANCEL':
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+							'status' => 'wps-abandoned',
+						), 'PUT' );
+					}
+					break;
+		    case 'BILL_DELETE':
+					break;
+		    case 'BILL_PAYED':
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+							'status' => 'wps-billed',
+							'paye' => 1,
+						), 'PUT' );
+					}
+					break;
+				case 'BILL_REOPEN':
+					break;
+				case 'BILL_UNPAYED':
+					$wpshop_object = new wpshop_object( $this->db );
+					$propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+					
+					if ( ! empty( $propal ) ) {
+						$propal->update( $user );
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+							'status' => 'publish',
+						), 'PUT' );
+					}
+					break;
 		    // Payments
-		    //case 'PAYMENT_CUSTOMER_CREATE':
-		    //case 'PAYMENT_SUPPLIER_CREATE':
-		    //case 'PAYMENT_ADD_TO_BANK':
+		    case 'PAYMENT_CUSTOMER_CREATE':
+					$sync_date = dol_now( 'tzserver' );
+					
+					$data =  array( 
+						'title' => $object->ref,
+						'payment_type' => $object->paiementid,
+						'paiementcode' => $object->paiementcode,
+						'amount' => ! empty( $object->amount ) ? $object->amount : end( $object->amounts ),
+						'last_sync' => date( 'Y-m-d H:i:s', $sync_date ),
+						'external_id' => (int) $object->id,
+						'parent_id' => (int) $_REQUEST['facid'],
+						'status' => 'publish',
+						'date'   => date( 'Y-m-d H:i:s', $object->datepaye ),
+					);
+					
+						$request = WPAPI::post( '/wp-json/wpshop/v2/create/payment/', $data, 'POST' );
+						
+						$wpshop_object = new wpshop_object($this->db);
+						$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+						$wpshop_object->doli_id = $object->id;
+						$wpshop_object->type = "payment";
+						$wpshop_object->sync_date = $sync_date;
+						$wpshop_object->last_sync_date = $sync_date;
+						$wpshop_object->create($user);
+					
+						break;
+		    case 'PAYMENT_ADD_TO_BANK':
+					break;
 		    //case 'PAYMENT_DELETE':
 
 		    // Online
 		    //case 'PAYMENT_PAYBOX_OK':
 		    //case 'PAYMENT_PAYPAL_OK':
 		    //case 'PAYMENT_STRIPE_OK':
-
-		    // Donation
-		    //case 'DON_CREATE':
-		    //case 'DON_UPDATE':
-		    //case 'DON_DELETE':
-
-		    // Interventions
-		    //case 'FICHINTER_CREATE':
-		    //case 'FICHINTER_MODIFY':
-		    //case 'FICHINTER_VALIDATE':
-		    //case 'FICHINTER_DELETE':
-		    //case 'LINEFICHINTER_CREATE':
-		    //case 'LINEFICHINTER_UPDATE':
-		    //case 'LINEFICHINTER_DELETE':
-
-		    // Members
-		    //case 'MEMBER_CREATE':
-		    //case 'MEMBER_VALIDATE':
-		    //case 'MEMBER_SUBSCRIPTION':
-		    //case 'MEMBER_MODIFY':
-		    //case 'MEMBER_NEW_PASSWORD':
-		    //case 'MEMBER_RESILIATE':
-		    //case 'MEMBER_DELETE':
-
-		    // Categories
-		    //case 'CATEGORY_CREATE':
-		    //case 'CATEGORY_MODIFY':
-		    //case 'CATEGORY_DELETE':
-		    //case 'CATEGORY_SET_MULTILANGS':
-
-		    // Projects
-		    //case 'PROJECT_CREATE':
-		    //case 'PROJECT_MODIFY':
-		    //case 'PROJECT_DELETE':
-
-		    // Project tasks
-		    //case 'TASK_CREATE':
-		    //case 'TASK_MODIFY':
-		    //case 'TASK_DELETE':
-
-		    // Task time spent
-		    //case 'TASK_TIMESPENT_CREATE':
-		    //case 'TASK_TIMESPENT_MODIFY':
-		    //case 'TASK_TIMESPENT_DELETE':
-
-		    // Shipping
-		    //case 'SHIPPING_CREATE':
-		    //case 'SHIPPING_MODIFY':
-		    //case 'SHIPPING_VALIDATE':
-		    //case 'SHIPPING_SENTBYMAIL':
-		    //case 'SHIPPING_BILLED':
-		    //case 'SHIPPING_CLOSED':
-		    //case 'SHIPPING_REOPEN':
-			//case 'SHIPPING_DELETE':
-			//	break;
+					break;
 			default:
 		        dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 		        break;

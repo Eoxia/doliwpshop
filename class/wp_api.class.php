@@ -12,9 +12,6 @@
  * @since     0.2.0
  */
 
-dol_include_once('wpshop/vendor/autoload.php');
-
-
 /**
  * Gestion des requêtes.
  */

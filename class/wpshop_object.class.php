@@ -27,17 +27,17 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 /**
  * Class for MyObject
  */
-class wpshop_product extends CommonObject
+class wpshop_object extends CommonObject
 {
 	/**
 	 * @var string ID to identify managed object
 	 */
-	public $element = 'wpshop_product';
+	public $element = 'wpshop';
 
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
-	public $table_element = 'wpshop_product';
+	public $table_element = 'wpshop';
 
 	/**
 	 * @var int  Does myobject support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
@@ -60,8 +60,9 @@ class wpshop_product extends CommonObject
      */
 	public $fields=array(
 	    'rowid'         =>array('type'=>'integer',      'label'=>'TechnicalID',      'enabled'=>1, 'visible'=>-2, 'noteditable'=>1, 'notnull'=> 1, 'index'=>1, 'position'=>1, 'comment'=>'Id'),
-			'fk_product'    => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-			'wp_product'    => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+			'doli_id'    => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+			'wp_id'    => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+			'type'    => array( 'type'=>'varchar(15)', 'label'=>'Type', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
 			'sync_date' =>array('type'=>'datetime',     'label'=>'SyncDate',     'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
 			'last_sync_date' =>array('type'=>'datetime',     'label'=>'LastDateSync',     'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
 	);
@@ -74,12 +75,17 @@ class wpshop_product extends CommonObject
 	/**
 	 * @var string FK_Product
 	 */
-	public $fk_product;
+	public $doli_id;
 	
 	/**
 	 * @var string FK_Product
 	 */
-	public $wp_product;
+	public $wp_id;
+	
+	/**
+	 * @var string
+	 */
+	public $type;
 
 	/**
      * @var integer|string date_creation
@@ -146,13 +152,12 @@ class wpshop_product extends CommonObject
 		return $this->last_sync_date;
 	}
 	
-	public function fetch($id) {
-		if (empty($id)) return -1;
+	public function fetch($id, $type = '') {
+		if (empty($id) || empty($type)) return -1;
 
 		$sql = 'SELECT '.$this->getFieldList();
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element;
-
-		if (!empty($id))  $sql.= ' WHERE fk_product = '.$id;
+		if (!empty($id))  $sql.= ' WHERE type="' . $type . '" AND doli_id = '.$id;
 		else $sql.=' WHERE 1 = 1';	// usage with empty id and empty ref is very rare
 		$sql.=' LIMIT 1';	// This is a fetch, to be sure to get only one record
 		$res = $this->db->query($sql);

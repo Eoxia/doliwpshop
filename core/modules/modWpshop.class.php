@@ -67,7 +67,9 @@ class modWPshop extends DolibarrModules
 			'models' => 0,
 			'css' => array('/wpshop/css/wpshop.css.php'),
 			'js' => array('/wpshop/js/wpshop.js.php'),
-			'hooks' => array('data' => array('productcard')),
+			'hooks' => array( 
+				'data' => array('productcard', 'propalcard', 'ordercard', 'invoicecard')
+			),
 			'moduleforexternal' => 0
 		);
 

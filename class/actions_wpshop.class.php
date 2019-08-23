@@ -23,7 +23,7 @@
  * Put detailed description here.
  */
 
-dol_include_once('/wpshop/class/wpshop_product.class.php');
+dol_include_once('/wpshop/class/wpshop_object.class.php');
 
 
 /**
@@ -57,7 +57,6 @@ class ActionsWpshop
 	 */
 	public $resprints;
 
-
 	/**
 	 * Constructor
 	 *
@@ -68,16 +67,58 @@ class ActionsWpshop
 	    $this->db = $db;
 	}
 
-
-
 	function addMoreActionsButtons( $parameters, &$object, &$action ) {
 		global $conf;
 		
-		$wpshop_product = new wpshop_product($this->db);
-		$product = $wpshop_product->fetch( (int) $object->id );
-		?>
-		<div class="inline-block divButAction"><a class="butAction" target="_blank" href="<?php echo $conf->global->WPSHOP_URL_WORDPRESS . '/wp-admin/post.php?post=' . $product->wp_product . '&action=edit'; ?>">Edit on WordPress</a></div>
-		<?php
+		$type = '';
+		
+		switch( $parameters['currentcontext'] ) {
+			case 'propalcard':
+				$type = 'propal';
+				break;
+			case 'invoicecard':
+				$type = 'invoice';
+				break;
+			case 'productcard':
+				$type = 'product';
+				break;
+			case 'ordercard':
+				$type = 'order';
+				break;
+			case 'paiementcard':
+				$type = 'payment';
+				break;
+		}
+		
+		$wpshop_object = new wpshop_object($this->db);
+		$wpshop_object = $wpshop_object->fetch( (int) $object->id, $type );
+		
+		$route = '/wp-admin/post.php?post=';
+		
+		switch ( $wpshop_object->type ) {
+			case 'product':
+				break;
+			case 'propal':
+				$route = '/wp-admin/admin.php?page=wps-proposal&id=';
+				break;
+			case 'order':
+				$route = '/wp-admin/admin.php?page=wps-order&id=';
+				break;
+			case 'invoice':
+				$route = '/wp-admin/admin.php?page=wps-invoice&id=';
+				break;
+		}
+		
+		if ( is_object( $wpshop_object ) ) {
+			?>
+			<div class="inline-block divButAction"><a class="butAction" target="_blank" href="<?php echo $conf->global->WPSHOP_URL_WORDPRESS . $route . $wpshop_object->wp_id . '&action=edit'; ?>">Edit on WordPress</a></div>
+			<?php
+		} else {
+			?>
+			<div class="inline-block divButAction"><a class="butActionRefused" title="Non disponible car l'objet n'est pas associé à WordPress" href="#">Edit on WordPress</a></div>
+			<?php
+		}
+		
 		return 0;
 	}
 }

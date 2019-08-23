@@ -14,11 +14,12 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_wpshop_product (
+CREATE TABLE llx_wpshop (
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid INTEGER AUTO_INCREMENT PRIMARY KEY,
-	fk_product INTEGER DEFAULT 1 NOT NULL,
-	wp_product INTEGER DEFAULT 1 NOT NULL,
+	doli_id INTEGER DEFAULT 1 NOT NULL,
+	wp_id INTEGER DEFAULT 1 NOT NULL,
+	type VARCHAR(15) DEFAULT "" NOT NULL,
 	sync_date DATETIME NOT NULL,
 	last_sync_date DATETIME NOT NULL
 	-- END MODULEBUILDER FIELDS
