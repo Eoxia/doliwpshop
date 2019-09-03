@@ -135,11 +135,11 @@ class wpshop_object extends CommonObject
 
 	public function create( User $user, $notrigger = false ) {
 		if ( empty( $this->sync_date ) ) {
-			$this->sync_date = dol_now( 'tzserver' );
+			$this->sync_date = dol_now( 'gmt' );
 		}
 		
 		if ( empty( $this->last_sync_date ) ) {
-			$this->last_sync_date = dol_now( 'tzserver' );
+			$this->last_sync_date = dol_now( 'gmt' );
 		}
 		
 		$this->createCommon($user, $notrigger);
@@ -147,7 +147,7 @@ class wpshop_object extends CommonObject
 	}
 	
 	public function update(User $user, $notrigger = false, &$statut = false) {
-		$this->last_sync_date = dol_now( 'tzserver' );
+		$this->last_sync_date = dol_now( 'gmt' );
 		$statut = $this->updateCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
@@ -158,6 +158,36 @@ class wpshop_object extends CommonObject
 		$sql = 'SELECT '.$this->getFieldList();
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element;
 		if (!empty($id))  $sql.= ' WHERE type="' . $type . '" AND doli_id = '.$id;
+		else $sql.=' WHERE 1 = 1';	// usage with empty id and empty ref is very rare
+		$sql.=' LIMIT 1';	// This is a fetch, to be sure to get only one record
+		$res = $this->db->query($sql);
+		if ($res)
+		{
+			$obj = $this->db->fetch_object($res);
+			if ($obj)
+			{
+				$this->setVarsFromFetchObj($obj);
+				return $this;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			$this->error = $this->db->lasterror();
+			$this->errors[] = $this->error;
+			return -1;
+		}
+	}
+	
+	public function fetch_exist($id, $wp_id, $type = '') {
+		if (empty($id) || empty($type)) return -1;
+
+		$sql = 'SELECT '.$this->getFieldList();
+		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element;
+		if (!empty($id))  $sql.= ' WHERE type="' . $type . '" AND doli_id = '.$id.' AND wp_id=' . $wp_id;
 		else $sql.=' WHERE 1 = 1';	// usage with empty id and empty ref is very rare
 		$sql.=' LIMIT 1';	// This is a fetch, to be sure to get only one record
 		$res = $this->db->query($sql);

@@ -18,8 +18,11 @@
 
 use Luracast\Restler\RestException;
 
+require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
+
 dol_include_once('/wpshop/class/wpshop_object.class.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
 require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
 
@@ -72,7 +75,6 @@ class Wpshop extends DolibarrApi
 				throw new RestException(401);
 			}
 			
-			
 			$result = $this->_validate($request_data);
 			
 			foreach($request_data as $field => $value) {
@@ -86,16 +88,25 @@ class Wpshop extends DolibarrApi
 					$class = new Products();
 					$request_data['array_options']['web'] = 1;
 					break;
-				case 'proposal':
+				case 'propal':
 					$class = new Proposals();
 					break;
 				case 'order':
 					$class = new Orders();
 					$request_data['date_commande'] = dol_now();
 					break;
+				case 'third_party':
+					$class = new Thirdparties();
+					break;
+				case 'contact':
+				case 'invoice':
+				case 'payment':
+					$class = 'tmp';
+					break;
 				default:
 					break;
 			}
+			
 			
 			if ( empty( $class ) ) {
 				return null;
@@ -103,18 +114,55 @@ class Wpshop extends DolibarrApi
 			
 			unset( $request_data['type'] );
 			
-			
 			if ( empty( $request_data['doli_id'] ) ) {
 				$this->wpshop_object->doli_id = $class->post( $request_data );
 			}
 			
-			$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
+			$founded = new wpshop_object( $this->db );
+			$founded_object = $founded->fetch_exist( (int) $this->wpshop_object->doli_id, $this->wpshop_object->wp_id, $this->wpshop_object->type );
+			if ( empty( $founded_object ) ) {
+				$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
+			} else {
+				if ( $class != 'tmp' ) {
+					$products = new $class();
+					
+					$product = $products->put($request_data['doli_id'], $request_data);
+				}
+				
+				$last_sync_date = $founded->update(DolibarrApiAccess::$user, false, $statut );
+			}
 			
-			
-			$object = $class->get( $this->wpshop_object->doli_id );
-			$object->last_sync_data = $last_sync_date;
+			if ( ! empty( $class ) && $class != 'tmp' ) {
+				$object = $class->get( $this->wpshop_object->doli_id );
+
+				$object->last_sync_date = date( 'Y-m-d H:i:s', $last_sync_date );
+			} else {
+				$object = new stdClass();
+				$object->last_sync_date = date( 'Y-m-d H:i:s', $last_sync_date );
+			}
 			
 			return $object;
+		}
+		
+		/**
+     *  Associate WP with a product object
+     *
+     * @param array $request_data   Request datas
+     * @return int  ID of myobject
+     *
+     * @url	POST object/statut
+     */
+		public function post_check_statut($request_data = null) {
+			$founded = new wpshop_object( $this->db );
+			$founded_object = $founded->fetch_exist( (int) $request_data['doli_id'], $request_data['wp_id'], $request_data['type'] );
+			
+			$date_wp = strtotime( $request_data['wp_sync_date'] );
+			
+			if ( $date_wp === $founded_object->last_sync_date ) {
+				return true;
+			}
+			
+			return false;
 		}
 
 		/**

@@ -147,7 +147,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 		    case 'PRODUCT_CREATE':
 					if ( empty( $object->wp_id ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
-						$sync_date = dol_now( 'tzserver' );
+						$sync_date = dol_now( 'gmt' );
 					
 						$request = WPAPI::post( '/wp-json/wpshop/v1/product/', array( 
 							'title' => $object->label,
@@ -198,7 +198,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 				case 'ORDER_CREATE':
 					if ( ! empty( $_REQUEST['action'] ) ) {
-						$sync_date = dol_now( 'tzserver' );
+						$sync_date = dol_now( 'gmt' );
 						
 						$wpshop_product = new wpshop_object( $this->db );
 						$product = $wpshop_product->fetch( (int) $object->id, 'order' );
@@ -346,7 +346,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 				case 'PROPAL_CREATE':
 				if ( ! empty( $_REQUEST['action'] ) ) {
 				
-						$sync_date = dol_now( 'tzserver' );
+						$sync_date = dol_now( 'gmt' );
 						
 						$data = array( 
 							'title' => $object->ref,
@@ -437,7 +437,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 		    // Bills
 		    case 'BILL_CREATE':
-					$sync_date = dol_now( 'tzserver' );
+					$sync_date = dol_now( 'gmt' );
 					
 					$request = WPAPI::post( '/wp-json/wpshop/v2/create/invoice/', array( 
 						'title' => $object->ref,
@@ -532,7 +532,7 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 		    // Payments
 		    case 'PAYMENT_CUSTOMER_CREATE':
-					$sync_date = dol_now( 'tzserver' );
+					$sync_date = dol_now( 'gmt' );
 					
 					$data =  array( 
 						'title' => $object->ref,
