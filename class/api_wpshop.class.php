@@ -107,7 +107,6 @@ class Wpshop extends DolibarrApi
 					break;
 			}
 			
-			
 			if ( empty( $class ) ) {
 				return null;
 			}
