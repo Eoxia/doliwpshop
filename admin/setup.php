@@ -22,16 +22,17 @@
  * \brief   Wpshop setup page.
  */
 
+
 // Load Dolibarr environment
-require '../../../main.inc.php';
-require '../class/wp_api.class.php';
+// Dolibarr environment
+$res = @include("../../main.inc.php"); // From htdocs directory
+if (! $res) {
+	$res = @include("../../../main.inc.php"); // From "custom" directory
+}
 
-global $langs, $user;
-
-// Libraries
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/wpshop.lib.php';
-//require_once "../class/myclass.class.php";
+require_once '../class/wp_api.class.php';
 
 // Translations
 $langs->loadLangs(array("admin", "wpshop@wpshop"));
@@ -76,9 +77,6 @@ dol_fiche_head($head, 'settings', '', -1, "wpshop@wpshop");
 
 // Setup page goes here
 echo $langs->trans("WpshopSetupPage").'<br><br>';
-
-
-
 
 if ($action == 'edit')
 {

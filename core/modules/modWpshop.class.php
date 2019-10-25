@@ -44,18 +44,19 @@ class modWPshop extends DolibarrModules
 
 		$this->db = $db;
 
-		$this->numero = 500000;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 500000;
 		$this->rights_class = 'wpshop';
 		$this->family = "other";
 		$this->module_position = '90';
 		$this->name = 'WPshop';
-		$this->description = "Gestion de la synchronisation multidirectionnelle avec WordPress";
-		$this->descriptionlong = "Gestion de la synchronisation multidirectionnelle avec WordPress";
+		$this->description = 'Module for Dolibarr ERP/CRM to connect WPshop Plugin from WordPress.';
+		$this->descriptionlong = 'Module for Dolibarr ERP/CRM to connect WPshop Plugin from WordPress.';
 		$this->editor_name = 'Eoxia';
 		$this->editor_url = 'https://eoxia.com';
 		$this->version = '0.1.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->picto='generic';
+		$this->picto = 'generic';
+
 		$this->module_parts = array(
 			'triggers' => 1,
 			'login' => 0,
@@ -65,16 +66,12 @@ class modWPshop extends DolibarrModules
 			'tpl' => 0,
 			'barcode' => 0,
 			'models' => 0,
-			'css' => array('/wpshop/css/wpshop.css.php'),
-			'js' => array('/wpshop/js/wpshop.js.php'),
-			'hooks' => array( 
-				'data' => array('productcard', 'propalcard', 'ordercard', 'invoicecard')
+			'hooks' => array(
+				'data' => array('productcard','propalcard','ordercard','invoicecard')
 			),
 			'moduleforexternal' => 0
 		);
 
-		// Data directories to create when module is enabled.
-		// Example: this->dirs = array("/wpshop/temp","/wpshop/subdir");
 		$this->dirs = array("/wpshop/temp");
 
 		// Config pages. Put here list of php page, stored into wpshop/admin directory, to use to setup module.

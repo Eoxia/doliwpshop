@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2019 SuperAdmin
+/* <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) 2015 ATM Consulting <support@atm-consulting.fr>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +17,12 @@
  */
 
 /**
- * \file    wpshop/lib/wpshop.lib.php
- * \ingroup wpshop
- * \brief   Library files with common functions for Wpshop
+ *	\file		lib/wpshop.lib.php
+ *	\ingroup	wpshop
+ *	\brief		This file is an example module library
+ *				Put some comments here
  */
 
-/**
- * Prepare admin pages header
- *
- * @return array
- */
 function wpshopAdminPrepareHead()
 {
 	global $langs, $conf;
@@ -36,17 +33,9 @@ function wpshopAdminPrepareHead()
 	$head = array();
 
 	$head[$h][0] = dol_buildpath("/wpshop/admin/setup.php", 1);
-	$head[$h][1] = $langs->trans("Settings");
+	$head[$h][1] = $langs->trans("Parameters");
 	$head[$h][2] = 'settings';
 
-	// Show more tabs from modules
-	// Entries must be declared in modules descriptor with line
-	//$this->tabs = array(
-	//	'entity:+tabname:Title:@wpshop:/wpshop/mypage.php?id=__ID__'
-	//); // to add new tab
-	//$this->tabs = array(
-	//	'entity:-tabname:Title:@wpshop:/wpshop/mypage.php?id=__ID__'
-	//); // to remove a tab
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'wpshop');
 
 	return $head;
