@@ -18,7 +18,11 @@
 
 use Luracast\Restler\RestException;
 
+require_once DOL_DOCUMENT_ROOT.'/main.inc.php';
+
 require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
 
 dol_include_once('/wpshop/class/wpshop_object.class.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
@@ -143,7 +147,7 @@ class Wpshop extends DolibarrApi
 			return $object;
 		}
 		
-		/**
+	/**
      *  Associate WP with a product object
      *
      * @param array $request_data   Request datas
@@ -151,7 +155,7 @@ class Wpshop extends DolibarrApi
      *
      * @url	POST object/statut
      */
-		public function post_check_statut($request_data = null) {
+	public function post_check_statut($request_data = null) {
 			$founded = new wpshop_object( $this->db );
 			$founded_object = $founded->fetch_exist( (int) $request_data['doli_id'], $request_data['wp_id'], $request_data['type'] );
 			
@@ -164,15 +168,15 @@ class Wpshop extends DolibarrApi
 			return false;
 		}
 
-		/**
-		 * Update product and sync date
-		 *
-		 * @param  int $id             ID of product
-		 * @param  array $request_data [description]
-		 *
-		 * @url PUT object/{id}
-		 */
-		function put($id, $request_data = null) {
+	/**
+	 * Update product and sync date
+	 *
+	 * @param  int $id             ID of product
+	 * @param  array $request_data [description]
+	 *
+	 * @url PUT object/{id}
+	 */
+	function put($id, $request_data = null) {
 			if (! DolibarrApiAccess::$user->rights->wpshop->write) {
 				throw new RestException(401);
 			}
@@ -195,8 +199,69 @@ class Wpshop extends DolibarrApi
 			$product->last_sync_date = $last_sync_date;
 			return $product;
 		}
+
+	/**
+	 * Get single product
+	 *
+	 * @param  int $id ID of product
+	 * @return object
+	 *
+	 * @url GET products
+	 */
+	function get_product_advanced( $id ) {
+		global $db, $conf;
+
+		$obj_ret = array();
+
+		$socid = DolibarrApiAccess::$user->societe_id ? DolibarrApiAccess::$user->societe_id : '';
+
+		$sql = "SELECT t.rowid, t.ref, t.ref_ext, pac.fk_product_parent";
+		$sql.= " FROM ".MAIN_DB_PREFIX."product as t";
+		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product_attribute_combination as pac";
+		$sql.= " ON pac.fk_product_child=t.rowid";
+		$sql.= ", ".MAIN_DB_PREFIX."product_extrafields as pf";
+		$sql.= ' WHERE t.entity IN ('.getEntity('product').')';
+		$sql.= ' AND pf.fk_object=t.rowid AND pf.web=1';
+		$sql .= " AND t.rowid = " . $db->escape( $id );
+
+		// Add sql filters
+		if ($sqlfilters) {
+			if (! DolibarrApi::_checkFilters($sqlfilters)) {
+				throw new RestException(503, 'Error when validating parameter sqlfilters '.$sqlfilters);
+			}
+			$regexstring='\(([^:\'\(\)]+:[^:\'\(\)]+:[^:\(\)]+)\)';
+			echo "<pre>"; print_r( preg_replace_callback('/'.$regexstring.'/', 'DolibarrApi::_forge_criteria_callback', $sqlfilters) ); echo "</pre>";exit;
+			$sql.=" AND (".preg_replace_callback('/'.$regexstring.'/', 'DolibarrApi::_forge_criteria_callback', $sqlfilters).")";
+		}
+
+		$sql.= $db->plimit(1, 0);
 		
-		/**
+		$result = $db->query($sql);
+
+		if ($result) {
+			$obj = $db->fetch_object($result);
+
+			$product_static = new Product($db);
+			if($product_static->fetch($obj->rowid)) {
+				$tmp_product = $this->_cleanObjectDatas( $product_static );
+
+				$tmp_product->fk_product_parent = 0;
+
+				if ( isset( $obj->fk_product_parent ) ) {
+					$tmp_product->fk_product_parent = $obj->fk_product_parent;
+				}
+
+				$obj_ret = $tmp_product;
+			}
+		}
+		else {
+			throw new RestException(503, 'Error when retrieve product list : '.$db->lasterror());
+		}
+
+		return $obj_ret;
+	}
+		
+	/**
      * List products
      *
      * Get a list of products
@@ -210,7 +275,7 @@ class Wpshop extends DolibarrApi
      * @param  string $sqlfilters Other criteria to filter answers separated by a comma. Syntax example "(t.tobuy:=:0) and (t.tosell:=:1)"
      * @return array                Array of product objects
      *
-		 * @url GET object/get/web
+	 * @url GET object/get/web
      */
     function index($sortfield = "t.ref", $sortorder = 'ASC', $limit = 100, $page = 0, $mode = 0, $category = 0, $sqlfilters = '')
     {
@@ -220,12 +285,15 @@ class Wpshop extends DolibarrApi
 
         $socid = DolibarrApiAccess::$user->societe_id ? DolibarrApiAccess::$user->societe_id : '';
 
-        $sql = "SELECT t.rowid, t.ref, t.ref_ext";
+        $sql = "SELECT t.rowid, t.ref, t.ref_ext, pac.fk_product_parent";
         $sql.= " FROM ".MAIN_DB_PREFIX."product as t";
-				$sql.= ", ".MAIN_DB_PREFIX."product_extrafields as pf";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product_attribute_combination as pac";
+        $sql.= " ON pac.fk_product_child=t.rowid";
+		$sql.= ", ".MAIN_DB_PREFIX."product_extrafields as pf";
         if ($category > 0) {
             $sql.= ", ".MAIN_DB_PREFIX."categorie_product as c";
         }
+
         $sql.= ' WHERE t.entity IN ('.getEntity('product').')';
 				$sql.= ' AND pf.fk_object=t.rowid AND pf.web=1';
         // Select products of given category
@@ -240,6 +308,7 @@ class Wpshop extends DolibarrApi
             // Show only services
             $sql.= " AND t.fk_product_type = 1";
         }
+
         // Add sql filters
         if ($sqlfilters) {
             if (! DolibarrApi::_checkFilters($sqlfilters)) {
@@ -261,6 +330,7 @@ class Wpshop extends DolibarrApi
         }
 
         $result = $db->query($sql);
+
         if ($result) {
             $num = $db->num_rows($result);
             $min = min($num, ($limit <= 0 ? $num : $limit));
@@ -270,7 +340,16 @@ class Wpshop extends DolibarrApi
                 $obj = $db->fetch_object($result);
                 $product_static = new Product($db);
                 if($product_static->fetch($obj->rowid)) {
-                    $obj_ret[] = $this->_cleanObjectDatas($product_static);
+                	$tmp_product = $this->_cleanObjectDatas($product_static);
+
+                	$tmp_product->fk_product_parent = 0;
+
+                	if ( isset( $obj->fk_product_parent ) ) {
+                		$tmp_product->fk_product_parent = $obj->fk_product_parent;
+	                }
+
+                    $obj_ret[] = $tmp_product;
+
                 }
                 $i++;
             }
@@ -282,6 +361,38 @@ class Wpshop extends DolibarrApi
             throw new RestException(404, 'No product found');
         }
         return $obj_ret;
+    }
+
+	/**
+	 * Get attribute by product
+	 *
+	 *
+	 * @param  integer $id  Sort field
+	 * @return array                Array of attributes objects
+	 *
+	 * @url GET product/attribute
+	 */
+    function get_attribute_by_product( $id ) {
+    	global $db;
+
+	    $combination = new ProductCombination($db);
+	    return $combination->getUniqueAttributesAndValuesByFkProductParent( $id );
+    }
+
+	/**
+	 *  Associate WP with a product object
+	 *
+	 * @param array $request_data   Request datas
+	 * @return array
+	 *
+	 * @url	POST object/get/child
+	 */
+    function get_by_attribute_and_parent( $request_data = null ) {
+	    global $db, $conf;
+
+	    $combination = new ProductCombination($db);
+
+	    return $combination->fetchByProductCombination2ValuePairs($request_data['product_id'], $request_data['data']);
     }
 
     /**
@@ -296,7 +407,7 @@ class Wpshop extends DolibarrApi
     	return $object;
     }
 		
-		/**
+	/**
      * Validate fields before create or update object
      *
      * @param	array		$data   Array of data to validate
