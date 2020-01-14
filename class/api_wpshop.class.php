@@ -392,6 +392,12 @@ class Wpshop extends DolibarrApi
 
 	    $combination = new ProductCombination($db);
 
+		foreach( $request_data['data'] as $key => $val ) {
+			if ( $val == -1 ) {
+				unset( $request_data['data'][ $key ] );
+			}
+		}
+
 	    return $combination->fetchByProductCombination2ValuePairs($request_data['product_id'], $request_data['data']);
     }
 
