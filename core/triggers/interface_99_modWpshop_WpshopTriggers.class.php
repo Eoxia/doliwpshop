@@ -113,36 +113,39 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 			switch ($action) {
 				case 'ECMFILES_CREATE':
 				case 'ECMFILES_MODIFY':
-				if ( $_REQUEST['action'] != 'confirm_paiement' ) {
-					$object_class = null;
-					$type = '';
-					switch ( $object->src_object_type ) {
-						case 'propal':
-							$object_class = new Propal($this->db);
-							$type = 'propal';
-							break;
-						case 'commande':
-							$object_class = new Commande($this->db);
-							$type = 'order';
-							break;
-						case 'facture':
-							$object_class = new Facture($this->db);
-							$type = 'invoice';
-							break;
+					if ( $_REQUEST['action'] != 'confirm_paiement' ) {
+						$object_class = null;
+						$type = '';
+						switch ( $object->src_object_type ) {
+							case 'propal':
+								$object_class = new Propal($this->db);
+								$type = 'propal';
+								break;
+							case 'commande':
+								$object_class = new Commande($this->db);
+								$type = 'order';
+								break;
+							case 'facture':
+								$object_class = new Facture($this->db);
+								$type = 'invoice';
+								break;
+						}
+
+						if ($object_class != null) {
+
+							$object_class->fetch( $object->src_object_id );
+							$wpshop_object = new wpshop_object( $this->db );
+							$propal        = $wpshop_object->fetch( (int) $object->src_object_id, $type );
+
+							if ( ! empty( $propal ) && ! empty( $propal->wp_id ) && ! empty( $propal->doli_id ) ) {
+								$propal->update( $user );
+								$request = WPAPI::post( '/wp-json/wpshop/v2/sync', array(
+									'wp_id'   => $propal->wp_id,
+									'doli_id' => $propal->doli_id,
+								), 'POST' );
+							}
+						}
 					}
-					
-					$object_class->fetch( $object->src_object_id );
-					$wpshop_object = new wpshop_object( $this->db );
-					$propal = $wpshop_object->fetch( (int) $object->src_object_id, $type );
-					
-					if ( ! empty( $propal ) && ! empty( $propal->wp_id ) && ! empty( $propal->doli_id ) ) {
-						$propal->update( $user );
-						$request = WPAPI::post( '/wp-json/wpshop/v2/sync', array(
-							'wp_id' => $propal->wp_id,
-							'doli_id' => $propal->doli_id,
-						), 'POST' );
-					}
-				}
 					break;
 		    case 'PRODUCT_CREATE':
 					if ( empty( $object->wp_id ) && ( ! empty( $object->array_options['options_web'] ) && $object->array_options['options_web'] ) ) {
