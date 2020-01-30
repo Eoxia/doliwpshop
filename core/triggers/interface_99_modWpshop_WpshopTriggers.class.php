@@ -444,58 +444,58 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 		    // Bills
 		    case 'BILL_CREATE':
-					$sync_date = dol_now( 'gmt' );
-					
-					$request = WPAPI::post( '/wp-json/wpshop/v2/create/invoice/', array( 
-						'title' => $object->ref,
-						'total_ht' => $object->total_ht,
-						'total_ttc' => $object->total_ttc,
-						'tva_tx' => $object->total_tva,
-						'socid' => $object->socid,
-						'datec' => $object->date,
-						'linked_object' => $object->linked_objects,
-						'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
-						'external_id' => (int) $object->id,
-					), 'POST' );
-					
-					$wpshop_object = new wpshop_object($this->db);
-					$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
-					$wpshop_object->doli_id = $object->id;
-					$wpshop_object->type = "invoice";
-					$wpshop_object->sync_date = $sync_date;
-					$wpshop_object->last_sync_date = $sync_date;
-					$wpshop_object->create($user);
+				$sync_date = dol_now( 'gmt' );
+
+				$request = WPAPI::post( '/wp-json/wpshop/v2/create/invoice/', array(
+					'title' => $object->ref,
+					'total_ht' => $object->total_ht,
+					'total_ttc' => $object->total_ttc,
+					'tva_tx' => $object->total_tva,
+					'socid' => $object->socid,
+					'datec' => $object->date,
+					'linked_object' => $object->linked_objects,
+					'date_last_synchro' => date( 'Y-m-d H:i:s', $sync_date ),
+					'external_id' => (int) $object->id,
+				), 'POST' );
+
+				$wpshop_object = new wpshop_object($this->db);
+				$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+				$wpshop_object->doli_id = $object->id;
+				$wpshop_object->type = "invoice";
+				$wpshop_object->sync_date = $sync_date;
+				$wpshop_object->last_sync_date = $sync_date;
+				$wpshop_object->create($user);
+				break;
+			case 'BILL_MODIFY':
 					break;
-					case 'BILL_MODIFY':
-						break;
-		    case 'BILL_VALIDATE':
-					// $wpshop_object = new wpshop_object( $this->db );
-					// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
-					// 
-					// if ( ! empty( $propal ) ) {
-					// 	$propal->update( $user );
-					// 
-					// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
-					// 		'title' => $object->newref,
-					// 		'status' => 'publish',
-					// 		'total_ht' => $object->total_ht,
-					// 		'total_ttc' => $object->total_ttc,
-					// 		'tva_amount' => $object->total_tva,
-					// 	), 'PUT' );
-					// }
-					break;
+            case 'BILL_VALIDATE':
+				// $wpshop_object = new wpshop_object( $this->db );
+				// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+				//
+				// if ( ! empty( $propal ) ) {
+				// 	$propal->update( $user );
+				//
+				// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+				// 		'title' => $object->newref,
+				// 		'status' => 'publish',
+				// 		'total_ht' => $object->total_ht,
+				// 		'total_ttc' => $object->total_ttc,
+				// 		'tva_amount' => $object->total_tva,
+				// 	), 'PUT' );
+				// }
+				break;
 		    case 'BILL_UNVALIDATE':
-					// $wpshop_object = new wpshop_object( $this->db );
-					// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
-					// 
-					// if ( ! empty( $propal ) ) {
-					// 	$propal->update( $user );
-					// 
-					// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
-					// 		'status' => 'draft',
-					// 	), 'PUT' );
-					// }
-					break;
+				// $wpshop_object = new wpshop_object( $this->db );
+				// $propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
+				//
+				// if ( ! empty( $propal ) ) {
+				// 	$propal->update( $user );
+				//
+				// 	$request = WPAPI::post( '/wp-json/wpshop/v1/doli-invoice/' . (int) $propal->wp_id, array(
+				// 		'status' => 'draft',
+				// 	), 'PUT' );
+				// }
+				break;
 		    case 'BILL_CANCEL':
 					$wpshop_object = new wpshop_object( $this->db );
 					$propal = $wpshop_object->fetch( (int) $object->id, 'invoice' );
@@ -539,33 +539,33 @@ class InterfaceWpshopTriggers extends DolibarrTriggers
 					break;
 		    // Payments
 		    case 'PAYMENT_CUSTOMER_CREATE':
-					if ( ! empty( (int) $_REQUEST['facid'] ) ) {
-						$sync_date = dol_now( 'gmt' );
-						
-						$data =  array( 
-							'title' => $object->ref,
-							'payment_type' => $object->paiementid,
-							'paiementcode' => $object->paiementcode,
-							'amount' => ! empty( $object->amount ) ? $object->amount : end( $object->amounts ),
-							'last_sync' => date( 'Y-m-d H:i:s', $sync_date ),
-							'external_id' => (int) $object->id,
-							'parent_id' => (int) $_REQUEST['facid'], // Security.
-							'status' => 'publish',
-							'date'   => date( 'Y-m-d H:i:s', $object->datepaye ),
-						);
-						
-							$request = WPAPI::post( '/wp-json/wpshop/v2/create/payment/', $data, 'POST' );
-							
-							$wpshop_object = new wpshop_object($this->db);
-							$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
-							$wpshop_object->doli_id = $object->id;
-							$wpshop_object->type = "payment";
-							$wpshop_object->sync_date = $sync_date;
-							$wpshop_object->last_sync_date = $sync_date;
-							$wpshop_object->create($user);
-						}
-					
-						break;
+				if ( ! empty( (int) $_REQUEST['facid'] ) ) {
+					$sync_date = dol_now( 'gmt' );
+
+					$data =  array(
+						'title' => $object->ref,
+						'payment_type' => $object->paiementid,
+						'paiementcode' => $object->paiementcode,
+						'amount' => ! empty( $object->amount ) ? $object->amount : end( $object->amounts ),
+						'last_sync' => date( 'Y-m-d H:i:s', $sync_date ),
+						'external_id' => (int) $object->id,
+						'parent_id' => (int) $_REQUEST['facid'], // Security.
+						'status' => 'publish',
+						'date'   => date( 'Y-m-d H:i:s', $object->datepaye ),
+					);
+
+					$request = WPAPI::post( '/wp-json/wpshop/v2/create/payment/', $data, 'POST' );
+
+					$wpshop_object = new wpshop_object($this->db);
+					$wpshop_object->wp_id = isset( $request ) ? $request['data']['id'] : $object->wp_id;
+					$wpshop_object->doli_id = $object->id;
+					$wpshop_object->type = "payment";
+					$wpshop_object->sync_date = $sync_date;
+					$wpshop_object->last_sync_date = $sync_date;
+					$wpshop_object->create($user);
+				}
+
+				break;
 		    case 'PAYMENT_ADD_TO_BANK':
 					break;
 		    //case 'PAYMENT_DELETE':
