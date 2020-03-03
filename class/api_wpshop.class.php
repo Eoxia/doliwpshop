@@ -45,12 +45,12 @@ require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
  */
 class Wpshop extends DolibarrApi
 {
-		/**
-		 * @var array   $FIELDS     Mandatory fields, checked when create and update object
-		 */
-		static $FIELDS = array();
-	
-		public $wpshop_object;
+	/**
+	 * @var array   $FIELDS     Mandatory fields, checked when create and update object
+	 */
+	static $FIELDS = array();
+
+	public $wpshop_object;
 		
     /**
      * Constructor
@@ -60,9 +60,9 @@ class Wpshop extends DolibarrApi
      */
     function __construct()
     {
-			global $db, $conf;
-			$this->db = $db;
-			$this->wpshop_object = new wpshop_object($this->db);
+		global $db, $conf;
+		$this->db = $db;
+		$this->wpshop_object = new wpshop_object($this->db);
     }
 
     /**
@@ -75,77 +75,99 @@ class Wpshop extends DolibarrApi
      */
     function post($request_data = null)
     {
-			if (! DolibarrApiAccess::$user->rights->wpshop->write) {
-				throw new RestException(401);
-			}
-			
-			$result = $this->_validate($request_data);
-			
-			foreach($request_data as $field => $value) {
-				$this->wpshop_object->$field = $value;
-			}
-			
-			$class = null;
-			
-			switch( $request_data['type'] ) {
-				case 'product':
-					$class = new Products();
-					$request_data['array_options']['web'] = 1;
-					break;
-				case 'propal':
-					$class = new Proposals();
-					break;
-				case 'order':
-					$class = new Orders();
-					$request_data['date_commande'] = dol_now();
-					break;
-				case 'third_party':
-					$class = new Thirdparties();
-					break;
-				case 'contact':
-				case 'invoice':
-				case 'payment':
-					$class = 'tmp';
-					break;
-				default:
-					break;
-			}
-			
-			if ( empty( $class ) ) {
-				return null;
-			}
-			
-			unset( $request_data['type'] );
-			
-			if ( empty( $request_data['doli_id'] ) ) {
-				$this->wpshop_object->doli_id = $class->post( $request_data );
-			}
-			
-			$founded = new wpshop_object( $this->db );
-			$founded_object = $founded->fetch_exist( (int) $this->wpshop_object->doli_id, $this->wpshop_object->wp_id, $this->wpshop_object->type );
-			if ( empty( $founded_object ) ) {
-				$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
-			} else {
-				if ( $class != 'tmp' ) {
-					$products = new $class();
-					
-					$product = $products->put($request_data['doli_id'], $request_data);
-				}
-				
-				$last_sync_date = $founded->update(DolibarrApiAccess::$user, false, $statut );
-			}
-			
-			if ( ! empty( $class ) && $class != 'tmp' ) {
+		if (! DolibarrApiAccess::$user->rights->wpshop->write) {
+			throw new RestException(401);
+		}
+
+		$result = $this->_validate($request_data);
+
+		foreach($request_data as $field => $value) {
+			$this->wpshop_object->$field = $value;
+		}
+
+		$class = null;
+
+		$data_sha = array();
+
+		switch( $request_data['type'] ) {
+			case 'product':
+				$class = new Products();
+				$request_data['array_options']['web'] = 1;
+
 				$object = $class->get( $this->wpshop_object->doli_id );
 
-				$object->last_sync_date = date( 'Y-m-d H:i:s', $last_sync_date );
-			} else {
-				$object = new stdClass();
-				$object->last_sync_date = date( 'Y-m-d H:i:s', $last_sync_date );
-			}
-			
-			return $object;
+				$data_sha['doli_id']   = $this->wpshop_object->doli_id;
+				$data_sha['wp_id']     = $this->wpshop_object->wp_id;
+				$data_sha['label']     = $object->label;
+				$data_sha['price']     = (float) $object->price;
+				$data_sha['price_ttc'] = (float) $object->price_ttc;
+				$data_sha['tva_tx']    = (float) $object->tva_tx;
+
+				break;
+			case 'propal':
+				$class = new Proposals();
+
+				$object = $class->get( $this->wpshop_object->doli_id );
+
+				break;
+			case 'order':
+				$class = new Orders();
+
+				$object = $class->get( $this->wpshop_object->doli_id );
+
+				$request_data['date_commande'] = dol_now();
+				break;
+			case 'third_party':
+				$class = new Thirdparties();
+
+				$object = $class->get( $this->wpshop_object->doli_id );
+
+				break;
+			case 'contact':
+			case 'invoice':
+			case 'payment':
+				$class = 'tmp';
+				break;
+			default:
+				break;
 		}
+
+	    $this->wpshop_object->shadata = hash( 'sha256', implode( ',', $data_sha ) );
+
+	    if ( empty( $class ) ) {
+			return null;
+		}
+
+		unset( $request_data['type'] );
+
+		/*if ( empty( $request_data['doli_id'] ) ) {
+			$this->wpshop_object->doli_id = $class->post( $request_data );
+		}*/
+
+		$founded = new wpshop_object( $this->db );
+		$founded_object = $founded->fetch_exist( (int) $this->wpshop_object->doli_id, $this->wpshop_object->wp_id, $this->wpshop_object->type );
+		if ( empty( $founded_object ) || $founded_object == -1 ) {
+			$this->wpshop_object->create(DolibarrApiAccess::$user);
+		} else {
+			if ( $class != 'tmp' ) {
+
+				$products = new $class();
+
+				$product = $products->put($request_data['doli_id'], $request_data);
+			}
+
+			$founded->update(DolibarrApiAccess::$user, false, $statut );
+		}
+
+		if ( ! empty( $class ) && $class != 'tmp' ) {
+			$object->data_sha = $this->wpshop_object->shadata;
+		} else {
+			$object = new stdClass();
+			$object->data_sha = $this->wpshop_object->shadata;
+		}
+
+		return $object;
+	}
 		
 	/**
      *  Associate WP with a product object
@@ -156,17 +178,15 @@ class Wpshop extends DolibarrApi
      * @url	POST object/statut
      */
 	public function post_check_statut($request_data = null) {
-			$founded = new wpshop_object( $this->db );
-			$founded_object = $founded->fetch_exist( (int) $request_data['doli_id'], $request_data['wp_id'], $request_data['type'] );
-			
-			$date_wp = strtotime( $request_data['wp_sync_date'] );
-			
-			if ( $date_wp === $founded_object->last_sync_date ) {
-				return true;
-			}
-			
-			return false;
+		$founded = new wpshop_object( $this->db );
+		$founded_object = $founded->fetch_exist( (int) $request_data['doli_id'], $request_data['wp_id'], $request_data['type'] );
+
+		if ( $request_data['sha_256'] === $founded_object->shadata ) {
+			return true;
 		}
+
+		return false;
+	}
 
 	/**
 	 * Update product and sync date
@@ -177,28 +197,28 @@ class Wpshop extends DolibarrApi
 	 * @url PUT object/{id}
 	 */
 	function put($id, $request_data = null) {
-			if (! DolibarrApiAccess::$user->rights->wpshop->write) {
-				throw new RestException(401);
-			}
-			
-			$result = $this->wpshop_object->fetch($id);
-			
-			foreach($request_data as $field => $value) {
-				$this->wpshop_object->$field = $value;
-			}
-			
-			$products = new Products();
-			$product = $products->put($id, $request_data);
-			
-			$last_sync_date = $this->wpshop_object->update(DolibarrApiAccess::$user, false, $statut );
-
-			if ( $statut == -1 ) {
-				$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
-			}
-			
-			$product->last_sync_date = $last_sync_date;
-			return $product;
+		if (! DolibarrApiAccess::$user->rights->wpshop->write) {
+			throw new RestException(401);
 		}
+
+		$result = $this->wpshop_object->fetch($id);
+
+		foreach($request_data as $field => $value) {
+			$this->wpshop_object->$field = $value;
+		}
+
+		$products = new Products();
+		$product = $products->put($id, $request_data);
+
+		$last_sync_date = $this->wpshop_object->update(DolibarrApiAccess::$user, false, $statut );
+
+		if ( $statut == -1 ) {
+			$last_sync_date = $this->wpshop_object->create(DolibarrApiAccess::$user);
+		}
+
+		$product->last_sync_date = $last_sync_date;
+		return $product;
+	}
 
 	/**
 	 * Get single product

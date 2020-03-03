@@ -58,13 +58,14 @@ class wpshop_object extends CommonObject
 	/**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
      */
-	public $fields=array(
-	    'rowid'         =>array('type'=>'integer',      'label'=>'TechnicalID',      'enabled'=>1, 'visible'=>-2, 'noteditable'=>1, 'notnull'=> 1, 'index'=>1, 'position'=>1, 'comment'=>'Id'),
-			'doli_id'    => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-			'wp_id'    => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-			'type'    => array( 'type'=>'varchar(15)', 'label'=>'Type', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-			'sync_date' =>array('type'=>'datetime',     'label'=>'SyncDate',     'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
-			'last_sync_date' =>array('type'=>'datetime',     'label'=>'LastDateSync',     'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
+	public $fields = array(
+	    'rowid' => array( 'type'=> 'integer', 'label'=> 'TechnicalID', 'enabled'=> 1, 'visible'=> -2, 'noteditable' => 1, 'notnull' => 1, 'index' => 1, 'position' => 1, 'comment' => 'Id'),
+		'doli_id' => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+		'wp_id' => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+		'type' => array( 'type'=>'varchar(15)', 'label'=>'Type', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
+		'sync_date' => array('type'=>'datetime', 'label'=>'SyncDate', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
+	    'last_sync_date' => array('type'=>'datetime', 'label'=>'LastDateSync', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
+	    'shadata' => array('type'=>'varchar(255)', 'label'=>'shaData', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
 	);
 
 	/**
@@ -73,29 +74,34 @@ class wpshop_object extends CommonObject
 	public $rowid;
 
 	/**
-	 * @var string FK_Product
+	 * @var integer doli_id
 	 */
 	public $doli_id;
 	
 	/**
-	 * @var string FK_Product
+	 * @var intger wp_id
 	 */
 	public $wp_id;
 	
 	/**
-	 * @var string
+	 * @var string type
 	 */
 	public $type;
 
 	/**
-     * @var integer|string date_creation
+     * @var datetime sync_date
      */
 	public $sync_date;
 	
 	/**
-		 * @var integer|string date_creation
-		 */
+	* @var datetime last_sync_date
+	*/
 	public $last_sync_date;
+
+	/**
+	 * @var string shadata
+	 */
+	public $shadata;
 
 	/**
 	 * Constructor
@@ -141,7 +147,7 @@ class wpshop_object extends CommonObject
 		if ( empty( $this->last_sync_date ) ) {
 			$this->last_sync_date = dol_now( 'gmt' );
 		}
-		
+
 		$this->createCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
