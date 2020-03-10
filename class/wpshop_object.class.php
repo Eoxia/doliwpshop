@@ -139,6 +139,7 @@ class wpshop_object extends CommonObject
 		}
 	}
 
+	// @todo: Need comment and clean
 	public function create( User $user, $notrigger = false ) {
 		if ( empty( $this->sync_date ) ) {
 			$this->sync_date = dol_now( 'gmt' );
@@ -151,13 +152,15 @@ class wpshop_object extends CommonObject
 		$this->createCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
-	
+
+	// @todo: Need comment and clean
 	public function update(User $user, $notrigger = false, &$statut = false) {
 		$this->last_sync_date = dol_now( 'gmt' );
 		$statut = $this->updateCommon($user, $notrigger);
 		return $this->last_sync_date;
 	}
-	
+
+	// @todo: Need comment and clean
 	public function fetch($id, $type = '') {
 		if (empty($id) || empty($type)) return -1;
 
@@ -187,7 +190,8 @@ class wpshop_object extends CommonObject
 			return -1;
 		}
 	}
-	
+
+	// @todo: Need comment and clean
 	public function fetch_exist($id, $wp_id, $type = '') {
 		if (empty($id) || empty($type)) return -1;
 

@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
 require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 
 /**
  * \file    wpshop/class/api_wpshop.class.php
@@ -88,6 +89,7 @@ class Wpshop extends DolibarrApi
 		$class = null;
 
 		$data_sha = array();
+	    $founded  = new wpshop_object( $this->db );
 
 		switch( $request_data['type'] ) {
 			case 'product':
@@ -102,13 +104,21 @@ class Wpshop extends DolibarrApi
 				$data_sha['price']     = (float) $object->price;
 				$data_sha['price_ttc'] = (float) $object->price_ttc;
 				$data_sha['tva_tx']    = (float) $object->tva_tx;
-
 				break;
 			case 'propal':
 				$class = new Proposals();
 
-				$object = $class->get( $this->wpshop_object->doli_id );
+				if ( ! empty( $this->wpshop_object->doli_id ) ) {
+					$object = $class->get( $this->wpshop_object->doli_id );
 
+					$data_sha = array();
+
+					$data_sha['doli_id']   = (int) $this->wpshop_object->doli_id;
+					$data_sha['wp_id']     = (int) $this->wpshop_object->wp_id;
+					$data_sha['ref']       = $object->ref;
+					$data_sha['total_ht']  = (float) $object->total_ht;
+					$data_sha['total_ttc'] = (float) $object->total_ttc;
+				}
 				break;
 			case 'order':
 				$class = new Orders();
@@ -121,6 +131,34 @@ class Wpshop extends DolibarrApi
 				$class = new Thirdparties();
 
 				$object = $class->get( $this->wpshop_object->doli_id );
+				$object->db = $this->db;
+
+				$data_sha['doli_id'] = (int) $this->wpshop_object->doli_id;
+				$data_sha['wp_id']   = (int) $this->wpshop_object->wp_id;
+				$data_sha['title']   = $object->name;
+				$data_sha['address'] = $object->address;
+				$data_sha['town']    = $object->town;
+				$data_sha['zip']     = $object->zip;
+				$data_sha['state']   = $object->state;
+				$data_sha['country'] = $object->country;
+				$data_sha['town']    = $object->town;
+				$data_sha['phone']   = $object->phone;
+				$data_sha['email']   = $object->email;
+
+				$contacts = $object->contact_array_objects();
+
+				if ( ! empty( $contacts ) ) {
+					foreach ( $contacts as $key => $contact ) {
+						// @todo: L'email est que du coté de WPShop quand elle est généré par WPShop car inexistante dans dolibarr.
+						$data_sha['contacts_' . $key . '_doli_id'] = $contact->id;
+						$data_sha['contacts_' . $key . '_doli_third_party_id'] = $contact->socid;
+						$data_sha['contacts_' . $key . '_wp_third_party_id'] = (int) $this->wpshop_object->wp_id;
+						$data_sha['contacts_' . $key . '_lastname'] = $contact->lastname;
+						$data_sha['contacts_' . $key . '_firstname'] = $contact->firstname;
+						$data_sha['contacts_' . $key . '_phone_pro'] = $contact->phone_pro;
+						$data_sha['contacts_' . $key . '_phone_mobile'] = $contact->phone_mobile;
+					}
+				}
 
 				break;
 			case 'contact':
@@ -140,22 +178,22 @@ class Wpshop extends DolibarrApi
 
 		unset( $request_data['type'] );
 
-		/*if ( empty( $request_data['doli_id'] ) ) {
+		if ( empty($request_data['doli_id'] ) ) {
 			$this->wpshop_object->doli_id = $class->post( $request_data );
-		}*/
+			$object = $class->get( $this->wpshop_object->doli_id );
+		}
 
-		$founded = new wpshop_object( $this->db );
 		$founded_object = $founded->fetch_exist( (int) $this->wpshop_object->doli_id, $this->wpshop_object->wp_id, $this->wpshop_object->type );
 		if ( empty( $founded_object ) || $founded_object == -1 ) {
 			$this->wpshop_object->create(DolibarrApiAccess::$user);
 		} else {
 			if ( $class != 'tmp' ) {
 
-				$products = new $class();
-
-				$product = $products->put($request_data['doli_id'], $request_data);
+				$updated_object = new $class();
+				$updated_object->put($request_data['doli_id'], $request_data);
 			}
 
+			$founded->shadata = hash( 'sha256', implode( ',', $data_sha ) );
 			$founded->update(DolibarrApiAccess::$user, false, $statut );
 		}
 
@@ -170,10 +208,11 @@ class Wpshop extends DolibarrApi
 	}
 		
 	/**
-     *  Associate WP with a product object
+     *  Check SHA256 between WP Object and Doli Object for data consistency.
      *
-     * @param array $request_data   Request datas
-     * @return int  ID of myobject
+     * @param array $request_data Request datas
+	 *
+     * @return boolean            True if SHA256 is equals. Otherwise false.
      *
      * @url	POST object/statut
      */
