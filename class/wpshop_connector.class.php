@@ -27,17 +27,17 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 /**
  * Class for MyObject
  */
-class wpshop_object extends CommonObject
+class WPShopConnector extends CommonObject
 {
 	/**
 	 * @var string ID to identify managed object
 	 */
-	public $element = 'wpshop';
+	public $element = 'wpshopConnector';
 
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
-	public $table_element = 'wpshop';
+	public $table_element = 'wpshop_connector';
 
 	/**
 	 * @var int  Does myobject support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
@@ -60,11 +60,9 @@ class wpshop_object extends CommonObject
      */
 	public $fields = array(
 	    'rowid' => array( 'type'=> 'integer', 'label'=> 'TechnicalID', 'enabled'=> 1, 'visible'=> -2, 'noteditable' => 1, 'notnull' => 1, 'index' => 1, 'position' => 1, 'comment' => 'Id'),
-		'doli_id' => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-		'wp_id' => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-		'type' => array( 'type'=>'varchar(15)', 'label'=>'Type', 'enabled' => 1, 'visible' => -2, 'noteeditable' => 1, 'notnull' => 1),
-		'sync_date' => array('type'=>'datetime', 'label'=>'SyncDate', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
-	    'last_sync_date' => array('type'=>'datetime', 'label'=>'LastDateSync', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
+		'doliid' => array( 'type'=>'integer', 'label'=>'DolibarrProductID', 'enabled' => 1, 'visible' => -2, 'noteditable' => 1, 'notnull' => 1),
+		'wpid' => array( 'type'=>'integer', 'label'=>'WPProductID', 'enabled' => 1, 'visible' => -2, 'noteditable' => 1, 'notnull' => 1),
+		'type' => array( 'type'=>'varchar(15)', 'label'=>'Type', 'enabled' => 1, 'visible' => -2, 'noteditable' => 1, 'notnull' => 1),
 	    'shadata' => array('type'=>'varchar(255)', 'label'=>'shaData', 'enabled'=>1, 'visible'=>-2, 'notnull'=> 1, 'position'=>500),
 	);
 
@@ -87,16 +85,6 @@ class wpshop_object extends CommonObject
 	 * @var string type
 	 */
 	public $type;
-
-	/**
-     * @var datetime sync_date
-     */
-	public $sync_date;
-	
-	/**
-	* @var datetime last_sync_date
-	*/
-	public $last_sync_date;
 
 	/**
 	 * @var string shadata
@@ -141,23 +129,14 @@ class wpshop_object extends CommonObject
 
 	// @todo: Need comment and clean
 	public function create( User $user, $notrigger = false ) {
-		if ( empty( $this->sync_date ) ) {
-			$this->sync_date = dol_now( 'gmt' );
-		}
-		
-		if ( empty( $this->last_sync_date ) ) {
-			$this->last_sync_date = dol_now( 'gmt' );
-		}
-
 		$this->createCommon($user, $notrigger);
-		return $this->last_sync_date;
+		return null;
 	}
 
 	// @todo: Need comment and clean
 	public function update(User $user, $notrigger = false, &$statut = false) {
-		$this->last_sync_date = dol_now( 'gmt' );
 		$statut = $this->updateCommon($user, $notrigger);
-		return $this->last_sync_date;
+		return null;
 	}
 
 	// @todo: Need comment and clean
