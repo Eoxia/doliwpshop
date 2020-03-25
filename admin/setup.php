@@ -32,7 +32,7 @@ if (! $res) {
 
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/wpshop.lib.php';
-require_once '../class/wp_api.class.php';
+require_once '../lib/wp_api.class.php';
 
 // Translations
 $langs->loadLangs(array("admin", "wpshop@wpshop"));
