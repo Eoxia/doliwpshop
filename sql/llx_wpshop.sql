@@ -14,14 +14,11 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_wpshop (
+CREATE TABLE llx_wpshop_connector (
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid INTEGER AUTO_INCREMENT PRIMARY KEY,
-	doli_id INTEGER DEFAULT 1 NOT NULL,
-	wp_id INTEGER DEFAULT 1 NOT NULL,
+	doliid INTEGER DEFAULT 1 NOT NULL,
+	wpid INTEGER DEFAULT 1 NOT NULL,
 	type VARCHAR(15) DEFAULT "" NOT NULL,
-	sync_date DATETIME NOT NULL,
-	last_sync_date DATETIME NOT NULL,
 	shadata VARCHAR(255) NOT NULL
-	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
