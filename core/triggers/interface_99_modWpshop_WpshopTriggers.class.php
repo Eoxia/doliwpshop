@@ -39,9 +39,7 @@ require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 
 dol_include_once('/wpshop/class/wp_api.class.php');
-dol_include_once('/wpshop/class/wpshop_object.class.php');
-
-
+dol_include_once('/wpshop/class/wpshop_connector.class.php');
 
 /**
  *  Class of triggers for Wpshop module
