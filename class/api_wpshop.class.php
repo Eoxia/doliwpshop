@@ -24,12 +24,11 @@ require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
 
-dol_include_once('/wpshop/class/wpshop_connector.class.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/api_contacts.class.php';
 require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
-require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 
 /**
  * \file    wpshop/class/api_wpshop.class.php
@@ -40,14 +39,13 @@ require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 /**
  * API class for wpshop myobject
  *
+ * @property DoliDB db
  * @smart-auto-routing false
  * @access protected
  * @class  DolibarrApiAccess {@requires user,external}
  */
 class Wpshop extends DolibarrApi
 {
-	public $wpshop_connector;
-		
     /**
      * Constructor
      *
@@ -58,71 +56,65 @@ class Wpshop extends DolibarrApi
     {
 		global $db, $conf;
 		$this->db = $db;
-		$this->wpshop_connector = new WPShopConnector($this->db);
     }
 
-    /**
-     *  Associate WP with a product object
-     *
-     * @param array $request_data   Request datas
-     * @return int  ID of myobject
-     *
-     * @url	POST object
-     */
+	/**
+	 *  Associate WP with a product object
+	 *
+	 * @param   array  $request_data  Request data
+	 *
+	 * @return mixed
+	 *
+	 * @url    POST object
+	 * @throws RestException
+	 */
     function post($request_data = null)
     {
 		if (! DolibarrApiAccess::$user->rights->wpshop->write) {
 			throw new RestException(401);
 		}
 
+		// @todo: Use result for check if request_data is valid.
 		$result = $this->_validate($request_data);
-
-		foreach($request_data as $field => $value) {
-			$this->wpshop_connector->$field = $value;
-		}
 
 		$class = null;
 
-		$data_sha = array();
-	    $founded  = new WPShopConnector( $this->db );
-
+	    // @todo: Create const for type.
 		switch( $request_data['type'] ) {
-			case 'product':
+			case 'wps-product':
 				$class = new Products();
 				$request_data['array_options']['web'] = 1;
 
-				$object = $class->get( $this->wpshop_connector->doli_id );
+				$object = $class->get( $this->wpshop_connector->doliid );
 
-				$data_sha['doli_id']   = $this->wpshop_connector->doli_id;
-				$data_sha['wp_id']     = $this->wpshop_connector->wp_id;
+				$data_sha['doli_id']   = $this->wpshop_connector->doliid;
+				$data_sha['wp_id']     = $this->wpshop_connector->wpid;
 				$data_sha['label']     = $object->label;
 				$data_sha['price']     = (float) $object->price;
 				$data_sha['price_ttc'] = (float) $object->price_ttc;
 				$data_sha['tva_tx']    = (float) $object->tva_tx;
 				break;
-			case 'propal':
+			case 'wps-proposal':
 				$class = new Proposals();
 
-				if ( ! empty( $this->wpshop_connector->doli_id ) ) {
-					$object = $class->get( $this->wpshop_connector->doli_id );
+				if ( ! empty( $this->wpshop_connector->doliid ) ) {
+					$object = $class->get( $this->wpshop_connector->doliid );
 
-					$data_sha = array();
-
-					$data_sha['doli_id']   = (int) $this->wpshop_connector->doli_id;
-					$data_sha['wp_id']     = (int) $this->wpshop_connector->wp_id;
+					$data_sha['doli_id']   = (int) $this->wpshop_connector->doliid;
+					$data_sha['wp_id']     = (int) $this->wpshop_connector->wpid;
 					$data_sha['ref']       = $object->ref;
 					$data_sha['total_ht']  = (float) $object->total_ht;
 					$data_sha['total_ttc'] = (float) $object->total_ttc;
 				}
 				break;
-			case 'third_party':
+			case 'wps-third-party':
 				$class = new Thirdparties();
 
-				$object = $class->get( $this->wpshop_connector->doli_id );
+				$object = $class->get( $this->wpshop_connector->doliid );
 				$object->db = $this->db;
 
-				$data_sha['doli_id'] = (int) $this->wpshop_connector->doli_id;
-				$data_sha['wp_id']   = (int) $this->wpshop_connector->wp_id;
+				$data_sha['doli_id'] = (int) $this->wpshop_connector->doliid;
+				$data_sha['wp_id']   = (int) $this->wpshop_connector->wpid;
 				$data_sha['title']   = $object->name;
 				$data_sha['address'] = $object->address;
 				$data_sha['town']    = $object->town;
@@ -133,7 +125,7 @@ class Wpshop extends DolibarrApi
 				$data_sha['phone']   = $object->phone;
 				$data_sha['email']   = $object->email;
 
-				$contacts = $object->contact_array_objects();
+				/*$contacts = $object->contact_array_objects();
 
 				if ( ! empty( $contacts ) ) {
 					foreach ( $contacts as $key => $contact ) {
@@ -146,8 +138,22 @@ class Wpshop extends DolibarrApi
 						$data_sha['contacts_' . $key . '_phone_pro'] = $contact->phone_pro;
 						$data_sha['contacts_' . $key . '_phone_mobile'] = $contact->phone_mobile;
 					}
-				}
+				}*/
 
+				break;
+			case 'wps-user':
+				$class = new Contacts();
+
+				if ( ! empty( $this->wpshop_connector->doliid ) ) {
+					$object = $class->get( $this->wpshop_connector->doliid );
+
+					$data_sha['doli_id'] = (int) $this->wpshop_connector->doliid;
+					$data_sha['wp_id']   = (int) $this->wpshop_connector->wpid;
+					$data_sha['lastname']     = $object->lastname;
+					$data_sha['phone']        = $object->phone;
+					$data_sha['phone_mobile'] = $object->phone_mobile;
+					$data_sha['email']        = $object->email;
+				}
 				break;
 			default:
 				break;
@@ -156,87 +162,155 @@ class Wpshop extends DolibarrApi
 	    $this->wpshop_connector->shadata = hash( 'sha256', implode( ',', $data_sha ) );
 
 	    if ( empty( $class ) ) {
-			return null;
+	    	// @todo: Status code.
+			return array(
+				'status' => false,
+				'status_message' => 'This type ' . $request_data['type'] . ' is not authorized',
+				'status_code' => '0x3'
+			);
 		}
 
-		unset( $request_data['type'] );
+	    $object = null;
 
-		if ( empty($request_data['doli_id'] ) ) {
-			$this->wpshop_connector->doli_id = $class->post( $request_data );
-			$object = $class->get( $this->wpshop_connector->doli_id );
+		unset($request_data['type']);
+
+		if (empty($request_data['doliid'])) {
+			$this->wpshop_connector->doliid = $class->post( $request_data );
+			$object = $class->get($this->wpshop_connector->doliid);
+
+			$object->data_sha = $this->wpshop_connector->shadata;
 		}
 
-		$founded_object = $founded->fetch_exist( (int) $this->wpshop_connector->doli_id, $this->wpshop_connector->wp_id, $this->wpshop_connector->type );
-		if ( empty( $founded_object ) || $founded_object == -1 ) {
+		$founded_object = $founded->fetch_exist((int) $this->wpshop_connector->doliid, (int) $this->wpshop_connector->wpid, $this->wpshop_connector->type);
+
+		if (empty($founded_object) || $founded_object == -1) {
 			$this->wpshop_connector->create(DolibarrApiAccess::$user);
+			$founded_object = $founded->fetch_exist( (int) $this->wpshop_connector->doliid, $this->wpshop_connector->wpid, $this->wpshop_connector->type );
+			$object = $founded_object;
+			$status_message = 'Created new connector id ' . $founded_object->id;
 		} else {
-			if ( $class != 'tmp' ) {
+			$updated_object = new $class();
+			$updated_object->put($request_data['doliid'], $request_data);
 
-				$updated_object = new $class();
-				$updated_object->put($request_data['doli_id'], $request_data);
-			}
+			$founded_object->shadata = hash( 'sha256', implode( ',', $data_sha ) );
+			$founded_object->update(DolibarrApiAccess::$user, false, $statut );
 
-			$founded->shadata = hash( 'sha256', implode( ',', $data_sha ) );
-			$founded->update(DolibarrApiAccess::$user, false, $statut );
+			$object = $founded_object;
+			$status_message = 'Updated connector id ' . $founded_object->id;
 		}
 
-		if ( ! empty( $class ) && $class != 'tmp' ) {
-			$object->data_sha = $this->wpshop_connector->shadata;
-		} else {
-			$object = new stdClass();
-			$object->data_sha = $this->wpshop_connector->shadata;
-		}
-
-		return $object;
+		return array(
+			'status' => true,
+			'status_code' => '0x0',
+			'status_message' => $status_message,
+			'data' => $object,
+		);
 	}
 
 	/**
 	 *  Check SHA256 between WP Object and Doli Object for data consistency.
 	 *
-	 * @param $doli_id
-	 * @param $wp_id
-	 * @param $type
-	 * @param $sha256
+	 * @param $id
 	 *
 	 * @return array            True if SHA256 is equals. Otherwise false.
 	 *
-	 * @url    GET object/status
+	 * @url    GET product/{$id}/checkSha
 	 */
-	public function post_check_status($doli_id, $wp_id, $type, $sha256) {
-		$founded = new WPShopConnector( $this->db );
-		$founded_object = $founded->fetch_exist($doli_id, $wp_id, $type);
-
-		if ($founded_object == -1) {
+	public function product_check_status($id) {
+		return true;
+		if ($founded_object == 0 || $founded_object == -1) {
 			// @todo: Const et voir avec LM pour message.
 			return array(
-				'status' => false,
-				'status_code' => '0x1',
+				'status'         => false,
+				'status_code'    => '0x1',
 				'status_message' => 'No connector.'
 			);
 		}
 
-		if ($sha256 === $founded_object->shadata ) {
+		if ($sha256 === $founded_object->shadata) {
 			return array(
-				'status' => true,
-				'status_code' => '0x0',
-				'status_message' => ''
+				'status'         => true,
+				'status_code'    => '0x0',
+				'status_message' => 'Sync OK'
 			);
 		}
 
 		return array(
-			'status' => false,
-			'status_code' => '0x2',
+			'status'         => true,
+			'status_code'    => '0x2',
 			'status_message' => 'SHA256 is not equal.'
+		);
+	}
+
+	/**
+	 *  Check User Status (With Third Party) and SHA256 consistency.
+	 *
+	 * @param $wp_contact_id
+	 * @param $doli_contact_id
+	 * @param $sha_contact
+	 * @param $wp_third_party_id
+	 * @param $doli_third_party_id
+	 * @param $sha_third_party
+	 *
+	 * @return array            True if SHA256 is equals. Otherwise false.
+	 *
+	 * @url    GET getUserStatus
+	 */
+	public function get_user_status($wp_contact_id, $doli_contact_id, $sha_contact, $wp_third_party_id, $doli_third_party_id, $sha_third_party) {
+		// @todo: Vérifie que le contact que doli est bien relié au third_party_id.
+
+		$founded        = new WPShopConnector($this->db);
+		$founded_contact = $founded->fetch_exist($doli_contact_id, $wp_contact_id, 'wps-user');
+
+		if ($founded_contact == 0 || $founded_contact == -1) {
+			return array(
+				'status'         => false,
+				'status_code'    => '0x12',
+				'status_message' => 'No connector with WP Contact and Doli Contact in llx_wpshop_connector.'
+			);
+		}
+
+		if ($sha_contact !== $founded_contact->shadata) {
+			return array(
+				'status'         => false,
+				'status_code'    => '0x13',
+				'status_message' => 'SHA256 is not equal for WP Contact and Doli Contact.'
+			);
+		}
+
+		$founded_third_party = $founded->fetch_exist($doli_third_party_id, $wp_third_party_id, 'wps-third-party');
+
+		if ($founded_third_party == 0 || $founded_third_party == -1) {
+			return array(
+				'status'         => false,
+				'status_code'    => '0x14',
+				'status_message' => 'No connector with WP Third Party and Doli Third Party in llx_wpshop_connector.'
+			);
+		}
+
+		if ($sha_third_party !== $founded_third_party->shadata) {
+			return array(
+				'status'         => false,
+				'status_code'    => '0x15',
+				'status_message' => 'SHA256 is not equal for WP Third Party and Doli Third Party.'
+			);
+		}
+
+		return array(
+			'status'         => true,
+			'status_code'    => '0x0',
+			'status_message' => 'Sync OK'
 		);
 	}
 
 	/**
 	 * Update product and sync date
 	 *
-	 * @param  int $id             ID of product
-	 * @param  array $request_data [description]
+	 * @param   int    $id            ID of product
+	 * @param   array  $request_data  [description]
 	 *
 	 * @url PUT object/{id}
+	 * @throws RestException
 	 */
 	function put($id, $request_data = null) {
 		if (! DolibarrApiAccess::$user->rights->wpshop->write) {
@@ -268,7 +342,7 @@ class Wpshop extends DolibarrApi
 	 * @param  int $id ID of product
 	 * @return object
 	 *
-	 * @url GET products
+	 * @url GET productsonweb/{id}
 	 */
 	function get_product_advanced( $id ) {
 		global $db, $conf;
@@ -474,24 +548,19 @@ class Wpshop extends DolibarrApi
     	$object = parent::_cleanObjectDatas($object);
     	return $object;
     }
-		
+
 	/**
-     * Validate fields before create or update object
-     *
-     * @param	array		$data   Array of data to validate
-     * @return	array
-     *
-     * @throws	RestException
-     */
+	 * Validate fields before create or update object
+	 *
+	 * @param   array  $data  Array of data to validate
+	 *
+	 * @return bool
+	 * @todo: Secure request_data.
+	 *
+	 */
     private function _validate($data)
     {
-        $myobject = array();
-        foreach (self::$FIELDS as $field) {
-            if (!isset($data[$field]))
-                throw new RestException(400, "$field field missing");
-            $myobject[$field] = $data[$field];
-        }
-        return $myobject;
+        return true;
     }
 		
 }

@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2019 SuperAdmin
+/* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,9 +43,9 @@ if (! $user->admin) accessforbidden();
 $action = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 
-$arrayofparameters=array(
-	'WPSHOP_URL_WORDPRESS'=>array('css'=>'minwidth500','enabled'=>1),
-	'WPSHOP_TOKEN'=>array('css'=>'minwidth500','enabled'=>1)
+$arrayofparameters = array(
+	'WPSHOP_URL_WORDPRESS' => array('css'=> 'minwidth500', 'enabled' => 1),
+	'WPSHOP_TOKEN'         => array('css'=> 'minwidth500', 'enabled'=> 1)
 );
 
 
@@ -58,6 +57,7 @@ if ((float) DOL_VERSION >= 6)
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 }
 
+// @todo: Statut en status
 $connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
 /*
  * View
@@ -116,6 +116,7 @@ else
 			print '</td><td>' . $conf->global->$key . '</td></tr>';
 		}
 
+		// @todo: Translate to English.
 		print '<tr class="oddevent"><td>Communication avec WordPress</td><td>';
 		
 		if ( $connected === true ) {

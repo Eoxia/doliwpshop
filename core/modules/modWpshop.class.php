@@ -63,9 +63,6 @@ class modWpshop extends DolibarrModules {
 			'tpl'               => 0,
 			'barcode'           => 0,
 			'models'            => 0,
-			'hooks'             => array(
-				'data' => array( 'productcard', 'propalcard', 'ordercard', 'invoicecard' )
-			),
 			'moduleforexternal' => 0
 		);
 
@@ -134,17 +131,10 @@ class modWpshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		$result = $this->_load_tables( '/wpshop/sql/' );
-		if ( $result < 0 ) {
-			return - 1;
-		} // Do not activate module if not allowed errors found on module SQL queries (the _load_table run sql with run_sql with error allowed parameter to 'default')
-
 		$extra_fields = new ExtraFields( $this->db );
 		$extra_fields->addExtraField( 'web', 'On the web', 'boolean', 1000, '', 'product' );
 
-		$sql = array();
-
-		return $this->_init( $sql, $options );
+		return 1;
 	}
 
 	/**
@@ -155,10 +145,10 @@ class modWpshop extends DolibarrModules {
 	 * @param   string  $options  Options when enabling module ('', 'noboxes')
 	 *
 	 * @return     int                1 if OK, 0 if KO
+	 *
+	 * @todo: We have to remove extrafields or not ?
 	 */
 	public function remove( $options = '' ) {
-		$sql = array();
-
-		return $this->_remove( $sql, $options );
+		return 1;
 	}
 }
