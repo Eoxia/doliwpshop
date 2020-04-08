@@ -63,7 +63,10 @@ class modWpshop extends DolibarrModules {
 			'tpl'               => 0,
 			'barcode'           => 0,
 			'models'            => 0,
-			'moduleforexternal' => 0
+			'moduleforexternal' => 0,
+			'hooks'             => array(
+				'productcard',
+			)
 		);
 
 		$this->dirs = array( "/wpshop/temp" );
@@ -132,9 +135,10 @@ class modWpshop extends DolibarrModules {
 	 */
 	public function init( $options = '' ) {
 		$extra_fields = new ExtraFields( $this->db );
-		$extra_fields->addExtraField( 'web', 'On the web', 'boolean', 1000, '', 'product' );
+		$extra_fields->addExtraField( 'web', 'On the web', 'boolean', 999, '', 'product' );
+		$extra_fields->addExtraField( '_wps_id', 'WPShop ID', 'int', 1000, '', 'product' );
 
-		return 1;
+		return $this->_init(null);
 	}
 
 	/**
@@ -149,6 +153,6 @@ class modWpshop extends DolibarrModules {
 	 * @todo: We have to remove extrafields or not ?
 	 */
 	public function remove( $options = '' ) {
-		return 1;
+		return $this->_remove(null);
 	}
 }

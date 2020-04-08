@@ -81,11 +81,30 @@ class WPAPI {
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
-		$output = curl_exec($ch); 
-		curl_close($ch); 
+		$output = curl_exec($ch);
+
+		curl_close($ch);
+
+		if ($output === NULL) {
+			return array(
+				'status' => NULL,
+			);
+		}
 		
 		$output = json_decode( $output, true );
-		return $output;
+
+		if (json_last_error() != JSON_ERROR_NONE) {
+			return array(
+				'status' => false,
+				'error_code' => json_last_error(),
+				'error_message' => json_last_error_msg(),
+			);
+		}
+
+		return array(
+			'status' => true,
+			'data' => $output,
+		);
 	}
 
 	/**
