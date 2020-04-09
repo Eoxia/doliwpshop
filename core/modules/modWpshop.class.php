@@ -136,7 +136,7 @@ class modWpshop extends DolibarrModules {
 	public function init( $options = '' ) {
 		$extra_fields = new ExtraFields( $this->db );
 		$extra_fields->addExtraField( 'web', 'On the web', 'boolean', 999, '', 'product' );
-		$extra_fields->addExtraField( '_wps_id', 'WPShop ID', 'int', 1000, '', 'product' );
+		$extra_fields->addExtraField( '_wps_id', 'WPShop ID', 'int', 1000, '', 'product', $unique = 0, $required = 0, $default_value = '', $param = '', $alwayseditable = 0, $perms = '', $list = '5' );
 
 		return $this->_init(null);
 	}
