@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2015   Jean-François Ferry     <jfefe@aternatik.fr>
- * Copyright (C) 2019 SuperAdmin
+/* Copyright (C) 2020 Eoxia
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +22,8 @@ require_once DOL_DOCUMENT_ROOT.'/main.inc.php';
 require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
+
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
@@ -62,6 +63,7 @@ class Wpshop extends DolibarrApi
 		global $db, $conf;
 		$this->db = $db;
 		$this->product = new Product($this->db);
+		$this->societe = new Societe($this->db);
 	}
 
 	/**
@@ -95,4 +97,38 @@ class Wpshop extends DolibarrApi
 
 		return $result;
 	}
+
+	/**
+	 * @param integer $wp_id
+	 * @param integer $doli_id
+	 *
+	 * @url GET /associateThirdparty
+	 */
+	public function associateThirdparty($wp_id, $doli_id) {
+		$result = $this->societe->fetch($doli_id);
+
+		if (!$result) {
+			throw new RestException(404, 'Thirdparty not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('societe', $this->societe->id)) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$oldsociety = dol_clone($this->societe, 0);
+
+		$this->societe->array_options['options__wps_id'] = $wp_id;
+
+		$updatetype = false;
+
+		if ($this->societe->type != $oldsociety->type) {
+			$updatetype = true;
+		}
+
+		$result = $this->societe->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
+
+		return $result;
+	}
 }
+
+

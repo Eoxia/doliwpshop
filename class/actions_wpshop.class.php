@@ -16,6 +16,8 @@
  */
 
 require_once DOL_DOCUMENT_ROOT . '/custom/wpshop/lib/wp_api.class.php';
+require_once DOL_DOCUMENT_ROOT . '/custom/wpshop/class/product_wpshop.class.php';
+require_once DOL_DOCUMENT_ROOT . '/custom/wpshop/class/thirdparty_wpshop.class.php';
 
 /**
  * \file    wpshop/class/actions_wpshop.class.php
@@ -79,74 +81,46 @@ class ActionsWpshop
 
 		$connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
 
+		if ( ! $connected ) {
+			setEventMessages('Not connected to WPshop.', null, 'errors');
+			return -1;
+		}
+
 		if (in_array('productcard', explode(':', $parameters['context'])))
 		{
+			$productWpshop = new ProductWpshop();
+
 			if ($action == 'view' && $connected === true && ! empty($object->array_options['options__wps_id']))
 			{
-				$url = '/wp-json/wpshop/v1/product/' . $object->array_options['options__wps_id'];
-
-				$response = WPAPI::get($url);
-
-				if (!$response) {
-					// @todo: How debug is working in Dolibarr ? doli_log
-					// EOFramework API return NULL if product ID is not found. Missing real message from EOFramework.
-					$object->array_options['options__wps_id'] = "";
-					$result = $object->update($object->id, $user, 1, 'update', true);
-
-					if (!$result)
-					{
-						setEventMessages('An error occurred to update this object #' . $object->id, null, 'errors');
-					} else
-					{
-						setEventMessages('WP Product was not found, delete wps_id entry.', null);
-					}
-				}
+				$productWpshop->checkProductExistOnWp($object);
 			}
 
 			if ($action == 'createwp' && $connected === true && empty($object->array_options['options__wps_id']))
 			{
-				$url = '/wp-json/wpshop/v2/sync';
-
-				$response = WPAPI::post($url, array(
-					'doli_id' => $object->id,
-					'type'    => 'wps-product', // @todo: Générique.
-				));
-
-				if ($response['status']) {
-					$object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
-					$result = $object->update($object->id, $user, 1, 'update', true);
-
-					if (!$result)
-					{
-						setEventMessages('An error occurred to update this object ' . $object->id, null, 'errors');
-					}
-					else
-					{
-						setEventMessages('WP Product was created, updated Dolibarr Product with wps_id #' . $response['data']['wp_object']['data']['id'], null);
-					}
-				} else {
-					setEventMessages('Request Error: POST ' . $url . ' "' . $response['error_message'] . '"', null, 'errors');
-				}
+				$productWpshop->createProductOnWp($object);
 			}
 		}
 
-		if (! $error)
+		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
-			$this->results = $results;
-			$this->resprints = $resprints;
+			$thirdpartyWpshop = new ThirdPartyWpshop();
 
-			return $replace; // 0 or return 1 to replace standard code
+			if ($action == 'view' && $connected === true && ! empty($object->array_options['options__wps_id']))
+			{
+				$thirdpartyWpshop->checkThirdPartyExistOnWp($object);
+			}
+
+			if ($action == 'createwp' && $connected === true && empty($object->array_options['options__wps_id']))
+			{
+				$thirdpartyWpshop->createThirdPartyOnWp($object);
+			}
 		}
-		else
-		{
-			array_merge($this->errors, $errors);
-			return -1;
-		}
+
+		return 0;
 	}
 
     public function addMoreActionsButtons($parameters, &$object, &$action)
 	{
-
 		$connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
 
 		if ($connected !== true)
@@ -171,5 +145,6 @@ class ActionsWpshop
 			<div class="inline-block divButAction"><a class="butActionRefused" title="Non disponible car l'objet est déjà associée" href="#">Create on WP</a></div>
 			<?php
 		}
+
 	}
 }

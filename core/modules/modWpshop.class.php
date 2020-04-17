@@ -66,6 +66,7 @@ class modWpshop extends DolibarrModules {
 			'moduleforexternal' => 0,
 			'hooks'             => array(
 				'productcard',
+				'thirdpartycard',
 			)
 		);
 
@@ -137,6 +138,9 @@ class modWpshop extends DolibarrModules {
 		$extra_fields = new ExtraFields( $this->db );
 		$extra_fields->addExtraField( 'web', 'On the web', 'boolean', 999, '', 'product' );
 		$extra_fields->addExtraField( '_wps_id', 'WPShop ID', 'int', 1000, '', 'product', 0, 0,'','', 0,'','0' );
+
+		$extra_fields->addExtraField( 'firstname', 'Firstname', 'varchar', 2, '255', 'thirdparty' );
+		$extra_fields->addExtraField( '_wps_id', 'WPShop ID', 'int', 1000, '', 'thirdparty', 0, 0,'','', 0,'','0' );
 
 		return $this->_init(null);
 	}
