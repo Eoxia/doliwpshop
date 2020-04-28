@@ -121,6 +121,8 @@ class ActionsWpshop
 
     public function addMoreActionsButtons($parameters, &$object, &$action)
 	{
+		global $conf;
+
 		$connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
 
 		if ($connected !== true)
@@ -141,6 +143,12 @@ class ActionsWpshop
 		}
 		else
 		{
+			if ($object->element == 'product') {
+				?>
+				<div class="inline-block divButAction"><a class="butAction" title="View on WP" href="<?php echo $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id']; ?>">View on WP</a></div>
+				<?php
+			}
+
 			?>
 			<div class="inline-block divButAction"><a class="butActionRefused" title="Non disponible car l'objet est déjà associée" href="#">Create on WP</a></div>
 			<?php
