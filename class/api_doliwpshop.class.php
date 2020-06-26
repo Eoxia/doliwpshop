@@ -1,28 +1,35 @@
 <?php
-/**
- * Gestion des requêtes.
+/* Copyright (C) 2020 Eoxia
  *
- * @author    Eoxia <dev@eoxia.com>
- * @copyright (c) 2011-2019 Eoxia <dev@eoxia.com>.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
  *
- * @license   AGPLv3 <https://spdx.org/licenses/AGPL-3.0-or-later.html>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * @package   doli_wpshop
- *
- * @since     0.2.0
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Gestion des requêtes.
+ * \file    htdocs/custom/doliwpshop/class/api_doliwpshop.class.php
+ * \ingroup doliwpshop
+ * \brief   File for API management of WPshop object.
  */
-class WPAPI {
+
+/**
+ * Class WPshopAPI
+ */
+class WPshopAPI {
 	
 	public static $base = '';
 
 	/**
-	 * Le constructeur
-	 *
-	 * @since 0.2.0
+	 * Constructor
 	 */
 	 public function __construct() {
 			global $conf;
@@ -32,13 +39,13 @@ class WPAPI {
 	 }
 		 
 	 /**
-	 * Autoload a WPAPI class
+	 * Autoload a WPshopAPI class
 	 *
 	 * @param string $class Class name
 	 */
 	public static function autoloader($class) {
 		// Check that the class starts with "Requests"
-		if (strpos($class, 'WPAPI') !== 0) {
+		if (strpos($class, 'WPshopAPI') !== 0) {
 			return;
 		}
 		$file = str_replace('_', '/', $class);
@@ -46,30 +53,29 @@ class WPAPI {
 			require_once(dirname(__FILE__) . '/' . $file . '.php');
 		}
 	}
+
 	/**
-	 * Register the standard WPAPI autoloader
+	 * Register the standard WPshopAPI autoloader
 	 */
 	public static function register_autoloader() {
-		spl_autoload_register(array('WPAPI', 'autoloader'));
+		spl_autoload_register(array('WPshopAPI', 'autoloader'));
 	}
 
 	/**
-	 * Requête POST.
+	 * POST Request
 	 *
-	 * @since 0.2.0
+	 * @param  string $end_point The url called.
+	 * @param  array  $data      The form data.
+	 * @param  string $method    the type of method, default POST.
 	 *
-	 * @param  string $end_point L'url a appeler.
-	 * @param  array  $data      Les données du formulaire.
-	 * @param  string $method    le type de la méthode.
-	 *
-	 * @return array|boolean   Retournes les données de la requête ou false.
+	 * @return array|boolean   Returns the query data or false.
 	 */
 	public static function post( $end_point, $data = array(), $method = 'POST' ) {
 		$data = json_encode( $data );
 		global $conf;
 		
 		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
-		
+
 		$ch = curl_init(); 
 		curl_setopt($ch, CURLOPT_URL, $api_url); 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -108,27 +114,11 @@ class WPAPI {
 	}
 
 	/**
-	 * Appel la méthode PUT
+	 * GET Request
 	 *
-	 * @since 2.0.0
+	 * @param  string $end_point The url called.
 	 *
-	 * @param  string $end_point L'url a appeler.
-	 * @param  array  $data      Les données du formulaire.
-	 *
-	 * @return array|boolean   Retournes les données de la requête ou false.
-	 */
-	public static function put( $end_point, $data ) {
-		return Request_Util::post( $end_point, $data, 'PUT' );
-	}
-
-	/**
-	 * Requête GET.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $end_point L'url a appeler.
-	 *
-	 * @return array|boolean    Retournes les données de la requête ou false.
+	 * @return array|boolean   Returns the query data or false.
 	 */
 	public static function get( $end_point ) {
 		global $conf;

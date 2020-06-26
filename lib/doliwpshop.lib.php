@@ -1,6 +1,5 @@
 <?php
-/* <one line to give the program's name and a brief idea of what it does.>
- * Copyright (C) 2015 ATM Consulting <support@atm-consulting.fr>
+/* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,26 +16,31 @@
  */
 
 /**
- *	\file		lib/wpshop.lib.php
- *	\ingroup	wpshop
- *	\brief		This file is an example module library
- *				Put some comments here
+ *	\file		htdocs/custom/doliwpshop/lib/doliwpshop.lib.php
+ *	\ingroup	doliwpshop
+ *	\brief		Library files with common functions for DoliWPshop
  */
 
-function wpshopAdminPrepareHead()
+/**
+ *  Prepare admin pages header
+ *
+ *  @return	array
+ */
+function doliwpshopAdminPrepareHead()
 {
 	global $langs, $conf;
 
-	$langs->load("wpshop@wpshop");
+	$langs->load("doliwpshop@doliwpshop");
 
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/wpshop/admin/setup.php", 1);
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop.php", 1);
 	$head[$h][1] = $langs->trans("Parameters");
 	$head[$h][2] = 'settings';
+	$h++;
 
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'wpshop');
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
 
 	return $head;
 }
