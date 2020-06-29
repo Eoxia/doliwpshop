@@ -58,7 +58,7 @@ class ThirdPartyDoliWPshop {
 					setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
 					return -1;
 				} else {
-					setEventMessages($langs->trans("ErrorWPSThirdParty") , null);
+					setEventMessages($langs->trans("ErrorWPSThirdParty") , null, 'errors');
 					return -1;
 				}
 			}

@@ -57,7 +57,7 @@ class ProductDoliWPshop {
 					setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
 					return -1;
 				} else {
-					setEventMessages($langs->trans("ErrorWPSProduct"), null);
+					setEventMessages($langs->trans("ErrorWPSProduct"), null, 'errors');
 					return -1;
 				}
 			}
