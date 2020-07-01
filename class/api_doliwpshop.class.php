@@ -15,128 +15,119 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Luracast\Restler\RestException;
+
+require_once DOL_DOCUMENT_ROOT.'/main.inc.php';
+
+require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
+
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+
+require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/api_contacts.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
+require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
+
 /**
- * \file    htdocs/custom/doliwpshop/class/api_doliwpshop.class.php
+ * \file     htdocs/custom/doliwpshop/class/api_doliwpshop.class.php
  * \ingroup doliwpshop
- * \brief   File for API management of WPshop object.
+ * \brief   File for API management of myobject.
  */
 
 /**
- * Class WPshopAPI
+ * API class for doliwpshop myobject
+ *
+ * @property DoliDB db
+ * @access protected
+ * @class  DolibarrApiAccess {@requires user,external}
  */
-class WPshopAPI {
-	
-	public static $base = '';
+class DoliWPshop extends DolibarrApi
+{
+	/**
+	 * @var Product
+	 */
+	private $product;
 
 	/**
 	 * Constructor
-	 */
-	 public function __construct() {
-			global $conf;
-		
-			self::$base = $conf->global->WPSHOP_URL_WORDPRESS;
-		
-	 }
-		 
-	 /**
-	 * Autoload a WPshopAPI class
 	 *
-	 * @param string $class Class name
+	 * @url     GET /
+	 *
 	 */
-	public static function autoloader($class) {
-		// Check that the class starts with "Requests"
-		if (strpos($class, 'WPshopAPI') !== 0) {
-			return;
-		}
-		$file = str_replace('_', '/', $class);
-		if (file_exists(dirname(__FILE__) . '/' . $file . '.php')) {
-			require_once(dirname(__FILE__) . '/' . $file . '.php');
-		}
+	function __construct()
+	{
+		global $db, $conf;
+		$this->db = $db;
+		$this->product = new Product($this->db);
+		$this->societe = new Societe($this->db);
 	}
 
 	/**
-	 * Register the standard WPshopAPI autoloader
+	 * @param integer $wp_id
+	 * @param integer $doli_id
+	 *
+	 * @url GET /associateProduct
 	 */
-	public static function register_autoloader() {
-		spl_autoload_register(array('WPshopAPI', 'autoloader'));
+	public function associateProduct($wp_id, $doli_id) {
+		$result = $this->product->fetch($doli_id);
+
+		if (!$result) {
+			throw new RestException(404, 'Product not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('product', $this->product->id)) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$oldproduct = dol_clone($this->product, 0);
+
+		$this->product->array_options['options__wps_id'] = $wp_id;
+
+		$updatetype = false;
+
+		if ($this->product->type != $oldproduct->type && ($this->product->isProduct() || $this->product->isService())) {
+			$updatetype = true;
+		}
+
+		$result = $this->product->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
+
+		return $result;
 	}
 
 	/**
-	 * POST Request
+	 * @param integer $wp_id
+	 * @param integer $doli_id
 	 *
-	 * @param  string $end_point The url called.
-	 * @param  array  $data      The form data.
-	 * @param  string $method    the type of method, default POST.
-	 *
-	 * @return array|boolean   Returns the query data or false.
+	 * @url GET /associateThirdparty
 	 */
-	public static function post( $end_point, $data = array(), $method = 'POST' ) {
-		$data = json_encode( $data );
-		global $conf;
-		
-		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
+	public function associateThirdparty($wp_id, $doli_id) {
+		$result = $this->societe->fetch($doli_id);
 
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $api_url); 
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			'Content-Type: application/json',
-			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
-			'Content-Length: ' . strlen( $data ),
-		) ); 
-		
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
-		$output = curl_exec($ch);
-
-		curl_close($ch);
-
-		if ($output === NULL) {
-			return array(
-				'status' => NULL,
-			);
-		}
-		
-		$output = json_decode( $output, true );
-
-		if (json_last_error() != JSON_ERROR_NONE) {
-			return array(
-				'status' => false,
-				'error_code' => json_last_error(),
-				'error_message' => json_last_error_msg(),
-			);
+		if (!$result) {
+			throw new RestException(404, 'Thirdparty not found');
 		}
 
-		return array(
-			'status' => true,
-			'data' => $output,
-		);
-	}
+		if (!DolibarrApi::_checkAccessToResource('societe', $this->societe->id)) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
 
-	/**
-	 * GET Request
-	 *
-	 * @param  string $end_point The url called.
-	 *
-	 * @return array|boolean   Returns the query data or false.
-	 */
-	public static function get( $end_point ) {
-		global $conf;
-		
-		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
-		
-		$ch = curl_init(); 
-		curl_setopt($ch, CURLOPT_URL, $api_url); 
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			'Content-Type: application/json',
-			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
-		) ); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
-		$output = curl_exec($ch); 
-		curl_close($ch); 
-		
-		$output = json_decode( $output );
-		
-		return $output;
+		$oldsociety = dol_clone($this->societe, 0);
+
+		$this->societe->array_options['options__wps_id'] = $wp_id;
+
+		$updatetype = false;
+
+		if ($this->societe->type != $oldsociety->type) {
+			$updatetype = true;
+		}
+
+		$result = $this->societe->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
+
+		return $result;
 	}
 }
+
+

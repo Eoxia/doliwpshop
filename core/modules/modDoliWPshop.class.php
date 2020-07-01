@@ -40,7 +40,7 @@ class modDoliWPshop extends DolibarrModules {
 		$this->db = $db;
 
 		$this->numero          = 800000;
-		$this->rights_class    = 'wpshop';
+		$this->rights_class    = 'doliwpshop';
 		$this->family          = "Connectors";
 		$this->module_position = '90';
 		$this->name            = preg_replace( '/^mod/i', '', get_class( $this ) );

@@ -21,7 +21,7 @@
  * \brief   Hook on new actions for connected Dolibarr and WPshop
  */
 
-require_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/api_doliwpshop.class.php';
+require_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/lib/api_doliwpshop.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/product_doliwpshop.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/thirdparty_doliwpshop.class.php';
 

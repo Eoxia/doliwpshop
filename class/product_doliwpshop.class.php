@@ -50,7 +50,7 @@ class ProductDoliWPshop {
 
 			if (!$response) {
 				// EOFramework API return NULL if product ID is not found. Missing real message from EOFramework.
-				$object->array_options['options__wps_id'] = "";
+				//$object->array_options['options__wps_id'] = "";
 				$result = $object->update($object->id, $user, 1, 'update', true);
 
 				if (!$result) {
@@ -86,10 +86,12 @@ class ProductDoliWPshop {
 			'type'    => 'wps-product',
 		));
 
+			echo '<pre>';
+			print_r($object->id);
+			echo '</pre>';
 		if ($response['status']) {
 			$object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
 			$result = $object->update($object->id, $user, 1, 'update', true);
-
 			if (!$result) {
 				setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
 				return -1;

@@ -28,7 +28,7 @@ if (! $res) {
 }
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/doliwpshop.lib.php';
-require_once '../class/api_doliwpshop.class.php';
+require_once '../lib/api_doliwpshop.class.php';
 
 // Translations
 $langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
