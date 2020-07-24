@@ -1,0 +1,65 @@
+# Copyright (C) 2019 SuperAdmin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleDoliWPshopName'
+ModuleDoliWPshopName = DoliWPshop
+# Module description 'ModuleDoliWPshopDesc'
+ModuleDoliWPshopDesc = Module pour Dolibarr ERP/CRM pour connecter le plugin WPshop de WordPress.
+
+#
+# Page d'administration
+#
+Settings = Réglages
+DoliWPshopSetup = Configuration du module DoliWPshop
+DoliWPshopSetupPage = Page de configuration du module DoliWPshop
+WPSHOP_URL_WORDPRESS = URL du site WordPress
+WPSHOP_TOKEN = Clé API WPshop
+CommunicationWordPress = Communication avec WordPress
+ConnectedWordPress = Connectée à WordPress ✔
+FailureWordPress = Echec de la connexion ❌
+
+#
+# Page À propos
+#
+About = À propos
+WpshopAbout = À propos de WPshop
+WpshopAboutPage = Page à propos de WPshop
+
+NotConnectedWPshop = Non connecté à WPshop.
+CreateOnWPshop = Créer sur WPshop
+ViewOnWPshop = Voir sur WPshop
+NotAvailableObject = Non disponible car l'objet est déjà associé
+NotAvailableDolibarr = Non disponible car Dolibarr n'est pas connecté à WPShop
+
+ErrorUpdateObject = Une erreur s'est produite pour mettre à jour cet objet #
+ErrorWPSThirdParty = WPS Third Party n'a pas été trouvé, supprimer l'entrée wps_id.
+CreateWPSThirdParty = WPS Third Party a été créé, mis à jour Dolibarr Third Party avec wps_id #
+ErrorPostRequest = Erreur sur la requête POST
+ErrorWPSProduct = WPS Product n'a pas été trouvé ou a changé d'ID
+CreateWPSProduct = WPS Product a été créé, mis à jour Dolibarr Product avec wps_id #
+WPshopStatus = Statut de WPshop
+Publish = publié
+Draft = brouillon
+
+#
+# Page de configuration
+#
+ReadRight = Consulter mon objet sur WPshop
+CreateRight = Créer/modifier mon objet sur WPshop
+DeleteRight = Supprimer mon objet sur WPshop

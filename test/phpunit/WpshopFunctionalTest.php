@@ -196,9 +196,9 @@ class WpshopFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 */
 	public function testConfigurationPage()
 	{
-		$this->url('/custom/wpshop/admin/setup.php');
+		$this->url('/custom/wpshop/admin/doliwpshop.php');
 		$this->authenticate();
-		return $this->assertContains('wpshop/admin/setup.php', $this->url(), 'Configuration page');
+		return $this->assertContains('wpshop/admin/doliwpshop.php', $this->url(), 'Configuration page');
 	}
 
 	/**

@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2019 SuperAdmin
+/* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,31 @@
  */
 
 /**
- * \file    core/tpl/mytemplate.tpl.php
- * \ingroup wpshop
- * \brief   Example template.
- *
- * Put detailed description here.
+ *	\file		htdocs/custom/doliwpshop/lib/doliwpshop.lib.php
+ *	\ingroup	doliwpshop
+ *	\brief		Library files with common functions for DoliWPshop
  */
 
-// Protection to avoid direct call of template
-if (empty($conf) || ! is_object($conf))
+/**
+ *  Prepare admin pages header
+ *
+ *  @return	array
+ */
+function doliwpshopAdminPrepareHead()
 {
-	print "Error, template page can't be called as URL";
-	exit;
+	global $langs, $conf;
+
+	$langs->load("doliwpshop@doliwpshop");
+
+	$h = 0;
+	$head = array();
+
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop.php", 1);
+	$head[$h][1] = $langs->trans("Parameters");
+	$head[$h][2] = 'settings';
+	$h++;
+
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
+
+	return $head;
 }
-
-
-/** Your code here. */
-echo "Hello world!";

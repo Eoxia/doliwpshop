@@ -1,0 +1,66 @@
+# Copyright (C) 2019 SuperAdmin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleDoliWPshopName'
+ModuleDoliWPshopName = DoliWPshop
+# Module description 'ModuleDoliWPshopDesc'
+ModuleDoliWPshopDesc = Module for Dolibarr ERP/CRM to connect WPshop Plugin from WordPress.
+
+#
+# Admin page
+#
+Settings = Settings
+DoliWPshopSetup = DoliWPshop setup
+DoliWPshopSetupPage = DoliWPshop setup page
+WPSHOP_URL_WORDPRESS = WordPress website URL
+WPSHOP_TOKEN = API Key WPshop
+CommunicationWordPress = Communication with WordPress
+ConnectedWordPress = Connected to WordPress ✔
+FailureWordPress = Connection failure with WordPress ❌
+
+#
+# About page
+#
+About = About
+WpshopAbout = About WPshop
+WpshopAboutPage = WPshop about page
+
+
+NotConnectedWPshop = Not connected to WPshop.
+CreateOnWPshop = Create on WPshop
+ViewOnWPshop = View on WPshop
+NotAvailableObject = Not available because the object is already associated
+NotAvailableDolibarr = Not available because Dolibarr is not connected to WPShop
+
+ErrorUpdateObject = An error occurred to update this object #
+ErrorWPSThirdParty = WPS Third Party was not found, delete wps_id entry.
+CreateWPSThirdParty = WPS Third Party was created, updated Dolibarr Third Party with wps_id #
+ErrorPostRequest = Request Error: POST
+ErrorWPSProduct = WPS Product was not found or changed ID
+CreateWPSProduct = WPS Product was created, updated Dolibarr Product with wps_id #
+WPshopStatus = WPshop Status
+Publish = publish
+Draft = draft
+
+#
+# config
+#
+ReadRight = Consult myobject of WPshop
+CreateRight = Create/Update myobject of WPshop
+DeleteRight = Delete myobject of WPshop

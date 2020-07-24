@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2019 SuperAdmin
+/* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +16,22 @@
  */
 
 /**
- * \file    wpshop/admin/setup.php
- * \ingroup wpshop
- * \brief   Wpshop setup page.
+ * \file    htdocs/custom/doliwpshop/admin/doliwpshop.php
+ * \ingroup doliwpshop
+ * \brief   Page setup for DoliWpshop module.
  */
 
 // Load Dolibarr environment
-require '../../../main.inc.php';
-require '../class/wp_api.class.php';
-
-global $langs, $user;
-
-// Libraries
+$res = @include("../../main.inc.php"); // From htdocs directory
+if (! $res) {
+	$res = @include("../../../main.inc.php"); // From "custom" directory
+}
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
-require_once '../lib/wpshop.lib.php';
-//require_once "../class/myclass.class.php";
+require_once '../lib/doliwpshop.lib.php';
+require_once '../lib/api_doliwpshop.class.php';
 
 // Translations
-$langs->loadLangs(array("admin", "wpshop@wpshop"));
+$langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
 
 // Access control
 if (! $user->admin) accessforbidden();
@@ -43,45 +40,40 @@ if (! $user->admin) accessforbidden();
 $action = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 
-$arrayofparameters=array(
-	'WPSHOP_URL_WORDPRESS'=>array('css'=>'minwidth500','enabled'=>1),
-	'WPSHOP_TOKEN'=>array('css'=>'minwidth500','enabled'=>1)
+$arrayofparameters = array(
+	'WPSHOP_URL_WORDPRESS' => array('css'=> 'minwidth500', 'enabled' => 1),
+	'WPSHOP_TOKEN'         => array('css'=> 'minwidth500', 'enabled'=> 1)
 );
-
 
 /*
  * Actions
  */
-if ((float) DOL_VERSION >= 6)
-{
+if ((float) DOL_VERSION >= 6) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 }
 
-$connected = WPAPI::get( '/wp-json/wpshop/v2/statut' );
+// @todo: Statut en status
+$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
+
 /*
  * View
  */
-
-$page_name = "WpshopSetup";
+$page_name = "DoliWPshopSetup";
 llxHeader('', $langs->trans($page_name));
 
 // Subheader
-$linkback = '<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback = '<a href="'.($backtopage?$backtopage:DOL_URL_ROOT .'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 
-print load_fiche_titre($langs->trans($page_name), $linkback, 'object_wpshop@wpshop');
+print load_fiche_titre($langs->trans($page_name), $linkback, 'object_doliwpshop@doliwpshop');
 
 // Configuration header
-$head = wpshopAdminPrepareHead();
-dol_fiche_head($head, 'settings', '', -1, "wpshop@wpshop");
+$head = doliwpshopAdminPrepareHead();
+dol_fiche_head($head, 'settings', '', -1, "doliwpshop@doliwpshop");
 
 // Setup page goes here
-echo $langs->trans("WpshopSetupPage").'<br><br>';
+echo $langs->trans("DoliWPshopSetupPage").'<br><br>';
 
-
-
-
-if ($action == 'edit')
-{
+if ($action == 'edit') {
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'?check=true">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="update">';
@@ -89,8 +81,7 @@ if ($action == 'edit')
 	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre"><td class="titlefield">'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';
 
-	foreach($arrayofparameters as $key => $val)
-	{
+	foreach($arrayofparameters as $key => $val) {
 		print '<tr class="oddeven"><td>';
 		print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
 		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $conf->global->$key . '"></td></tr>';
@@ -103,27 +94,23 @@ if ($action == 'edit')
 
 	print '</form>';
 	print '<br>';
-}
-else
-{
-	if (! empty($arrayofparameters))
-	{
+} else {
+	if (! empty($arrayofparameters)) {
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre"><td class="titlefield">'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';
 
-		foreach($arrayofparameters as $key => $val)
-		{
+		foreach($arrayofparameters as $key => $val)	{
 			print '<tr class="oddeven"><td>';
 			print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
 			print '</td><td>' . $conf->global->$key . '</td></tr>';
 		}
 
-		print '<tr class="oddevent"><td>Communication avec WordPress</td><td>';
+		print '<tr class="oddevent"><td>'.$langs->trans("CommunicationWordPress").'</td><td>';
 		
 		if ( $connected === true ) {
-			echo '🥦 Connecté à WordPress';
+			echo $langs->trans("ConnectedWordPress");
 		} else {
-			echo '❌ Echec de la connexion';
+			echo $langs->trans("FailureWordPress");
 		}
 		print '</td></tr>';
 		print '</table>';
@@ -132,12 +119,10 @@ else
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit">'.$langs->trans("Modify").'</a>';
 		print '</div>';
 	}
-	else
-	{
+	else {
 		print '<br>'.$langs->trans("NothingToSetup");
 	}
 }
-
 
 // Page end
 dol_fiche_end();
