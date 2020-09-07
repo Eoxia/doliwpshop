@@ -21,9 +21,10 @@
  * \brief   Hook on new actions for connected Dolibarr and WPshop
  */
 
-require_once dol_include_once . '/custom/doliwpshop/lib/api_doliwpshop.class.php';
-require_once dol_include_once . '/custom/doliwpshop/class/product_doliwpshop.class.php';
-require_once dol_include_once . '/custom/doliwpshop/class/thirdparty_doliwpshop.class.php';
+include_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/lib/api_doliwpshop.class.php';
+include_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/product_doliwpshop.class.php';
+include_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/thirdparty_doliwpshop.class.php';
+include_once DOL_DOCUMENT_ROOT . '/custom/doliwpshop/class/category_doliwpshop.class.php';
 
 /**
  * Class ActionsDoliWPshop
@@ -56,7 +57,7 @@ class ActionsDoliWPshop
 	public function doActions($parameters, &$object, &$action)
 	{
 		global $langs;
-
+		
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
@@ -66,11 +67,11 @@ class ActionsDoliWPshop
 			setEventMessages($langs->trans("NotConnectedWPshop"), null, 'errors');
 			return -1;
 		}
-
+		
 		if (in_array('productcard', explode(':', $parameters['context'])))
 		{
 			$productDoliWPshop = new ProductDoliWPshop();
-
+			
 			if ($action == 'view' && $connected === true && ! empty($object->array_options['options__wps_id']))
 			{
 				$productDoliWPshop->checkProductExistOnWPshop($object);
@@ -81,7 +82,21 @@ class ActionsDoliWPshop
 				$productDoliWPshop->createProductOnWPshop($object);
 			}
 		}
+		if (in_array('categorycard', explode(':', $parameters['context'])))
+		{	
+			$categoryDoliWPshop = new CategoryDoliWPshop();
+			/*
+			if ($action == 'view' && $connected === true && ! empty($object->array_options['options__wps_id']))
+			{
+				$categoryDoliWPshop->checkCategoryExistOnWPshop($object);
+			}
+			*/
+			if ($action == 'createwp' && $connected === true && empty($object->array_options['options__wps_id']))
+			{
+				$categoryDoliWPshop->createCategoryOnWPshop($object);
+			}
 
+		}
 		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
 			$thirdpartyDoliWPshop = new ThirdPartyDoliWPshop();
@@ -97,7 +112,7 @@ class ActionsDoliWPshop
 			}
 		}
 
-		return 0;
+ 	return 0;
 	}
 
 	/**
@@ -108,25 +123,25 @@ class ActionsDoliWPshop
     public function addMoreActionsButtons($parameters, &$object, &$action)
 	{
 		global $conf, $langs;
-
+	
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
 		$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
-
+		
 		if ($connected !== true) {
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableDolibarr").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 			return;
 		}
-
+		
 		if (empty($object->array_options['options__wps_id'])) {
 			$actual_link  = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 			$actual_link .= '&action=createwp';
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
-		}
-		else {
-			if ($object->element == 'product') {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '">'.$langs->trans("ViewOnWPshop").'</a></div>';
+
+		} else {
+			if ($object->element == 'product' ) {
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 		}

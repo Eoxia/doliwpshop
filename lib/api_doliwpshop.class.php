@@ -74,8 +74,8 @@ class WPshopAPI {
 		$data = json_encode( $data );
 		global $conf;
 		
-		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
-
+		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . '/' . $end_point;
+		
 		$ch = curl_init(); 
 		curl_setopt($ch, CURLOPT_URL, $api_url); 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -88,9 +88,9 @@ class WPshopAPI {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
 		$output = curl_exec($ch);
-
+		
 		curl_close($ch);
-
+		
 		if ($output === NULL) {
 			return array(
 				'status' => NULL,
@@ -98,7 +98,7 @@ class WPshopAPI {
 		}
 		
 		$output = json_decode( $output, true );
-
+		
 		if (json_last_error() != JSON_ERROR_NONE) {
 			return array(
 				'status' => false,
@@ -106,7 +106,7 @@ class WPshopAPI {
 				'error_message' => json_last_error_msg(),
 			);
 		}
-
+		
 		return array(
 			'status' => true,
 			'data' => $output,
@@ -124,7 +124,7 @@ class WPshopAPI {
 		global $conf;
 		
 		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
-		
+	
 		$ch = curl_init(); 
 		curl_setopt($ch, CURLOPT_URL, $api_url); 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(

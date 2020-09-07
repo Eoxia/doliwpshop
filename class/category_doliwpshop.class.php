@@ -16,92 +16,94 @@
  */
 
 /**
- * \file    htdocs/custom/doliwpshop/class/product_doliwpshop.class.php
+ * \file    htdocs/custom/doliwpshop/class/category_doliwpshop.class.php
  * \ingroup doliwpshop
- * \brief   Hook on dolibarr product.
+ * \brief   Hook on dolibarr category.
  */
 
 /**
- * Class ProductDoliWPshop
+ * Class CategoryDoliWPshop
  */
-class ProductDoliWPshop {
+class CategoryDoliWPshop {
 	/**
 	 * Constructor
 	 */
 	public function __construct() {}
 
 	/**
-	 * Checks if the product object exists on WPshop
+	 * Checks if the category object exists on WPshop
 	 *
-	 * @param  CommonObject $object  product object
+	 * @param  CommonObject $object  category object
 	 *
-	 * @return int             <0 if KO, product object exist if OK : 0
+	 * @return int             <0 if KO, category object exist if OK : 0
 	 */
-	public function checkProductExistOnWPshop($object) {
+	/*public function checkCategoryExistOnWPshop($object) {
 		global $user, $langs;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
 		if (! empty($object->array_options['options__wps_id'])) {
-			$url = 'wp-json/wpshop/v1/product/' . $object->array_options['options__wps_id'];
+			$url = 'wp-json/wpshop/v1/category/' . $object->array_options['options__wps_id'];
 
 			$response = WPshopAPI::get($url);
 
 			if (!$response) {
-				// EOFramework API return NULL if product ID is not found. Missing real message from EOFramework.
+				// EOFramework API return NULL if category ID is not found. Missing real message from EOFramework.
 				//$object->array_options['options__wps_id'] = "";
-				$result = $object->update($object->id, $user, 1, 'update', true);
-
+				$result = $object->update( $user, $object->id, 1, 'update', true);
+                
 				if (!$result) {
 					setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
 					return -1;
 				} else {
-					setEventMessages($langs->trans("ErrorWPSProduct"), null, 'errors');
+					setEventMessages($langs->trans("ErrorWPSCategory"), null, 'errors');
 					return -1;
 				}
 			}
 		}
 
 		return 0;
-	}
+	}*/
 
 	/**
-	 * Create the product object on WPshop
+	 * Create the category object on WPshop
 	 *
-	 * @param  CommonObject $object  product object
+	 * @param  CommonObject $object  category object
 	 *
-	 * @return int             <0 if KO, product object create if OK : 0
+	 * @return int             <0 if KO, category object create if OK : 0
 	 */
-	public function createProductOnWPshop($object) {
+	public function createCategoryOnWPshop($object) {
 		global $user, $langs;
-
+		
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
-		$url = 'wp-json/wpshop/v2/sync';
-		
+        $url = 'wp-json/wpshop/v2/sync';
+        			
 		$response = WPshopAPI::post($url, array(
 			'doli_id' => $object->id,
-			'type'    => 'wps-product',
-		));
-	
+			'type'    => 'wps-product-cat',
+        ));
+		
 		if ($response['status']) {
-			$object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
-			$result = $object->update($object->id, $user, 1, 'update', true);
+            $object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
+            $object->array_options['options__wps_slug'] = $response['data']['wp_object']['data']['slug'];
+            $result = $object->update( $user,$object->id, 1, 'update', true);
+			
 			if (!$result) {
 				setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
 				return -1;
 			}
 			else{
-				setEventMessages($langs->trans("CreateWPSProduct") . $response['data']['wp_object']['data']['id'], null);
+				setEventMessages($langs->trans("CreateWPSCategory") . $response['data']['wp_object']['data']['id'], null);
 				return 0;
 			}
 		} else {
 			setEventMessages($langs->trans("ErrorPostRequest") . $url . ' "' . $response['error_message'] . '"', null, 'errors');
 			return -1;
 		}
-
+		
 		return 0;
 	}
 }

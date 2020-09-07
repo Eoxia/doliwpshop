@@ -65,6 +65,7 @@ class modDoliWPshop extends DolibarrModules {
 			'hooks'             => array(
 				'productcard',
 				'thirdpartycard',
+				'categorycard',
 			)
 		);
 
@@ -94,7 +95,7 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
-
+		
 		// Permissions provided by this module
 		$this->rights = array();
 
@@ -141,11 +142,15 @@ class modDoliWPshop extends DolibarrModules {
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields( $this->db );
+		
 		$extra_fields->addExtraField( '_wps_status', $langs->trans("WPshopStatus"), 'select', 999, '', 'product', 0, 0, 'publish', array('options' => array('publish'=> 'publish', 'draft' => 'draft') ) );
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'product', 1, 0,'','', 0,'','1' );
 
 		$extra_fields->addExtraField( 'firstname', 'Firstname', 'varchar', 2, '255', 'thirdparty' );
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'thirdparty', 1, 0,'','', 0,'','1' );
+
+		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'categorie', 1, 0,'','', 0,'','1' );
+		$extra_fields->addExtraField( '_wps_slug', 'WPshop Slug', 'varchar', 1001, '', 'categorie', 2, 0,'','', 0,'','1' );
 
 		return $this->_init(null);
 	}

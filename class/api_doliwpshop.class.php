@@ -21,12 +21,15 @@ require_once DOL_DOCUMENT_ROOT.'/main.inc.php';
 
 require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
+
 require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
+require_once DOL_DOCUMENT_ROOT.'/categories/class/api_categories.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_contacts.class.php';
 require_once DOL_DOCUMENT_ROOT.'/commande/class/api_orders.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/api_proposals.class.php';
@@ -63,6 +66,7 @@ class DoliWPshop extends DolibarrApi
 		$this->db = $db;
 		$this->product = new Product($this->db);
 		$this->societe = new Societe($this->db);
+		$this->category = new Category($this->db);
 	}
 
 	/**
@@ -93,6 +97,32 @@ class DoliWPshop extends DolibarrApi
 		}
 
 		$result = $this->product->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
+
+		return $result;
+	}
+
+	public function associateCategory($wp_id, $doli_id) {
+		$result = $this->category->fetch($doli_id);
+		
+		if (!$result) {
+			throw new RestException(404, 'Category not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('category', $this->category->id)) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$oldcategory = dol_clone($this->category, 0);
+
+		$this->category->array_options['options__wps_id'] = $wp_id;
+
+		$updatetype = false;
+
+		if ($this->category->type != $oldcategory->type && ($this->category->isCategory())) {
+			$updatetype = true;
+		}
+
+		$result = $this->category->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
 
 		return $result;
 	}

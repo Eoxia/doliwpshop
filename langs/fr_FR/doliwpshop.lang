@@ -53,6 +53,7 @@ CreateWPSThirdParty = WPS Third Party a été créé, mis à jour Dolibarr Third
 ErrorPostRequest = Erreur sur la requête POST
 ErrorWPSProduct = WPS Product n'a pas été trouvé ou a changé d'ID
 CreateWPSProduct = WPS Product a été créé, mis à jour Dolibarr Product avec wps_id #
+CreateWPSCategory = La catégorie a été créée sur WPshop avec le wps_id #
 WPshopStatus = Statut de WPshop
 Publish = publié
 Draft = brouillon
