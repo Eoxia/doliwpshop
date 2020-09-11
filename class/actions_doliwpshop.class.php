@@ -135,7 +135,18 @@ class ActionsDoliWPshop
 		}
 		
 		if (empty($object->array_options['options__wps_id'])) {
-			$actual_link  = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+			if ( isset( $_SERVER['HTTPS'] ) ) {
+				if ( $_SERVER['HTTPS'] == 'on' ) {
+				  $server_protocol = 'https';
+				} else {
+				  $server_protocol = 'http';
+				} 
+			} else {
+				$server_protocol = 'http';
+			  }
+		
+			$actual_link = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			$actual_link .= '&action=createwp';
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
 
