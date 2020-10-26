@@ -66,7 +66,7 @@ class DoliWPshop extends DolibarrApi
 		$this->db = $db;
 		$this->product = new Product($this->db);
 		$this->societe = new Societe($this->db);
-		$this->category = new Category($this->db);
+		$this->category = new Categorie($this->db);
 	}
 
 	/**
