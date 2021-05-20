@@ -53,9 +53,9 @@ class modDoliWPshop extends DolibarrModules {
 		$this->picto           = 'doliwpshop@doliwpshop';
 
 		$this->module_parts = array(
-			'triggers'          => 0,
+			'triggers'          => 1,
 			'login'             => 0,
-			'substitutions'     => 1,
+			'substitutions'     => 0,
 			'menus'             => 0,
 			'theme'             => 0,
 			'tpl'               => 0,
@@ -76,7 +76,7 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Dependencies
 		$this->hidden       = false;
-		$this->depends      = array();
+		$this->depends      = array('modApi');
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
@@ -134,10 +134,19 @@ class modDoliWPshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		global $langs;
+		global $conf, $langs;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
+
+		$this->_load_tables('/doliwpshop/sql/');
+
+		if ( $conf->global->DOLIWPSHOP_USER_SET ==  0 ) {
+			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
+
+			$user = new User($this->db);
+
+		}
 
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
