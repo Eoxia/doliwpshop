@@ -30,6 +30,7 @@ DoliWPshopSetup = Configuration du module DoliWPshop
 DoliWPshopSetupPage = Page de configuration du module DoliWPshop
 WPSHOP_URL_WORDPRESS = URL du site WordPress
 WPSHOP_TOKEN = Clé API WPshop
+PaymentMessage = retour sur le site
 CommunicationWordPress = Communication avec WordPress
 ConnectedWordPress = Connectée à WordPress ✔
 FailureWordPress = Echec de la connexion ❌

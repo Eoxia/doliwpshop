@@ -41,8 +41,8 @@ $action = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 
 $arrayofparameters = array(
-	'WPSHOP_URL_WORDPRESS' => array('css'=> 'minwidth500', 'enabled' => 1),
-	'WPSHOP_TOKEN'         => array('css'=> 'minwidth500', 'enabled'=> 1)
+	'WPSHOP_URL_WORDPRESS'      => array('css'=> 'minwidth500', 'enabled' => 1),
+	'WPSHOP_TOKEN'              => array('css'=> 'minwidth500', 'enabled'=> 1),
 );
 
 /*
@@ -50,6 +50,21 @@ $arrayofparameters = array(
  */
 if ((float) DOL_VERSION >= 6) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+}
+
+if (($action == 'update' && !GETPOST("cancel", 'alpha')) || ($action == 'updateedit'))
+{
+	$WPSHOP_URL_WORDPRESS = GETPOST('WPSHOP_URL_WORDPRESS','alpha');
+
+	$link = '<a href="'.$WPSHOP_URL_WORDPRESS.'">'.$langs->trans("PaymentMessage").'</a>';
+
+	dolibarr_set_const($db, "ONLINE_PAYMENT_MESSAGE_OK", $link, 'integer', 0, '', $conf->entity);
+
+	if ($action != 'updateedit' && !$error)
+	{
+		header("Location: ".$_SERVER["PHP_SELF"]);
+		exit;
+	}
 }
 
 // @todo: Statut en status
@@ -86,6 +101,7 @@ if ($action == 'edit') {
 		print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
 		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $conf->global->$key . '"></td></tr>';
 	}
+
 	print '</table>';
 
 	print '<br><div class="center">';
