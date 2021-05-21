@@ -76,7 +76,7 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Dependencies
 		$this->hidden       = false;
-		$this->depends      = array('modApi');
+		$this->depends      = array("modSociete","modPropale","modCommande","modFacture","modBanque","modProduct","modService","modStock","modAgenda","modCategorie","modApi","modPaypal","modStripe");
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
@@ -141,11 +141,19 @@ class modDoliWPshop extends DolibarrModules {
 
 		$this->_load_tables('/doliwpshop/sql/');
 
-		if ( $conf->global->DOLIWPSHOP_USER_SET ==  0 ) {
+		if ( $conf->global->DOLIWPSHOP_USERAPI_SET ==  0 ) {
 			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
 			$user = new User($this->db);
+			$user->lastname  = 'API';
+			$user->firstname = 'REST';
+			$user->login     = 'USERAPI';
+			$user->setPassword($user, 'test');
+			$user->api_key = getRandomPassword(true);
 
+			$user_id = $user->create($user);
+
+			dolibarr_set_const($this->db, 'DOLIWPSHOP_USERAPI_SET', $user_id, 'integer', 0, '', $conf->entity);
 		}
 
 		// Create extrafields during init
