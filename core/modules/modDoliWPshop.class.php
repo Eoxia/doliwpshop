@@ -44,11 +44,11 @@ class modDoliWPshop extends DolibarrModules {
 		$this->family          = "Connectors";
 		$this->module_position = '90';
 		$this->name            = preg_replace( '/^mod/i', '', get_class( $this ) );
-		$this->description     = "MyModuleDescription";
-		$this->descriptionlong = "MyModule description (Long)";
+		$this->description     = $langs->trans("ModuleDoliWPshopDesc");
+		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '1.1.1';
+		$this->version         = '1.2.0';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
@@ -100,22 +100,22 @@ class modDoliWPshop extends DolibarrModules {
 		$this->rights = array();
 
 		$r                     = 0;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("ReadRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("ReadRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'read';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("CreateRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("CreateRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'write';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("DeleteRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("DeleteRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'delete';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
@@ -181,7 +181,6 @@ class modDoliWPshop extends DolibarrModules {
 	 *
 	 * @return     int                1 if OK, 0 if KO
 	 *
-	 * @todo: We have to remove extrafields or not ?
 	 */
 	public function remove( $options = '' ) {
 		return $this->_remove(null);
