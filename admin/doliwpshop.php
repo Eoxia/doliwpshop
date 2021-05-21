@@ -45,6 +45,43 @@ $arrayofparameters = array(
 	'WPSHOP_TOKEN'              => array('css'=> 'minwidth500', 'enabled'=> 1),
 );
 
+$userapi = new User($db);
+$userapi->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
+$userapi->getrights();
+//Rights invoices
+$userapi->rights->facture->lire ? 1 : $userapi->addrights(11);
+$userapi->rights->facture->creer ? 1 : $userapi->addrights(12);
+$userapi->rights->facture->paiment ? 1 : $userapi->addrights(16);
+//Rights propals
+$userapi->rights->propale->lire ? 1 : $userapi->addrights(21);
+$userapi->rights->propale->creer ? 1 : $userapi->addrights(22);
+$userapi->rights->propale->cloturer ? 1 : $userapi->addrights(26);
+//Rights products
+$userapi->rights->produit->lire ? 1 : $userapi->addrights(31);
+$userapi->rights->produit->creer ? 1 : $userapi->addrights(32);
+//Rights orders
+$userapi->rights->commande->lire ? 1 : $userapi->addrights(81);
+$userapi->rights->commande->creer ? 1 : $userapi->addrights(82);
+//Rights tiers
+$userapi->rights->societe->lire ? 1 : $userapi->addrights(121);
+$userapi->rights->societe->creer ? 1 : $userapi->addrights(122);
+$userapi->rights->societe->supprimer ? 1 : $userapi->addrights(125);
+$userapi->rights->societe->exporter ? 1 : $userapi->addrights(126);
+$userapi->rights->societe->client->voir ? 1 : $userapi->addrights(262);
+$userapi->rights->societe->contact->lire ? 1 : $userapi->addrights(281);
+//Rights tags
+$userapi->rights->categorie->lire ? 1 : $userapi->addrights(241);
+$userapi->rights->categorie->creer ? 1 : $userapi->addrights(242);
+//Rights services
+$userapi->rights->service->lire ? 1 : $userapi->addrights(531);
+$userapi->rights->service->creer ? 1 : $userapi->addrights(532);
+//Rights stocks
+$userapi->rights->stock->lire ? 1 : $userapi->addrights(1001);
+//Rights events
+$userapi->rights->agenda->myactions->read ? 1 : $userapi->addrights(2401);
+$userapi->rights->propale->myactions->create  ? 1 : $userapi->addrights(2402);
+$userapi->rights->propale->myactions->delete  ? 1 : $userapi->addrights(2403);
+
 /*
  * Actions
  */
