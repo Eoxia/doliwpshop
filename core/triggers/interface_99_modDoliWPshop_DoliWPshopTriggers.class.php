@@ -92,11 +92,15 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 		switch ($action) {
 			case 'PAYMENTONLINE_PAYMENT_OK' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+
+				require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';	// This also set $stripearrayofkeysbyenv
+				require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 
 				$TRANSACTIONID = $_SESSION['TRANSACTIONID'];
-				include_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
-				include_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';	// This also set $stripearrayofkeysbyenv
+
 				if ($TRANSACTIONID)	// Not linked to a stripe customer, we make the link
 				{
 					global $stripearrayofkeysbyenv;
@@ -108,6 +112,10 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 					}
 				 }
 
+				$user = new User($this->db);
+				$user->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
+				$user->getrights();
+
 				$order = new Commande($this->db);
 				$order->fetch($data['metadata']->dol_id);
 
@@ -118,7 +126,6 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 						$order->classifyBilled($user);
 						$invoice->validate($user);
 
-						include_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 						$paiement = new Paiement($this->db);
 						$paiement->datepaye = dol_now();
 						$paiement->amounts = array($invoice->id => $order->total_ttc);
@@ -142,7 +149,6 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 						$this->db->commit();
 					}
 				}
-
 				break;
 
 			default:
