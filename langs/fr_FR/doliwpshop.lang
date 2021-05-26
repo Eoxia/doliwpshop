@@ -68,3 +68,11 @@ Draft = brouillon
 ReadRightDoliWPshop = Consulter mon objet sur WPshop
 CreateRightDoliWPshop = Créer/modifier mon objet sur WPshop
 DeleteRightDoliWPshop = Supprimer mon objet sur WPshop
+
+#
+# Autre
+#
+AmountReceived = Montant reçu
+RiskLevel = Gravité du risque
+RiskScore = Cotation du risque
+SellerMessage = Message du vendeur
