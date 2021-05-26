@@ -93,6 +93,14 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 			case 'PAYMENTONLINE_PAYMENT_OK' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
+				$FULLTAG = GETPOST('fulltag');
+				// Detect $paymentmethod
+				$reg = array();
+				if (preg_match('/PM=([^\.]+)/', $FULLTAG, $reg))
+				{
+					$paymentmethod = $reg[1];
+				}
+
 				require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';	// This also set $stripearrayofkeysbyenv
 				require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 				require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
@@ -137,6 +145,15 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 						}
 						$paiement->paiementid = $paymentTypeId;
 						$paiement->ext_payment_id = $TRANSACTIONID;
+
+						$paiement->note = $langs->trans('Status') . ' : '. $data['charges']['data'][0]['status'] . '<br>';
+						$paiement->note .= $langs->trans('AmountReceived') . ' : '. price($data['amount_received']/100, 0, '', -1, -1, -1, $conf->currency)  . '<br>';
+						$paiement->note .= $langs->trans('Id') . ' : '. $data['id'] . '<br>';
+						$paiement->note .= $langs->trans('Email') . ' : '. $data['charges']['data'][0]['billing_details']['email'] . '<br>';
+						$paiement->note .= $langs->trans('Description') . ' : '. $data['description'] . '<br>';
+						$paiement->note .= $langs->trans('RiskLevel') . ' : '. $data['charges']['data'][0]['outcome']['risk_level'] . '<br>';
+						$paiement->note .= $langs->trans('RiskScore') . ' : '. $data['charges']['data'][0]['outcome']['risk_score'] . '<br>';
+						$paiement->note .= $langs->trans('SellerMessage') . ' : '. $data['charges']['data'][0]['outcome']['seller_message'] . '<br>';
 
 						$paiement->create($user, 1);
 
