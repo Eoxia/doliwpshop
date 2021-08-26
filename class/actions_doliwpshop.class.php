@@ -112,6 +112,42 @@ class ActionsDoliWPshop
 			}
 		}
 
+		if (in_array('producttranslationcard', explode(':', $parameters['context'])))
+		{
+			global $conf, $user;
+
+			if ($action == 'delete'){
+				if ($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION) {
+					$id           = GETPOST('id', 'alpha');
+					$langtodelete = GETPOST('langtodelete', 'alpha');
+
+					require_once DOL_DOCUMENT_ROOT.'/product/class/productlang.class.php';
+
+					$productLang = new ProductLang($this->db);
+					$productLangData = array_shift($productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product'=>$id,'t.lang'=>$langtodelete), 'AND'));
+					$productLangDataID = array();
+					$productLangDataID['id'] = $productLangData->array_options['options_wpshopidtradmultilangs'];
+					WPshopAPI::post('/wp-json/wpshop/v2/wpml_delete_data',$productLangDataID);
+
+					require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+					$now = dol_now();
+					$actioncomm = new ActionComm($this->db);
+
+					$actioncomm->elementtype = 'product';
+					$actioncomm->code        = 'AC_ARCHIVE_DATA_TRAD';
+					$actioncomm->type_code   = 'AC_OTH_AUTO';
+					$actioncomm->label       = $langs->trans('TranslateProductArchive');
+					$actioncomm->datep       = $now;
+					$actioncomm->fk_element  = $productLangData->fk_product;
+					$actioncomm->userownerid = $user->id;
+					$actioncomm->percentage  = -1;
+					$actioncomm->note = 'Label: '.$productLangData->label.'<br>'.'Description: '. $productLangData->description;
+
+					$actioncomm->create($user);
+				}
+			}
+		}
+
  	return 0;
 	}
 

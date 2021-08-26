@@ -37,6 +37,7 @@ PaymentMessage = retour sur le site
 CommunicationWordPress = Communication avec WordPress
 ConnectedWordPress = Connectée à WordPress ✔
 FailureWordPress = Echec de la connexion ❌
+DataArchiveOnDeletion = Archivage des données lors de la suppression d'une traduction sur un produit
 
 #
 # Page À propos
@@ -76,3 +77,4 @@ AmountReceived = Montant reçu
 RiskLevel = Gravité du risque
 RiskScore = Cotation du risque
 SellerMessage = Message du vendeur
+TranslateProductArchive = Traduction du produit archivé

@@ -66,6 +66,7 @@ class modDoliWPshop extends DolibarrModules {
 				'productcard',
 				'thirdpartycard',
 				'categorycard',
+				'producttranslationcard',
 			)
 		);
 

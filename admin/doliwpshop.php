@@ -37,8 +37,9 @@ $langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
 if (! $user->admin) accessforbidden();
 
 // Parameters
-$action = GETPOST('action', 'alpha');
+$action     = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
+$value      = GETPOST('value', 'alpha');
 
 $arrayofparameters = array(
 	'WPSHOP_URL_WORDPRESS'      => array('css'=> 'minwidth500', 'enabled' => 1),
@@ -92,10 +93,13 @@ if ((float) DOL_VERSION >= 6) {
 if (($action == 'update' && !GETPOST("cancel", 'alpha')) || ($action == 'updateedit'))
 {
 	$WPSHOP_URL_WORDPRESS = GETPOST('WPSHOP_URL_WORDPRESS','alpha');
+	$data_archive_on_deletion = GETPOST('data_archive_on_deletion','alpha');
 
 	$link = '<a href="'.$WPSHOP_URL_WORDPRESS.'">'.$langs->trans("PaymentMessage").'</a>';
 
 	dolibarr_set_const($db, "ONLINE_PAYMENT_MESSAGE_OK", $link, 'integer', 0, '', $conf->entity);
+
+	dolibarr_set_const($db, "WPSHOP_DATA_ARCHIVE_ON_DELETION", $data_archive_on_deletion, 'integer', 0, '', $conf->entity);
 
 	if ($action != 'updateedit' && !$error)
 	{
@@ -139,6 +143,11 @@ if ($action == 'edit') {
 		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $conf->global->$key . '"></td></tr>';
 	}
 
+	print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
+	print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').'';
+	print '</td></tr>';
+
+
 	print '</table>';
 
 	print '<br><div class="center">';
@@ -166,6 +175,11 @@ if ($action == 'edit') {
 			echo $langs->trans("FailureWordPress");
 		}
 		print '</td></tr>';
+
+		print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
+		print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').' disabled>';
+		print '</td></tr>';
+
 		print '</table>';
 
 		print '<div class="tabsAction">';
