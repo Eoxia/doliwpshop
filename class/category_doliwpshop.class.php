@@ -79,7 +79,7 @@ class CategoryDoliWPshop {
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
-        $url = 'wp-json/wpshop/v2/sync';
+        $url = '/wp-json/wpshop/v2/sync';
         			
 		$response = WPshopAPI::post($url, array(
 			'doli_id' => $object->id,

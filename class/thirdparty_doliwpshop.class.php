@@ -45,7 +45,7 @@ class ThirdPartyDoliWPshop {
 		$langs->load("doliwpshop@doliwpshop");
 
 		if (! empty($object->array_options['options__wps_id'])) {
-			$url = 'wp-json/wpshop/v1/thirdparty/' . $object->array_options['options__wps_id'];
+			$url = '/wp-json/wpshop/v1/thirdparty/' . $object->array_options['options__wps_id'];
 
 			$response = WPshopAPI::get($url);
 
@@ -79,7 +79,7 @@ class ThirdPartyDoliWPshop {
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
-		$url = 'wp-json/wpshop/v2/sync';
+		$url = '/wp-json/wpshop/v2/sync';
 
 		$response = WPshopAPI::post($url, array(
 			'doli_id' => $object->id,
