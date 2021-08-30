@@ -170,6 +170,9 @@ class modDoliWPshop extends DolibarrModules {
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'categorie', 1, 0,'','', 0,'','1' );
 		$extra_fields->addExtraField( '_wps_slug', 'WPshop Slug', 'varchar', 1001, '', 'categorie', 2, 0,'','', 0,'','1' );
 
+		$extra_fields->addExtraField( 'wpshopidtradmultilangs', 'WPshop_ID_trad_multilangs', 'int', 100, '10', 'product_lang', 1, 0,'','', 0,'','5' );
+		$extra_fields->addExtraField( 'wpshopurltradmultilangs', 'WPshop_Url_trad_multilangs', 'url', 101, '', 'product_lang', 1, 0,'','', 0,'','5' );
+
 		return $this->_init(null);
 	}
 
