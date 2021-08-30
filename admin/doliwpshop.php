@@ -180,6 +180,10 @@ if ($action == 'edit') {
 		print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').' disabled>';
 		print '</td></tr>';
 
+		print '<tr><td>'.$langs->trans("ActivateTranslateLink").'</td><td>';
+		print '<a href="'.DOL_MAIN_URL_ROOT.'/admin/ihm.php?mainmenu=home" target="_blank">'.DOL_MAIN_URL_ROOT.'/admin/ihm.php?mainmenu=home</a>';
+		print '</td></tr>';
+
 		print '</table>';
 
 		print '<div class="tabsAction">';

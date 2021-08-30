@@ -38,6 +38,7 @@ CommunicationWordPress = Communication avec WordPress
 ConnectedWordPress = Connectée à WordPress ✔
 FailureWordPress = Echec de la connexion ❌
 DataArchiveOnDeletion = Archivage des données lors de la suppression d'une traduction sur un produit
+ActivateTranslateLink = Lien pour configurer l'activation de la traduction multilangues
 
 #
 # Page À propos
