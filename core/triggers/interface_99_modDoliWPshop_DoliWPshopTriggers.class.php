@@ -300,28 +300,31 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 			case 'PRODUCT_SET_MULTILANGS' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
-				require_once DOL_DOCUMENT_ROOT.'/product/class/productlang.class.php';
+				require_once DOL_DOCUMENT_ROOT . '/product/class/productlang.class.php';
 
 				$productLang = new ProductLang($this->db);
 
-				$arrayProductLangs     = $productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product'=>$object->id), '');
+				$arrayProductLangs = $productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product' => $object->id), '');
 				$lastArrayProductLangs = end($arrayProductLangs);
 
-				$lastArrayProductLangsData                = array();
-				$lastArrayProductLangsData['lang']        = $lastArrayProductLangs->lang;
-				$lastArrayProductLangsData['label']       = $lastArrayProductLangs->label;
+				$lastArrayProductLangsData = array();
+				$lastArrayProductLangsData['lang'] = $lastArrayProductLangs->lang;
+				$lastArrayProductLangsData['label'] = $lastArrayProductLangs->label;
 				$lastArrayProductLangsData['description'] = $lastArrayProductLangs->description;
-				$lastArrayProductLangsData['fk_product']  = $lastArrayProductLangs->fk_product;
-				$lastArrayProductLangsData['wpshop_id']   = $object->array_options['options__wps_id'];
+				$lastArrayProductLangsData['fk_product'] = $lastArrayProductLangs->fk_product;
+				$lastArrayProductLangsData['wpshop_id'] = $object->array_options['options__wps_id'];
+				$lastArrayProductLangsData['language_code'] = $lastArrayProductLangs->array_options['options_language_code'];
 
-				$wpmlPostIdTranslated = WPshopAPI::post('/wp-json/wpshop/v2/wpml_insert_data',$lastArrayProductLangsData);
+ 				if ($lastArrayProductLangsData['lang'] != 'fr_FR') {
+					$wpmlPostIdTranslated = WPshopAPI::post('/wp-json/wpshop/v2/wpml_insert_data', $lastArrayProductLangsData);
 
-				$lastArrayProductLangs->array_options['wpshopidtradmultilangs']  = $wpmlPostIdTranslated['data'];
-				$lastArrayProductLangs->array_options['wpshopurltradmultilangs'] = $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $wpmlPostIdTranslated['data'];
+					$lastArrayProductLangs->array_options['wpshopidtradmultilangs'] = $wpmlPostIdTranslated['data'];
+					$lastArrayProductLangs->array_options['wpshopurltradmultilangs'] = $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $wpmlPostIdTranslated['data'];
 
-				$lastArrayProductLangs->insertExtraFields();
+					$lastArrayProductLangs->insertExtraFields();
 
-				break;
+					break;
+				}
 
 			default:
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
