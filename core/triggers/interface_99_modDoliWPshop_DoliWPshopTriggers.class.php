@@ -297,7 +297,7 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 
 				break;
 
-			case 'PRODUCT_SET_MULTILANGS' :
+			case 'PRODUCT_SET_MULTILANGS_WPSHOP' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
 				require_once DOL_DOCUMENT_ROOT . '/product/class/productlang.class.php';
