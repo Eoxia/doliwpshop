@@ -96,6 +96,8 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
+		$this->tabs[] = array('data' => 'product_admin:+productLangAttributes:Attributs supplémentaires (Traduction):@doliwpshop:$conf->global->MAIN_MULTILANGS:/custom/doliwpshop/admin/product_lang_extrafields.php');
+		$this->tabs[] = array('data' => 'product:+translate_doliwpshop:Traduction WPshop:@doliwpshop:$conf->global->MAIN_MULTILANGS:/custom/doliwpshop/traduction_doliwpshop.php?id=__ID__');
 		
 		// Permissions provided by this module
 		$this->rights = array();

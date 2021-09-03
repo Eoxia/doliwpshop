@@ -6,6 +6,9 @@
 - Rajout du flux de création automatique sur les propositions commerciales, commande, facture et paiements.
 - Rajout de traduction.
 - Réalisation d'une page personnaliser de paiment en ligne.
+- Création et configuration des traductions d'un produit. (description,titre)
+- Synchronisation avec les informations du plugins de traductions WPML sur Wordpress.
+- Création d'un post relatif à la traduction du produit Dolibarr sur Wordpress.
 
 #1.1.1
 Modifications DOL_DOCUMENT_ROOT en include_once

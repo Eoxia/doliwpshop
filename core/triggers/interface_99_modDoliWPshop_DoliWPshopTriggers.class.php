@@ -91,216 +91,204 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 
 		switch ($action) {
 			case 'PAYMENTONLINE_PAYMENT_OK' :
-				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				if ((float) DOL_VERSION >= 12 && (float) DOL_VERSION < 14) {
+					dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 
-				require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';	// This also set $stripearrayofkeysbyenv
-				require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
-				require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
-				require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
-				require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
+					require_once DOL_DOCUMENT_ROOT . '/stripe/class/stripe.class.php';    // This also set $stripearrayofkeysbyenv
+					require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+					require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+					require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+					require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
 
-				$FULLTAG = GETPOST('fulltag');
-				$PAYPALTOKEN = GETPOST('TOKEN');
-				if (empty($PAYPALTOKEN)) $PAYPALTOKEN = GETPOST('token');
-				$PAYPALPAYERID = GETPOST('PAYERID');
-				if (empty($PAYPALPAYERID)) $PAYPALPAYERID = GETPOST('PayerID');
+					$FULLTAG = GETPOST('fulltag');
+					$PAYPALTOKEN = GETPOST('TOKEN');
+					if (empty($PAYPALTOKEN)) $PAYPALTOKEN = GETPOST('token');
+					$PAYPALPAYERID = GETPOST('PAYERID');
+					if (empty($PAYPALPAYERID)) $PAYPALPAYERID = GETPOST('PayerID');
 
-				// Detect $paymentmethod
-				$reg = array();
-				if (preg_match('/PM=([^\.]+)/', $FULLTAG, $reg))
-				{
-					$paymentmethod = $reg[1];
-				}
+					// Detect $paymentmethod
+					$reg = array();
+					if (preg_match('/PM=([^\.]+)/', $FULLTAG, $reg)) {
+						$paymentmethod = $reg[1];
+					}
 
-				$user = new User($this->db);
-				$user->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
-				$user->getrights();
+					$user = new User($this->db);
+					$user->fetch($conf->global->DOLIWPSHOP_USERAPI_SET, '', '', 0, $conf->entity);
+					$user->getrights();
 
-				$order = new Commande($this->db);
-				$checkOrder = false;
+					$order = new Commande($this->db);
+					$checkOrder = false;
 
-				if (!empty($conf->paypal->enabled))
-				{
-					if ($paymentmethod == 'paypal')							// We call this page only if payment is ok on payment system
-					{
-						if ($PAYPALTOKEN)
-						{
-							// Get on url call
-							$onlinetoken        = $PAYPALTOKEN;
-							$fulltag            = $FULLTAG;
-							$payerID            = $PAYPALPAYERID;
-							// Set by newpayment.php
-							$paymentType        = $_SESSION['PaymentType'];
-							$currencyCodeType   = $_SESSION['currencyCodeType'];
-							$FinalPaymentAmt    = $_SESSION["FinalPaymentAmt"];
-							// From env
-							$ipaddress          = $_SESSION['ipaddress'];
+					if (!empty($conf->paypal->enabled)) {
+						if ($paymentmethod == 'paypal') { // We call this page only if payment is ok on payment system
+							if ($PAYPALTOKEN) {
+								// Get on url call
+								$onlinetoken = $PAYPALTOKEN;
+								$fulltag = $FULLTAG;
+								$payerID = $PAYPALPAYERID;
+								// Set by newpayment.php
+								$paymentType = $_SESSION['PaymentType'];
+								$currencyCodeType = $_SESSION['currencyCodeType'];
+								$FinalPaymentAmt = $_SESSION["FinalPaymentAmt"];
+								// From env
+								$ipaddress = $_SESSION['ipaddress'];
 
-							dol_syslog("Call paymentok with token=".$onlinetoken." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag, LOG_DEBUG, 0, '_payment');
+								dol_syslog("Call paymentok with token=" . $onlinetoken . " paymentType=" . $paymentType . " currencyCodeType=" . $currencyCodeType . " payerID=" . $payerID . " ipaddress=" . $ipaddress . " FinalPaymentAmt=" . $FinalPaymentAmt . " fulltag=" . $fulltag, LOG_DEBUG, 0, '_payment');
 
-							// Validate record
-							if (!empty($paymentType))
-							{
-								dol_syslog("We call GetExpressCheckoutDetails", LOG_DEBUG, 0, '_payment');
-								$resArray = getDetails($onlinetoken);
+								// Validate record
+								if (!empty($paymentType)) {
+									dol_syslog("We call GetExpressCheckoutDetails", LOG_DEBUG, 0, '_payment');
+									$resArray = getDetails($onlinetoken);
 
-								$ack = strtoupper($resArray["ACK"]);
-								if ($ack == "SUCCESS" || $ack == "SUCCESSWITHWARNING")
-								{
-									// Nothing to do
-									dol_syslog("Call to GetExpressCheckoutDetails return ".$ack, LOG_DEBUG, 0, '_payment');
-								} else {
-									dol_syslog("Call to GetExpressCheckoutDetails return error: ".json_encode($resArray), LOG_WARNING, '_payment');
-								}
-
-								dol_syslog("We call DoExpressCheckoutPayment token=".$onlinetoken." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag, LOG_DEBUG, 0, '_payment');
-								$resArray2 = confirmPayment($onlinetoken, $paymentType, $currencyCodeType, $payerID, $ipaddress, $FinalPaymentAmt, $fulltag);
-
-								$ack = strtoupper($resArray2["ACK"]);
-								if ($ack == "SUCCESS" || $ack == "SUCCESSWITHWARNING")
-								{
-									dol_syslog("Call to GetExpressCheckoutDetails return ".$ack, LOG_DEBUG, 0, '_payment');
-
-									$object->source   = $source;
-									$object->ref      = $ref;
-									$object->payerID  = $payerID;
-									$object->fulltag  = $fulltag;
-									$object->resArray = $resArray2;
-
-									// resArray was built from a string like that
-									// TOKEN=EC%2d1NJ057703V9359028&TIMESTAMP=2010%2d11%2d01T11%3a40%3a13Z&CORRELATIONID=1efa8c6a36bd8&ACK=Success&VERSION=56&BUILD=1553277&TRANSACTIONID=9B994597K9921420R&TRANSACTIONTYPE=expresscheckout&PAYMENTTYPE=instant&ORDERTIME=2010%2d11%2d01T11%3a40%3a12Z&AMT=155%2e57&FEEAMT=5%2e54&TAXAMT=0%2e00&CURRENCYCODE=EUR&PAYMENTSTATUS=Completed&PENDINGREASON=None&REASONCODE=None
-									$PAYMENTSTATUS = urldecode($resArray2["PAYMENTSTATUS"]); // Should contains 'Completed'
-									$TRANSACTIONID = urldecode($resArray2["TRANSACTIONID"]);
-									$TAXAMT = urldecode($resArray2["TAXAMT"]);
-									$NOTE = urldecode($resArray2["NOTE"]);
-
-									if (preg_match('/ORD=([^\.]+)/', $resArray['INVNUM'], $reg))
-									{
-										$data = $reg[1];
+									$ack = strtoupper($resArray["ACK"]);
+									if ($ack == "SUCCESS" || $ack == "SUCCESSWITHWARNING") {
+										// Nothing to do
+										dol_syslog("Call to GetExpressCheckoutDetails return " . $ack, LOG_DEBUG, 0, '_payment');
+									} else {
+										dol_syslog("Call to GetExpressCheckoutDetails return error: " . json_encode($resArray), LOG_WARNING, '_payment');
 									}
-									$order->fetch($data);
-									if ($resArray['AMT'] == price2num($order->total_ttc,2)){
-										$checkOrder = true;
+
+									dol_syslog("We call DoExpressCheckoutPayment token=" . $onlinetoken . " paymentType=" . $paymentType . " currencyCodeType=" . $currencyCodeType . " payerID=" . $payerID . " ipaddress=" . $ipaddress . " FinalPaymentAmt=" . $FinalPaymentAmt . " fulltag=" . $fulltag, LOG_DEBUG, 0, '_payment');
+									$resArray2 = confirmPayment($onlinetoken, $paymentType, $currencyCodeType, $payerID, $ipaddress, $FinalPaymentAmt, $fulltag);
+
+									$ack = strtoupper($resArray2["ACK"]);
+									if ($ack == "SUCCESS" || $ack == "SUCCESSWITHWARNING") {
+										dol_syslog("Call to GetExpressCheckoutDetails return " . $ack, LOG_DEBUG, 0, '_payment');
+
+										$object->source = $source;
+										$object->ref = $ref;
+										$object->payerID = $payerID;
+										$object->fulltag = $fulltag;
+										$object->resArray = $resArray2;
+
+										// resArray was built from a string like that
+										// TOKEN=EC%2d1NJ057703V9359028&TIMESTAMP=2010%2d11%2d01T11%3a40%3a13Z&CORRELATIONID=1efa8c6a36bd8&ACK=Success&VERSION=56&BUILD=1553277&TRANSACTIONID=9B994597K9921420R&TRANSACTIONTYPE=expresscheckout&PAYMENTTYPE=instant&ORDERTIME=2010%2d11%2d01T11%3a40%3a12Z&AMT=155%2e57&FEEAMT=5%2e54&TAXAMT=0%2e00&CURRENCYCODE=EUR&PAYMENTSTATUS=Completed&PENDINGREASON=None&REASONCODE=None
+										$PAYMENTSTATUS = urldecode($resArray2["PAYMENTSTATUS"]); // Should contains 'Completed'
+										$TRANSACTIONID = urldecode($resArray2["TRANSACTIONID"]);
+										$TAXAMT = urldecode($resArray2["TAXAMT"]);
+										$NOTE = urldecode($resArray2["NOTE"]);
+
+										if (preg_match('/ORD=([^\.]+)/', $resArray['INVNUM'], $reg)) {
+											$data = $reg[1];
+										}
+										$order->fetch($data);
+										if ($resArray['AMT'] == price2num($order->total_ttc, 2)) {
+											$checkOrder = true;
+										}
+									} else {
+										dol_syslog("Call to DoExpressCheckoutPayment return error: " . json_encode($resArray2), LOG_WARNING, 0, '_payment');
+
+										//Display a user friendly Error on the page using any of the following error information returned by PayPal
+										$ErrorCode = urldecode($resArray2["L_ERRORCODE0"]);
+										$ErrorShortMsg = urldecode($resArray2["L_SHORTMESSAGE0"]);
+										$ErrorLongMsg = urldecode($resArray2["L_LONGMESSAGE0"]);
+										$ErrorSeverityCode = urldecode($resArray2["L_SEVERITYCODE0"]);
 									}
 								} else {
-									dol_syslog("Call to DoExpressCheckoutPayment return error: ".json_encode($resArray2), LOG_WARNING, 0, '_payment');
-
-									//Display a user friendly Error on the page using any of the following error information returned by PayPal
-									$ErrorCode = urldecode($resArray2["L_ERRORCODE0"]);
-									$ErrorShortMsg = urldecode($resArray2["L_SHORTMESSAGE0"]);
-									$ErrorLongMsg = urldecode($resArray2["L_LONGMESSAGE0"]);
-									$ErrorSeverityCode = urldecode($resArray2["L_SEVERITYCODE0"]);
+									dol_print_error('', 'Session expired');
 								}
 							} else {
-								dol_print_error('', 'Session expired');
-							}
-						} else {
-							dol_print_error('', '$PAYPALTOKEN not defined');
-						}
-					}
-				}
-
-				if (!empty($conf->stripe->enabled))
-				{
-					if ($paymentmethod == 'stripe') { // We call this page only if payment is ok on payment system
-						$TRANSACTIONID = $_SESSION['TRANSACTIONID'];
-						if ($TRANSACTIONID)	// Not linked to a stripe customer, we make the link
-						{
-							global $stripearrayofkeysbyenv;
-							\Stripe\Stripe::setApiKey($stripearrayofkeysbyenv[0]['secret_key']);
-
-							if (preg_match('/^pi_/', $TRANSACTIONID)) {
-								// This may throw an error if not found.
-								$data = \Stripe\PaymentIntent::retrieve($TRANSACTIONID);    // payment_intent (pi_...)
+								dol_print_error('', '$PAYPALTOKEN not defined');
 							}
 						}
-						$order->fetch($data['metadata']->dol_id);
-						if ( $data['amount'] == $order->total_ttc * 100 ){
-							$checkOrder = true;
+					}
+
+					if (!empty($conf->stripe->enabled)) {
+						if ($paymentmethod == 'stripe') { // We call this page only if payment is ok on payment system
+							$TRANSACTIONID = $_SESSION['TRANSACTIONID'];
+							if ($TRANSACTIONID) { // Not linked to a stripe customer, we make the link
+								global $stripearrayofkeysbyenv;
+								\Stripe\Stripe::setApiKey($stripearrayofkeysbyenv[0]['secret_key']);
+
+								if (preg_match('/^pi_/', $TRANSACTIONID)) {
+									// This may throw an error if not found.
+									$data = \Stripe\PaymentIntent::retrieve($TRANSACTIONID);    // payment_intent (pi_...)
+								}
+							}
+							$order->fetch($data['metadata']->dol_id);
+							if ($data['amount'] == $order->total_ttc * 100) {
+								$checkOrder = true;
+							}
 						}
 					}
-				}
 
-				if ($checkOrder) {
-					$invoice = new Facture($this->db);
+					if ($checkOrder) {
+						$invoice = new Facture($this->db);
 						$result = $invoice->createFromOrder($order, $user);
-						if ( $result > 0 ) {
+						if ($result > 0) {
 							$order->classifyBilled($user);
 							$invoice->validate($user);
 
-						$paiement = new Paiement($this->db);
-						$paiement->datepaye = dol_now();
-						$paiement->amounts = array($invoice->id => $order->total_ttc);
-						if (empty($paymentTypeId))
-						{
-							$paymentType = $_SESSION["paymentType"];
-							if (empty($paymentType)) $paymentType = 'CB';
-							$paymentTypeId = dol_getIdFromCode($this->db, $paymentType, 'c_paiement', 'code', 'id', 1);
-						}
-						$paiement->paiementid = $paymentTypeId;
-						$paiement->ext_payment_id = $TRANSACTIONID;
+							$paiement = new Paiement($this->db);
+							$paiement->datepaye = dol_now();
+							$paiement->amounts = array($invoice->id => $order->total_ttc);
+							if (empty($paymentTypeId)) {
+								$paymentType = $_SESSION["paymentType"];
+								if (empty($paymentType)) $paymentType = 'CB';
+								$paymentTypeId = dol_getIdFromCode($this->db, $paymentType, 'c_paiement', 'code', 'id', 1);
+							}
+							$paiement->paiementid = $paymentTypeId;
+							$paiement->ext_payment_id = $TRANSACTIONID;
 
-						if ($paymentmethod == 'paypal') {
-							$paiement->note = $langs->trans('Status') . ' : '. $data['charges']['data'][0]['status'] . '<br>';
-							$paiement->note .= $langs->trans('AmountReceived') . ' : '. price($data['amount_received']/100, 0, '', -1, -1, -1, $conf->currency)  . '<br>';
-							$paiement->note .= $langs->trans('Id') . ' : '. $data['id'] . '<br>';
-							$paiement->note .= $langs->trans('Email') . ' : '. $data['charges']['data'][0]['billing_details']['email'] . '<br>';
-							$paiement->note .= $langs->trans('Description') . ' : '. $data['description'] . '<br>';
-							$paiement->note .= $langs->trans('RiskLevel') . ' : '. $data['charges']['data'][0]['outcome']['risk_level'] . '<br>';
-							$paiement->note .= $langs->trans('RiskScore') . ' : '. $data['charges']['data'][0]['outcome']['risk_score'] . '<br>';
-							$paiement->note .= $langs->trans('SellerMessage') . ' : '. $data['charges']['data'][0]['outcome']['seller_message'] . '<br>';
-						}
-
-						if ($paymentmethod == 'stripe') {
-							$paiement->note = $langs->trans('Status') . ' : '. $data['charges']['data'][0]['status'] . '<br>';
-							$paiement->note .= $langs->trans('AmountReceived') . ' : '. price($data['amount_received']/100, 0, '', -1, -1, -1, $conf->currency)  . '<br>';
-							$paiement->note .= $langs->trans('Id') . ' : '. $data['id'] . '<br>';
-							$paiement->note .= $langs->trans('Email') . ' : '. $data['charges']['data'][0]['billing_details']['email'] . '<br>';
-							$paiement->note .= $langs->trans('Description') . ' : '. $data['description'] . '<br>';
-							$paiement->note .= $langs->trans('RiskLevel') . ' : '. $data['charges']['data'][0]['outcome']['risk_level'] . '<br>';
-							$paiement->note .= $langs->trans('RiskScore') . ' : '. $data['charges']['data'][0]['outcome']['risk_score'] . '<br>';
-							$paiement->note .= $langs->trans('SellerMessage') . ' : '. $data['charges']['data'][0]['outcome']['seller_message'] . '<br>';
-						}
-
-						$paiement->create($user, 1);
-
-						if (!empty($conf->banque->enabled))
-						{
 							if ($paymentmethod == 'paypal') {
-								$bankaccountid = $bankaccountid = $conf->global->PAYPAL_BANK_ACCOUNT_FOR_PAYMENTS;
+								$paiement->note = $langs->trans('Status') . ' : ' . $data['charges']['data'][0]['status'] . '<br>';
+								$paiement->note .= $langs->trans('AmountReceived') . ' : ' . price($data['amount_received'] / 100, 0, '', -1, -1, -1, $conf->currency) . '<br>';
+								$paiement->note .= $langs->trans('Id') . ' : ' . $data['id'] . '<br>';
+								$paiement->note .= $langs->trans('Email') . ' : ' . $data['charges']['data'][0]['billing_details']['email'] . '<br>';
+								$paiement->note .= $langs->trans('Description') . ' : ' . $data['description'] . '<br>';
+								$paiement->note .= $langs->trans('RiskLevel') . ' : ' . $data['charges']['data'][0]['outcome']['risk_level'] . '<br>';
+								$paiement->note .= $langs->trans('RiskScore') . ' : ' . $data['charges']['data'][0]['outcome']['risk_score'] . '<br>';
+								$paiement->note .= $langs->trans('SellerMessage') . ' : ' . $data['charges']['data'][0]['outcome']['seller_message'] . '<br>';
 							}
+
 							if ($paymentmethod == 'stripe') {
-								$bankaccountid = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;
+								$paiement->note = $langs->trans('Status') . ' : ' . $data['charges']['data'][0]['status'] . '<br>';
+								$paiement->note .= $langs->trans('AmountReceived') . ' : ' . price($data['amount_received'] / 100, 0, '', -1, -1, -1, $conf->currency) . '<br>';
+								$paiement->note .= $langs->trans('Id') . ' : ' . $data['id'] . '<br>';
+								$paiement->note .= $langs->trans('Email') . ' : ' . $data['charges']['data'][0]['billing_details']['email'] . '<br>';
+								$paiement->note .= $langs->trans('Description') . ' : ' . $data['description'] . '<br>';
+								$paiement->note .= $langs->trans('RiskLevel') . ' : ' . $data['charges']['data'][0]['outcome']['risk_level'] . '<br>';
+								$paiement->note .= $langs->trans('RiskScore') . ' : ' . $data['charges']['data'][0]['outcome']['risk_score'] . '<br>';
+								$paiement->note .= $langs->trans('SellerMessage') . ' : ' . $data['charges']['data'][0]['outcome']['seller_message'] . '<br>';
 							}
-							$label = '(CustomerInvoicePayment)';
-							$paiement->addPaymentToBank($user, 'payment', $label, $bankaccountid, '', '');
+
+							$paiement->create($user, 1);
+
+							if (!empty($conf->banque->enabled)) {
+								if ($paymentmethod == 'paypal') {
+									$bankaccountid = $bankaccountid = $conf->global->PAYPAL_BANK_ACCOUNT_FOR_PAYMENTS;
+								}
+								if ($paymentmethod == 'stripe') {
+									$bankaccountid = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;
+								}
+								$label = '(CustomerInvoicePayment)';
+								$paiement->addPaymentToBank($user, 'payment', $label, $bankaccountid, '', '');
+							}
+							$this->db->commit();
 						}
-						$this->db->commit();
 					}
+				} elseif ((float) DOL_VERSION >= 14 ) {
+					dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+
+					$object->fetchObjectLinked($object->id, 'commande', null, 'facture');
+					$invoice_id = array_shift(array_values($object->linkedObjectsIds['facture']));
+					$invoice = new Facture($this->db);
+					$invoice->fetch($invoice_id);
+
+					$invoice->total_ht  = $object->total_ht;
+					$invoice->total_tva = $object->total_tva;
+					$invoice->total_ttc = $object->total_ttc;
+
+					$invoice->update($user, false);
+					$invoice->set_paid($user, '', '');
 				}
-				break;
-
-			case 'PAYMENTONLINE_PAYMENT_OK' :
-				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-
-				$object->fetchObjectLinked($object->id, 'commande', null, 'facture');
-				$invoice_id = array_shift(array_values($object->linkedObjectsIds['facture']));
-				$invoice = new Facture($this->db);
-				$invoice->fetch($invoice_id);
-
-				$invoice->total_ht  = $object->total_ht;
-				$invoice->total_tva = $object->total_tva;
-				$invoice->total_ttc = $object->total_ttc;
-
-				$invoice->update($user, false);
-				$invoice->set_paid($user, '', '');
 
 				break;
 
 			case 'PRODUCT_SET_MULTILANGS_WPSHOP' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
-				require_once DOL_DOCUMENT_ROOT . '/product/class/productlang.class.php';
+				require_once __DIR__ . '/../../class/productlang.class.php';
 
 				$productLang = new ProductLang($this->db);
 
