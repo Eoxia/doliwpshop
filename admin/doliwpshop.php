@@ -37,19 +37,75 @@ $langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
 if (! $user->admin) accessforbidden();
 
 // Parameters
-$action = GETPOST('action', 'alpha');
+$action     = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
+$value      = GETPOST('value', 'alpha');
 
 $arrayofparameters = array(
-	'WPSHOP_URL_WORDPRESS' => array('css'=> 'minwidth500', 'enabled' => 1),
-	'WPSHOP_TOKEN'         => array('css'=> 'minwidth500', 'enabled'=> 1)
+	'WPSHOP_URL_WORDPRESS'      => array('css'=> 'minwidth500', 'enabled' => 1),
+	'WPSHOP_TOKEN'              => array('css'=> 'minwidth500', 'enabled'=> 1),
 );
+
+$userapi = new User($db);
+$userapi->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
+$userapi->getrights();
+//Rights invoices
+$userapi->rights->facture->lire ? 1 : $userapi->addrights(11);
+$userapi->rights->facture->creer ? 1 : $userapi->addrights(12);
+$userapi->rights->facture->paiment ? 1 : $userapi->addrights(16);
+//Rights propals
+$userapi->rights->propale->lire ? 1 : $userapi->addrights(21);
+$userapi->rights->propale->creer ? 1 : $userapi->addrights(22);
+$userapi->rights->propale->cloturer ? 1 : $userapi->addrights(26);
+//Rights products
+$userapi->rights->produit->lire ? 1 : $userapi->addrights(31);
+$userapi->rights->produit->creer ? 1 : $userapi->addrights(32);
+//Rights orders
+$userapi->rights->commande->lire ? 1 : $userapi->addrights(81);
+$userapi->rights->commande->creer ? 1 : $userapi->addrights(82);
+//Rights tiers
+$userapi->rights->societe->lire ? 1 : $userapi->addrights(121);
+$userapi->rights->societe->creer ? 1 : $userapi->addrights(122);
+$userapi->rights->societe->supprimer ? 1 : $userapi->addrights(125);
+$userapi->rights->societe->exporter ? 1 : $userapi->addrights(126);
+$userapi->rights->societe->client->voir ? 1 : $userapi->addrights(262);
+$userapi->rights->societe->contact->lire ? 1 : $userapi->addrights(281);
+//Rights tags
+$userapi->rights->categorie->lire ? 1 : $userapi->addrights(241);
+$userapi->rights->categorie->creer ? 1 : $userapi->addrights(242);
+//Rights services
+$userapi->rights->service->lire ? 1 : $userapi->addrights(531);
+$userapi->rights->service->creer ? 1 : $userapi->addrights(532);
+//Rights stocks
+$userapi->rights->stock->lire ? 1 : $userapi->addrights(1001);
+//Rights events
+$userapi->rights->agenda->myactions->read ? 1 : $userapi->addrights(2401);
+$userapi->rights->propale->myactions->create  ? 1 : $userapi->addrights(2402);
+$userapi->rights->propale->myactions->delete  ? 1 : $userapi->addrights(2403);
 
 /*
  * Actions
  */
 if ((float) DOL_VERSION >= 6) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+}
+
+if (($action == 'update' && !GETPOST("cancel", 'alpha')) || ($action == 'updateedit'))
+{
+	$WPSHOP_URL_WORDPRESS = GETPOST('WPSHOP_URL_WORDPRESS','alpha');
+	$data_archive_on_deletion = GETPOST('data_archive_on_deletion','alpha');
+
+	$link = '<a href="'.$WPSHOP_URL_WORDPRESS.'">'.$langs->trans("PaymentMessage").'</a>';
+
+	dolibarr_set_const($db, "ONLINE_PAYMENT_MESSAGE_OK", $link, 'integer', 0, '', $conf->entity);
+
+	dolibarr_set_const($db, "WPSHOP_DATA_ARCHIVE_ON_DELETION", $data_archive_on_deletion, 'integer', 0, '', $conf->entity);
+
+	if ($action != 'updateedit' && !$error)
+	{
+		header("Location: ".$_SERVER["PHP_SELF"]);
+		exit;
+	}
 }
 
 // @todo: Statut en status
@@ -86,6 +142,12 @@ if ($action == 'edit') {
 		print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
 		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $conf->global->$key . '"></td></tr>';
 	}
+
+	print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
+	print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').'';
+	print '</td></tr>';
+
+
 	print '</table>';
 
 	print '<br><div class="center">';
@@ -113,6 +175,15 @@ if ($action == 'edit') {
 			echo $langs->trans("FailureWordPress");
 		}
 		print '</td></tr>';
+
+		print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
+		print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').' disabled>';
+		print '</td></tr>';
+
+		print '<tr><td>'.$langs->trans("ActivateTranslateLink").'</td><td>';
+		print '<a href="'.DOL_MAIN_URL_ROOT.'/admin/ihm.php?mainmenu=home" target="_blank">'.DOL_MAIN_URL_ROOT.'/admin/ihm.php?mainmenu=home</a>';
+		print '</td></tr>';
+
 		print '</table>';
 
 		print '<div class="tabsAction">';

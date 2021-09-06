@@ -44,18 +44,18 @@ class modDoliWPshop extends DolibarrModules {
 		$this->family          = "Connectors";
 		$this->module_position = '90';
 		$this->name            = preg_replace( '/^mod/i', '', get_class( $this ) );
-		$this->description     = "MyModuleDescription";
-		$this->descriptionlong = "MyModule description (Long)";
+		$this->description     = $langs->trans("ModuleDoliWPshopDesc");
+		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '1.1.1';
+		$this->version         = '1.2.0';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
 		$this->module_parts = array(
-			'triggers'          => 0,
+			'triggers'          => 1,
 			'login'             => 0,
-			'substitutions'     => 1,
+			'substitutions'     => 0,
 			'menus'             => 0,
 			'theme'             => 0,
 			'tpl'               => 0,
@@ -66,6 +66,7 @@ class modDoliWPshop extends DolibarrModules {
 				'productcard',
 				'thirdpartycard',
 				'categorycard',
+				'producttranslationcard',
 			)
 		);
 
@@ -76,7 +77,7 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Dependencies
 		$this->hidden       = false;
-		$this->depends      = array();
+		$this->depends      = array("modSociete","modPropale","modCommande","modFacture","modBanque","modProduct","modService","modStock","modAgenda","modCategorie","modApi","modPaypal","modStripe");
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
@@ -95,27 +96,29 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
+		$this->tabs[] = array('data' => 'product_admin:+productLangAttributes:Attributs supplémentaires (Traduction):@doliwpshop:$conf->global->MAIN_MULTILANGS:/custom/doliwpshop/admin/product_lang_extrafields.php');
+		$this->tabs[] = array('data' => 'product:+translate_doliwpshop:Traduction WPshop:@doliwpshop:$conf->global->MAIN_MULTILANGS:/custom/doliwpshop/traduction_doliwpshop.php?id=__ID__');
 		
 		// Permissions provided by this module
 		$this->rights = array();
 
 		$r                     = 0;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("ReadRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("ReadRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'read';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("CreateRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("CreateRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'write';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r;    // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->trans("DeleteRight");    // Permission label
+		$this->rights[$r][0] = $this->numero.$r;    // Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->trans("DeleteRightDoliWPshop");    // Permission label
 		$this->rights[$r][3] = 1;                    // Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'delete';                // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
 		$this->rights[$r][5] = '';                    // In php code, permission will be checked by test if ($user->rights->wpshop->level1->level2)
@@ -134,10 +137,27 @@ class modDoliWPshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		global $langs;
+		global $conf, $langs;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
+
+		$this->_load_tables('/doliwpshop/sql/');
+
+		if ( $conf->global->DOLIWPSHOP_USERAPI_SET ==  0 ) {
+			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
+
+			$user = new User($this->db);
+			$user->lastname  = 'API';
+			$user->firstname = 'REST';
+			$user->login     = 'USERAPI';
+			$user->setPassword($user, 'test');
+			$user->api_key = getRandomPassword(true);
+
+			$user_id = $user->create($user);
+
+			dolibarr_set_const($this->db, 'DOLIWPSHOP_USERAPI_SET', $user_id, 'integer', 0, '', $conf->entity);
+		}
 
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
@@ -152,6 +172,10 @@ class modDoliWPshop extends DolibarrModules {
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'categorie', 1, 0,'','', 0,'','1' );
 		$extra_fields->addExtraField( '_wps_slug', 'WPshop Slug', 'varchar', 1001, '', 'categorie', 2, 0,'','', 0,'','1' );
 
+		$extra_fields->addExtraField( 'wpshopidtradmultilangs', 'WPshop_ID_trad_multilangs', 'int', 100, '10', 'product_lang', 1, 0,'','', 0,'','5' );
+		$extra_fields->addExtraField( 'wpshopurltradmultilangs', 'WPshop_Url_trad_multilangs', 'url', 101, '', 'product_lang', 1, 0,'','', 0,'','5' );
+		$extra_fields->addExtraField( 'language_code', 'WPML_code', 'varchar', 102, '10', 'product_lang', 1, 1,'','', 0,'','1' );
+
 		return $this->_init(null);
 	}
 
@@ -164,7 +188,6 @@ class modDoliWPshop extends DolibarrModules {
 	 *
 	 * @return     int                1 if OK, 0 if KO
 	 *
-	 * @todo: We have to remove extrafields or not ?
 	 */
 	public function remove( $options = '' ) {
 		return $this->_remove(null);

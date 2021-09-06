@@ -26,6 +26,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/variants/class/ProductCombination.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/product/class/api_products.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
@@ -67,6 +68,7 @@ class DoliWPshop extends DolibarrApi
 		$this->product = new Product($this->db);
 		$this->societe = new Societe($this->db);
 		$this->category = new Categorie($this->db);
+		$this->order = new Commande($this->db);
 	}
 
 	/**
@@ -157,6 +159,35 @@ class DoliWPshop extends DolibarrApi
 		$result = $this->societe->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
 
 		return $result;
+	}
+
+	/**
+	 * @param integer $doli_id
+	 *
+	 * @url GET /getOnlinePaymentUrl
+	 */
+	public function getOnlinePaymentUrl($doli_id) {
+		global $conf;
+
+		$result = $this->order->fetch($doli_id);
+
+		if (!$result) {
+			throw new RestException(404, 'Order not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('commande', $this->order->id)) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$useonlinepayment = (!empty($conf->paypal->enabled) || !empty($conf->stripe->enabled) || !empty($conf->paybox->enabled));
+		if (!empty($conf->global->ORDER_HIDE_ONLINE_PAYMENT_ON_ORDER)) $useonlinepayment = 0;
+		if ($this->order->statut != Commande::STATUS_DRAFT && $useonlinepayment)
+		{
+			require_once DOL_DOCUMENT_ROOT.'/core/lib/payments.lib.php';
+			$url = getOnlinePaymentUrl(0, 'order',  $this->order->ref);
+		}
+
+		return $url;
 	}
 }
 
