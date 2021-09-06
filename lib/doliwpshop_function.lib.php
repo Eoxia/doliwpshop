@@ -71,7 +71,7 @@ function setMultiLangsByLangs($user, $lang_code = '', $extrafields_value = '', $
 	} else {
 		$result = $objectProduct->call_trigger('PRODUCT_SET_MULTILANGS_WPSHOP', $user);
 		if ($result < 0) {
-			$this->error = $this->db->lasterror();
+			$objectProduct->error = $objectProduct->db->lasterror();
 			return -1;
 		}
 	}

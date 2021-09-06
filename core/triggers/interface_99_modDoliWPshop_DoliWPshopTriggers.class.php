@@ -303,6 +303,16 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 				$lastArrayProductLangsData['wpshop_id'] = $object->array_options['options__wps_id'];
 				$lastArrayProductLangsData['language_code'] = $lastArrayProductLangs->array_options['options_language_code'];
 
+				$arrayProductLangs = $productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product' => $object->id), '');
+				foreach ($arrayProductLangs as $arrayProductLang) {
+					$result[] = $arrayProductLang->array_options['options_language_code'];
+				}
+				
+				if (in_array($lastArrayProductLangsData['language_code'],$result)) {
+					setEventMessages($langs->trans("ErrorLanguageCode") . ' '. $lastArrayProductLangsData['language_code'], null, 'errors');
+					return -1;
+				}
+
  				if ($lastArrayProductLangsData['lang'] != 'fr_FR') {
 					$wpmlPostIdTranslated = WPshopAPI::post('/wp-json/wpshop/v2/wpml_insert_data', $lastArrayProductLangsData);
 

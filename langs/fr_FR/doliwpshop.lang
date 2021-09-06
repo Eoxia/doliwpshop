@@ -79,3 +79,4 @@ RiskLevel = Gravité du risque
 RiskScore = Cotation du risque
 SellerMessage = Message du vendeur
 TranslateProductArchive = Traduction du produit archivé
+ErrorLanguageCode = WPML language code déjà utilisé :
