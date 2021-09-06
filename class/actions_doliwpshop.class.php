@@ -121,7 +121,7 @@ class ActionsDoliWPshop
 					$id           = GETPOST('id', 'alpha');
 					$langtodelete = GETPOST('langtodelete', 'alpha');
 
-					require_once DOL_DOCUMENT_ROOT.'/product/class/productlang.class.php';
+					require_once __DIR__.'/productlang.class.php';
 
 					$productLang = new ProductLang($this->db);
 					$productLangData = array_shift($productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product'=>$id,'t.lang'=>$langtodelete), 'AND'));
