@@ -151,6 +151,7 @@ class modDoliWPshop extends DolibarrModules {
 			$user->lastname  = 'API';
 			$user->firstname = 'REST';
 			$user->login     = 'USERAPI';
+			$user->email     = '';
 			$user->setPassword($user, 'test');
 			$user->api_key = getRandomPassword(true);
 
