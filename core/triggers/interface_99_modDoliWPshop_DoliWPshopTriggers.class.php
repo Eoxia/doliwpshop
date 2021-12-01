@@ -91,7 +91,7 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 
 		switch ($action) {
 			case 'PAYMENTONLINE_PAYMENT_OK' :
-				if ((float) DOL_VERSION >= 12 && (float) DOL_VERSION < 14) {
+				if ((float) DOL_VERSION >= 12 && (float) DOL_VERSION < 15) {
 					dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 
 					require_once DOL_DOCUMENT_ROOT . '/stripe/class/stripe.class.php';    // This also set $stripearrayofkeysbyenv
@@ -267,7 +267,7 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 							$this->db->commit();
 						}
 					}
-				} elseif ((float) DOL_VERSION >= 14 ) {
+				} elseif ((float) DOL_VERSION >= 15 ) {
 					dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
 					$object->fetchObjectLinked($object->id, 'commande', null, 'facture');
