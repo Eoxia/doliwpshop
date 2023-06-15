@@ -32,7 +32,7 @@ require_once '../lib/api_doliwpshop.class.php';
 
 global $conf, $langs, $user, $db;
 // Translations
-$langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
+$langs->loadLangs(array("admin", "doliwpshop@doliwpshop", "stocks"));
 
 // Access control
 if (! $user->admin) accessforbidden();
@@ -46,14 +46,23 @@ $value      = GETPOST('value', 'alpha');
  * Actions
  */
 
-if ($action == 'toggleStockManagement') {
-	$confValue = GETPOST('value');
-	dolibarr_set_const($db, 'DOLIWPSHOP_STOCK_MANAGEMENT', $value, 'chaine', 0, '', $conf->entity);
-}
+$reg = array();
 
-if ($action == 'switchAutoUnStockMethod') {
-	$confValue = GETPOST('value');
-	dolibarr_set_const($db, 'DOLIWPSHOP_UNSTOCK_ON_ORDER_VALIDATION_OR_INVOICE_CREATION', $confValue, 'chaine', 0, '', $conf->entity);
+if (preg_match('/set_([a-z0-9_\-]+)/i', $action, $reg)) {
+	$code = $reg[1];
+
+	dolibarr_del_const($db, 'STOCK_CALCULATE_ON_BILL', $conf->entity);
+	dolibarr_del_const($db, 'STOCK_CALCULATE_ON_VALIDATE_ORDER', $conf->entity);
+	dolibarr_del_const($db, 'STOCK_CALCULATE_ON_SHIPMENT', $conf->entity);
+	dolibarr_del_const($db, 'STOCK_CALCULATE_ON_SHIPMENT_CLOSE', $conf->entity);
+
+	if (dolibarr_set_const($db, $code, 1, 'chaine', 0, '', $conf->entity) > 0) {
+
+		header("Location: ".$_SERVER["PHP_SELF"]);
+		exit;
+	} else {
+		dol_print_error($db);
+	}
 }
 
 /*
@@ -67,64 +76,98 @@ llxHeader('', $title);
 // Subheader
 $linkback = '<a href="'.($backtopage?:DOL_URL_ROOT .'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 
+
 print load_fiche_titre($langs->trans($title), $linkback, 'object_doliwpshop@doliwpshop');
 
 // Configuration header
 $head = doliwpshopAdminPrepareHead();
+
 print dol_get_fiche_head($head, 'stock', '', -1, "doliwpshop@doliwpshop");
 
-
+if (isModEnabled('productbatch')) {
+	$langs->load("productbatch");
+	$disabled = ' disabled';
+	print info_admin($langs->trans("WhenProductBatchModuleOnOptionAreForced"));
+}
 print load_fiche_titre($langs->trans("StockManagementConfiguration"), '', '');
 
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="action" value="warehouse">';
+
+// Title rule for stock decrease
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
-print '<td>' . $langs->trans("Name") . '</td>';
-print '<td>' . $langs->trans("Description") . '</td>';
-print '<td class="center">' . $langs->trans("Status") . '</td>';
-print '</tr>';
+print "<td>".$langs->trans("RuleForStockManagementDecrease")."</td>\n";
+print '<td class="right">'.$langs->trans("Status").'</td>'."\n";
+print '</tr>'."\n";
 
-print '<tr class="oddeven"><td>';
-print $langs->trans('AutoUnStock');
-print "</td><td>";
-print $langs->trans('AutoUnStockDescription');
-print '</td>';
+$found = 0;
 
-print '<td class="center">';
-print '<a href="'.$_SERVER["PHP_SELF"].'?action=toggleStockManagement&value='. ($conf->global->DOLIWPSHOP_STOCK_MANAGEMENT > 0 ? 0 : 1) .'">';
-print img_picto($langs->trans("Enabled"), $conf->global->DOLIWPSHOP_STOCK_MANAGEMENT > 0 ? 'switch_on' : 'switch_off');
-print '</a>';
-print "</td>";
-print '</tr>';
-
-if ($conf->global->DOLIWPSHOP_STOCK_MANAGEMENT == 1) {
-
-	print '<tr class="oddeven"><td>';
-	print $langs->trans('UnstockOnOrderValidation');
-	print "</td><td>";
-	print $langs->trans('UnstockOnOrderValidationDescription');
-	print '</td>';
-
-	print '<td class="center">';
-	print '<a href="'.$_SERVER["PHP_SELF"].'?action=switchAutoUnStockMethod&value='. ($conf->global->DOLIWPSHOP_UNSTOCK_ON_ORDER_VALIDATION_OR_INVOICE_CREATION > 0 ? 0 : 1) .'">';
-	print img_picto($langs->trans("Enabled"), $conf->global->DOLIWPSHOP_UNSTOCK_ON_ORDER_VALIDATION_OR_INVOICE_CREATION > 0 ? 'switch_on' : 'switch_off');
-	print '</a>';
-	print "</td>";
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>';
-	print $langs->trans('UnstockOnInvoiceCreation');
-	print "</td><td>";
-	print $langs->trans('UnstockOnInvoiceCreationDescription');
-	print '</td>';
-
-	print '<td class="center">';
-	print '<a href="'.$_SERVER["PHP_SELF"].'?action=switchAutoUnStockMethod&value='. ($conf->global->DOLIWPSHOP_UNSTOCK_ON_ORDER_VALIDATION_OR_INVOICE_CREATION > 0 ? 0 : 1) .'">';
-	print img_picto($langs->trans("Enabled"), $conf->global->DOLIWPSHOP_UNSTOCK_ON_ORDER_VALIDATION_OR_INVOICE_CREATION > 0 ? 'switch_off' : 'switch_on');
-	print '</a>';
-	print "</td>";
-	print '</tr>';
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("DeStockOnBill").'</td>';
+print '<td class="right">';
+if (isModEnabled('facture')) {
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('STOCK_CALCULATE_ON_BILL', array(), null, 0, 0, 0, 2, 1);
+	} else {
+		$arrval = array('0' => $langs->trans("No"), '1' => $langs->trans("Yes"));
+		print $form->selectarray("STOCK_CALCULATE_ON_BILL", $arrval, $conf->global->STOCK_CALCULATE_ON_BILL);
+	}
+} else {
+	print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module30Name"));
 }
+print "</td>\n</tr>\n";
 
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("DeStockOnValidateOrder").'</td>';
+print '<td class="right">';
+if (isModEnabled('commande')) {
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('STOCK_CALCULATE_ON_VALIDATE_ORDER', array(), null, 0, 0, 0, 2, 1);
+	} else {
+		$arrval = array('0' => $langs->trans("No"), '1' => $langs->trans("Yes"));
+		print $form->selectarray("STOCK_CALCULATE_ON_VALIDATE_ORDER", $arrval, $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER);
+	}
+} else {
+	print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module25Name"));
+}
+print "</td>\n</tr>\n";
+
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("DeStockOnShipment").'</td>';
+print '<td class="right">';
+if (isModEnabled("expedition")) {
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('STOCK_CALCULATE_ON_SHIPMENT', array(), null, 0, 0, 0, 2, 1);
+	} else {
+		$arrval = array('0' => $langs->trans("No"), '1' => $langs->trans("Yes"));
+		print $form->selectarray("STOCK_CALCULATE_ON_SHIPMENT", $arrval, $conf->global->STOCK_CALCULATE_ON_SHIPMENT);
+	}
+} else {
+	print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module80Name"));
+}
+print "</td>\n</tr>\n";
+
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("DeStockOnShipmentOnClosing").'</td>';
+print '<td class="right">';
+if (isModEnabled("expedition")) {
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('STOCK_CALCULATE_ON_SHIPMENT_CLOSE', array(), null, 0, 0, 0, 2, 1);
+	} else {
+		$arrval = array('0' => $langs->trans("No"), '1' => $langs->trans("Yes"));
+		print $form->selectarray("STOCK_CALCULATE_ON_SHIPMENT_CLOSE", $arrval, $conf->global->STOCK_CALCULATE_ON_SHIPMENT_CLOSE);
+	}
+} else {
+	print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module80Name"));
+}
+print "</td>\n</tr>\n";
+
+print '</table>';
+
+print '<br>';
+print '</form>';
 
 // Page end
 print dol_get_fiche_end();
