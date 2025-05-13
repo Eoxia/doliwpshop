@@ -206,17 +206,17 @@ class DoliWPshop extends DolibarrApi
 			'societe'  =>  ['contact' => ['read', 'write']],
 		];
 
-		foreach ($permissions as $module => $actions) {
-			foreach ($actions as $action) {
-				if (is_array($action)) {
-					foreach ($action as $subaction) {
-						if (!DolibarrApiAccess::$user->hasRight($module, $action, $subaction)) {
-							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $action . ' with action: ' . $subaction);
+		foreach ($permissions as $module => $level1Permissions) {
+			foreach ($level1Permissions as $level1Permission) {
+				if (is_array($level1Permission)) {
+					foreach ($level1Permission as $level1 => $level2) {
+						if (!DolibarrApiAccess::$user->hasRight($module, $level1, $level2)) {
+							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $level1 . ' with action: ' . $level2);
 						}
 					}
 				} else {
-					if (!DolibarrApiAccess::$user->hasRight($module, $action)) {
-						throw new RestException(403, 'Access denied for resource: ' . $module . ' with action: ' . $action);
+					if (!DolibarrApiAccess::$user->hasRight($module, $level1Permission)) {
+						throw new RestException(403, 'Access denied for resource: ' . $module . ' with action: ' . $level1Permission);
 					}
 				}
 			}
