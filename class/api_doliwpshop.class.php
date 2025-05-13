@@ -189,6 +189,36 @@ class DoliWPshop extends DolibarrApi
 
 		return $url;
 	}
+
+	public function checkPermissions()
+	{
+		$permissions = [
+			'commande'  => ['read', 'write'],
+			'facture'   => ['read', 'write'],
+			'propale'   => ['read', 'write'],
+			'produit'   => ['read'],
+			'categorie' => ['read'],
+			'societe'  =>  ['contact' => ['read', 'write']],
+		];
+
+		foreach ($permissions as $resource => $actions) {
+			foreach ($actions as $action) {
+				if (is_array($action)) {
+					foreach ($action as $subaction) {
+						if (!DolibarrApiAccess::$user->hasRight($resource, $subaction)) {
+							throw new RestException(403, 'Access denied for resource: ' . $resource . ':' . $action . ' with action: ' . $subaction);
+						}
+					}
+				} else {
+					if (!DolibarrApiAccess::$user->hasRight($resource, $action)) {
+						throw new RestException(403, 'Access denied for resource: ' . $resource . ' with action: ' . $action);
+					}
+				}
+			}
+		}
+
+		return true;
+	}
 }
 
 
