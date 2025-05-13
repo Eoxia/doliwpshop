@@ -191,9 +191,9 @@ class DoliWPshop extends DolibarrApi
 	}
 
 	/**
-	 * @param integer $doli_id
 	 *
 	 * @url GET /checkPermissions
+	 *
 	 */
 	public function checkPermissions()
 	{
