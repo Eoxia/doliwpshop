@@ -209,9 +209,9 @@ class DoliWPshop extends DolibarrApi
 		foreach ($permissions as $module => $actions) {
 			foreach ($actions as $action) {
 				if (is_array($action)) {
-					foreach ($action as $subaction) {
-						if (!DolibarrApiAccess::$user->hasRight($module, $action, $subaction)) {
-							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $action . ' with action: ' . $subaction);
+					foreach ($action as $level1 => $level2) {
+						if (!DolibarrApiAccess::$user->hasRight($module, $level1, $level2)) {
+							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $level1 . ' with action: ' . $level2);
 						}
 					}
 				} else {
