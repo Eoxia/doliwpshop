@@ -207,11 +207,11 @@ class DoliWPshop extends DolibarrApi
 		];
 
 		foreach ($permissions as $module => $level1Permissions) {
-			foreach ($level1Permissions as $level1Permission) {
+			foreach ($level1Permissions as $key => $level1Permission) {
 				if (is_array($level1Permission)) {
-					foreach ($level1Permission as $level1 => $level2) {
-						if (!DolibarrApiAccess::$user->hasRight($module, $level1, $level2)) {
-							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $level1 . ' with action: ' . $level2);
+					foreach ($level1Permission as $level2Permission) {
+						if (!DolibarrApiAccess::$user->hasRight($module, $key, $level2Permission)) {
+							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $key . ' with action: ' . $level2Permission);
 						}
 					}
 				} else {
