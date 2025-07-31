@@ -178,7 +178,7 @@ class modDoliWPshop extends DolibarrModules {
 		$extra_fields->addExtraField( 'wpshopurltradmultilangs', 'WPshop_Url_trad_multilangs', 'url', 101, '', 'product_lang', 1, 0,'','', 0,'','5' );
 		$extra_fields->addExtraField( 'language_code', 'WPML_code', 'varchar', 102, '10', 'product_lang', 1, 1,'','', 0,'','1' );
 
-		return $this->_init(null);
+		return $this->_init([]);
 	}
 
 	/**
