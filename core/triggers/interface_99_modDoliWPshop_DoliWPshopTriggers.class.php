@@ -271,7 +271,10 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 					dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
 					$object->fetchObjectLinked($object->id, 'commande', null, 'facture');
-					$invoice_id = array_shift(array_values($object->linkedObjectsIds['facture']));
+					if (!is_array($object->linkedObjectsIds['facture']) || empty($object->linkedObjectsIds['facture'])) {
+						break;
+					}
+					$invoice_id  = reset($object->linkedObjectsIds['facture']);
 					$invoice = new Facture($this->db);
 					$invoice->fetch($invoice_id);
 
