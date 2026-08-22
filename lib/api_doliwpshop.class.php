@@ -34,7 +34,7 @@ class WPshopAPI {
 	 public function __construct() {
 			global $conf;
 		
-			self::$base = $conf->global->WPSHOP_URL_WORDPRESS;
+			self::$base = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? $conf->global->WPSHOP_URL_WORDPRESS : '';
 		
 	 }
 		 
@@ -74,13 +74,17 @@ class WPshopAPI {
 		$data = json_encode( $data );
 		global $conf;
 		
+		if (empty($conf->global->WPSHOP_URL_WORDPRESS)) return array('status' => false, 'error_message' => 'WPSHOP_URL_WORDPRESS not configured');
+		
 		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . '/' . $end_point;
 		
+		if (!function_exists('curl_init')) return array('status' => false, 'error_message' => 'cURL extension is missing');
+
 		$ch = curl_init(); 
 		curl_setopt($ch, CURLOPT_URL, $api_url); 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
-			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
+			'WPAPIKEY: ' . (isset($conf->global->WPSHOP_TOKEN) ? $conf->global->WPSHOP_TOKEN : ''),
 			'Content-Length: ' . strlen( $data ),
 		) ); 
 		
@@ -91,9 +95,10 @@ class WPshopAPI {
 		
 		curl_close($ch);
 		
-		if ($output === NULL) {
+		if ($output === false || $output === NULL) {
 			return array(
-				'status' => NULL,
+				'status' => false,
+				'error_message' => 'cURL request failed'
 			);
 		}
 		
@@ -123,18 +128,24 @@ class WPshopAPI {
 	public static function get( $end_point ) {
 		global $conf;
 		
+		if (empty($conf->global->WPSHOP_URL_WORDPRESS)) return false;
+
 		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
 	
+		if (!function_exists('curl_init')) return false;
+
 		$ch = curl_init(); 
 		curl_setopt($ch, CURLOPT_URL, $api_url); 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
-			'WPAPIKEY: ' . $conf->global->WPSHOP_TOKEN,
+			'WPAPIKEY: ' . (isset($conf->global->WPSHOP_TOKEN) ? $conf->global->WPSHOP_TOKEN : ''),
 		) ); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
 		$output = curl_exec($ch); 
 		curl_close($ch); 
 		
+		if ($output === false) return false;
+
 		$output = json_decode( $output );
 		
 		return $output;

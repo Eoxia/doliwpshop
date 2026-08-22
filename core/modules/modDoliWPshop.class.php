@@ -144,7 +144,7 @@ class modDoliWPshop extends DolibarrModules {
 
 		$this->_load_tables('/doliwpshop/sql/');
 
-		if ( $conf->global->DOLIWPSHOP_USERAPI_SET ==  0 ) {
+		if ( !isset($conf->global->DOLIWPSHOP_USERAPI_SET) || $conf->global->DOLIWPSHOP_USERAPI_SET == 0 ) {
 			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
 			$user = new User($this->db);
@@ -176,7 +176,7 @@ class modDoliWPshop extends DolibarrModules {
 		$extra_fields->addExtraField( 'wpshopurltradmultilangs', 'WPshop_Url_trad_multilangs', 'url', 101, '', 'product_lang', 1, 0,'','', 0,'','5' );
 		$extra_fields->addExtraField( 'language_code', 'WPML_code', 'varchar', 102, '10', 'product_lang', 1, 1,'','', 0,'','1' );
 
-		return $this->_init(null);
+		return $this->_init(array());
 	}
 
 	/**
@@ -190,6 +190,6 @@ class modDoliWPshop extends DolibarrModules {
 	 *
 	 */
 	public function remove( $options = '' ) {
-		return $this->_remove(null);
+		return $this->_remove(array());
 	}
 }
