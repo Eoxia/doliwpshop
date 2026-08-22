@@ -40,6 +40,7 @@ function doliwpshopAdminPrepareHead()
 	$head[$h][2] = 'settings';
 	$h++;
 
+	$object = null;
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
 
 	return $head;

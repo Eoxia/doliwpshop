@@ -72,6 +72,20 @@ class DoliWPshop extends DolibarrApi
 	}
 
 	/**
+	 * Check if the API key has permissions and the module is responsive
+	 *
+	 * @url GET /checkPermissions
+	 */
+	public function checkPermissions() {
+		return array(
+			'success' => array(
+				'code' => 200,
+				'message' => 'OK'
+			)
+		);
+	}
+
+	/**
 	 * @param integer $wp_id
 	 * @param integer $doli_id
 	 *
