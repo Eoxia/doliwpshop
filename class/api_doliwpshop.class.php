@@ -117,6 +117,12 @@ class DoliWPshop extends DolibarrApi
 		return $result;
 	}
 
+	/**
+	 * @param integer $wp_id
+	 * @param integer $doli_id
+	 *
+	 * @url GET /associatecategory
+	 */
 	public function associateCategory($wp_id, $doli_id) {
 		$result = $this->category->fetch($doli_id);
 		
