@@ -148,6 +148,9 @@ class ActionsDoliWPshop
 			}
 		}
 
+ 	return 0;
+	}
+
 	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
 	{
 		global $langs;
@@ -167,9 +170,6 @@ class ActionsDoliWPshop
 			}
 		}
 		return 0;
-	}
-
- 	return 0;
 	}
 
 	/**
