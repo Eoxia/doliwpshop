@@ -163,8 +163,12 @@ class ActionsDoliWPshop
 					$response = WPshopAPI::get($url);
 					
 					if (!empty($response) && isset($response->slug)) {
+						global $conf;
 						$slug = $response->slug;
-						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3">'.$slug.'</td></tr>';
+						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? $conf->global->WPSHOP_URL_WORDPRESS : '';
+						$wps_id = $object->array_options['options__wps_id'];
+						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id;
+						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
 					}
 				}
 			}
