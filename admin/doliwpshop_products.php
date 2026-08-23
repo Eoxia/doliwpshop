@@ -74,40 +74,14 @@ dol_fiche_head($head, 'products', '', -1, "doliwpshop@doliwpshop");
 // Setup page goes here
 echo 'Configuration de la synchronisation des produits et services.<br><br>';
 
-if ($action == 'edit') {
-	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
-	print '<input type="hidden" name="action" value="update">';
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre"><td class="titlefield">Paramètre</td><td class="right">Valeur</td></tr>';
 
-	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre"><td class="titlefield">Paramètre</td><td>Valeur</td></tr>';
+print '<tr class="oddevent"><td>Ajouter les Tags/catégories du produit sur WPshop automatiquement</td><td class="right">';
+print ajax_constantonoff('WPSHOP_AUTO_SYNC_PRODUCT_CATEGORIES');
+print '</td></tr>';
 
-	print '<tr><td>Ajouter les Tags/catégories du produit sur WPshop automatiquement</td><td>';
-	print '<input type="checkbox" id="WPSHOP_AUTO_SYNC_PRODUCT_CATEGORIES" name="WPSHOP_AUTO_SYNC_PRODUCT_CATEGORIES" value="1" '.(getDolGlobalInt('WPSHOP_AUTO_SYNC_PRODUCT_CATEGORIES') ? ' checked="checked"' : '').'>';
-	print '</td></tr>';
-
-	print '</table>';
-
-	print '<br><div class="center">';
-	print '<input class="button" type="submit" value="'.$langs->trans("Save").'">';
-	print '</div>';
-
-	print '</form>';
-	print '<br>';
-} else {
-	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre"><td class="titlefield">Paramètre</td><td>Valeur</td></tr>';
-
-	print '<tr class="oddevent"><td>Ajouter les Tags/catégories du produit sur WPshop automatiquement</td><td>';
-	print getDolGlobalInt('WPSHOP_AUTO_SYNC_PRODUCT_CATEGORIES') ? $langs->trans("Yes") : $langs->trans("No");
-	print '</td></tr>';
-
-	print '</table>';
-
-	print '<div class="tabsAction">';
-	print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit">'.$langs->trans("Modify").'</a>';
-	print '</div>';
-}
+print '</table>';
 
 // Page end
 dol_fiche_end();
