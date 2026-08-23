@@ -148,6 +148,27 @@ class ActionsDoliWPshop
 			}
 		}
 
+	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+
+		if (in_array('categorycard', explode(':', $parameters['context']))) {
+			if (!empty($object->array_options['options__wps_id'])) {
+				$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
+				if ($connected) {
+					$url = '/wp-json/wpshop/v2/category/' . $object->array_options['options__wps_id'];
+					$response = WPshopAPI::get($url);
+					
+					if (!empty($response) && isset($response->slug)) {
+						$slug = $response->slug;
+						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3">'.$slug.'</td></tr>';
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
  	return 0;
 	}
 
