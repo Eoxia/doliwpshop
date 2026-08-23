@@ -39,6 +39,16 @@ function doliwpshopAdminPrepareHead()
 	$head[$h][1] = $langs->trans("Parameters");
 	$head[$h][2] = 'settings';
 	$h++;
+	
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_products.php", 1);
+	$head[$h][1] = "Produits/services"; // We can hardcode or use translation
+	$head[$h][2] = 'products';
+	$h++;
+	
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_categories.php", 1);
+	$head[$h][1] = "Catégories";
+	$head[$h][2] = 'categories';
+	$h++;
 
 	$object = null;
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');

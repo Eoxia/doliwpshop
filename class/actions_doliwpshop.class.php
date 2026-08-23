@@ -151,6 +151,31 @@ class ActionsDoliWPshop
  	return 0;
 	}
 
+	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+
+		if (in_array('categorycard', explode(':', $parameters['context']))) {
+			if (!empty($object->array_options['options__wps_id'])) {
+				$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
+				if ($connected) {
+					$url = '/wp-json/wpshop/v2/category/' . $object->array_options['options__wps_id'];
+					$response = WPshopAPI::get($url);
+					
+					if (!empty($response) && isset($response->slug)) {
+						global $conf;
+						$slug = $response->slug;
+						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? $conf->global->WPSHOP_URL_WORDPRESS : '';
+						$wps_id = $object->array_options['options__wps_id'];
+						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id;
+						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
 	/**
 	 * Add new actions buttons on CommonObject
 	 *
@@ -189,6 +214,8 @@ class ActionsDoliWPshop
 		} else {
 			if ($object->element == 'product' ) {
 				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+			} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 		}

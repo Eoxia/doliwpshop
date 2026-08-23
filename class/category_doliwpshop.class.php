@@ -88,8 +88,8 @@ class CategoryDoliWPshop {
 		
 		if ($response['status']) {
             $object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
-            $object->array_options['options__wps_slug'] = $response['data']['wp_object']['data']['slug'];
-            $result = $object->update( $user,$object->id, 1, 'update', true);
+
+            $result = $object->insertExtraFields();
 			
 			if (!$result) {
 				setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
