@@ -80,7 +80,12 @@ class DoliWPshop extends DolibarrApi
 		return array(
 			'success' => array(
 				'code' => 200,
-				'message' => 'OK'
+				'message' => 'OK',
+				'user' => array(
+					'id' => \DolibarrApiAccess::$user->id,
+					'login' => \DolibarrApiAccess::$user->login,
+					'name' => \DolibarrApiAccess::$user->getFullName(null)
+				)
 			)
 		);
 	}
