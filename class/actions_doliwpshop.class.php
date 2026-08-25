@@ -210,9 +210,8 @@ class ActionsDoliWPshop
 		}
 		
 		if (empty($object->array_options['options__wps_id'])) {
-
 			$actual_link = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			$actual_link .= '&action=createwp';
+			$actual_link .= '&action=createwp&token='.newToken();
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
 
 		} else {
@@ -225,7 +224,7 @@ class ActionsDoliWPshop
 
 			if (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
 				$actual_link_update = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-				$actual_link_update .= '&action=updatewp';
+				$actual_link_update .= '&action=updatewp&token='.newToken();
 				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("UpdateOnWPshop").'" href="'.$actual_link_update.'">'.$langs->trans("UpdateOnWPshop").'</a></div>';
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
