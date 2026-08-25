@@ -165,9 +165,9 @@ class ActionsDoliWPshop
 					if (!empty($response) && isset($response->slug)) {
 						global $conf;
 						$slug = $response->slug;
-						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? $conf->global->WPSHOP_URL_WORDPRESS : '';
+						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 						$wps_id = $object->array_options['options__wps_id'];
-						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id;
+						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
 						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
 					}
 				}
@@ -212,10 +212,11 @@ class ActionsDoliWPshop
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
 
 		} else {
+			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 			if ($object->element == 'product' ) {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '&post_type=wps-product" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 		}
