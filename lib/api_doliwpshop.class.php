@@ -76,7 +76,7 @@ class WPshopAPI {
 		
 		if (empty($conf->global->WPSHOP_URL_WORDPRESS)) return array('status' => false, 'error_message' => 'WPSHOP_URL_WORDPRESS not configured');
 		
-		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . '/' . $end_point;
+		$api_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') . '/' . ltrim($end_point, '/');
 		
 		if (!function_exists('curl_init')) return array('status' => false, 'error_message' => 'cURL extension is missing');
 
@@ -130,7 +130,7 @@ class WPshopAPI {
 		
 		if (empty($conf->global->WPSHOP_URL_WORDPRESS)) return false;
 
-		$api_url = $conf->global->WPSHOP_URL_WORDPRESS . $end_point;
+		$api_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') . '/' . ltrim($end_point, '/');
 	
 		if (!function_exists('curl_init')) return false;
 

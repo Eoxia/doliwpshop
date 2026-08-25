@@ -96,6 +96,10 @@ class ActionsDoliWPshop
 				$categoryDoliWPshop->createCategoryOnWPshop($object);
 			}
 
+			if ($action == 'updatewp' && $connected === true && ! empty($object->array_options['options__wps_id']))
+			{
+				$categoryDoliWPshop->createCategoryOnWPshop($object); // This actually triggers a sync/pull from Dolibarr
+			}
 		}
 		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
@@ -165,9 +169,9 @@ class ActionsDoliWPshop
 					if (!empty($response) && isset($response->slug)) {
 						global $conf;
 						$slug = $response->slug;
-						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? $conf->global->WPSHOP_URL_WORDPRESS : '';
+						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 						$wps_id = $object->array_options['options__wps_id'];
-						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id;
+						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
 						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
 					}
 				}
@@ -194,30 +198,37 @@ class ActionsDoliWPshop
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableDolibarr").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 			return;
 		}
+
+		if ( isset( $_SERVER['HTTPS'] ) ) {
+			if ( $_SERVER['HTTPS'] == 'on' ) {
+			  $server_protocol = 'https';
+			} else {
+			  $server_protocol = 'http';
+			} 
+		} else {
+			$server_protocol = 'http';
+		}
 		
 		if (empty($object->array_options['options__wps_id'])) {
-
-			if ( isset( $_SERVER['HTTPS'] ) ) {
-				if ( $_SERVER['HTTPS'] == 'on' ) {
-				  $server_protocol = 'https';
-				} else {
-				  $server_protocol = 'http';
-				} 
-			} else {
-				$server_protocol = 'http';
-			  }
-		
 			$actual_link = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			$actual_link .= '&action=createwp';
+			$actual_link .= '&action=createwp&token='.newToken();
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
 
 		} else {
+			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 			if ($object->element == 'product' ) {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '&post_type=wps-product" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
-			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
+
+			if (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+				$actual_link_update = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$actual_link_update .= '&action=updatewp&token='.newToken();
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("UpdateOnWPshop").'" href="'.$actual_link_update.'">'.$langs->trans("UpdateOnWPshop").'</a></div>';
+			} else {
+				print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
+			}
 		}
 	}
 }
