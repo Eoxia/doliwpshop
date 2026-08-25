@@ -84,6 +84,7 @@ class CategoryDoliWPshop {
 		$response = WPshopAPI::post($url, array(
 			'doli_id' => $object->id,
 			'type'    => 'wps-product-cat',
+			'wp_id'   => !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 0,
         ));
 		
 		if ($response['status'] && !empty($response['data']['wp_object']['data']['id'])) {
