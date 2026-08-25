@@ -86,7 +86,7 @@ class CategoryDoliWPshop {
 			'type'    => 'wps-product-cat',
         ));
 		
-		if ($response['status']) {
+		if ($response['status'] && !empty($response['data']['wp_object']['data']['id'])) {
             $object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
 
             $result = $object->insertExtraFields();
@@ -100,7 +100,8 @@ class CategoryDoliWPshop {
 				return 0;
 			}
 		} else {
-			setEventMessages($langs->trans("ErrorPostRequest") . $url . ' "' . $response['error_message'] . '"', null, 'errors');
+			$error_msg = isset($response['error_message']) ? $response['error_message'] : (isset($response['data']['message']) ? $response['data']['message'] : 'Invalid response');
+			setEventMessages($langs->trans("ErrorPostRequest") . $url . ' "' . $error_msg . '"', null, 'errors');
 			return -1;
 		}
 		
