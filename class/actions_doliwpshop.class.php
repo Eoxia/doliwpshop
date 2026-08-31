@@ -177,6 +177,35 @@ class ActionsDoliWPshop
 				}
 			}
 		}
+
+		// Inject JS to make WPshop ID extrafield clickable across all object cards
+		if (!empty($object->array_options['options__wps_id'])) {
+			global $conf;
+			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
+			if ($wp_url) {
+				$wps_id = $object->array_options['options__wps_id'];
+				$link = '';
+				if ($object->element == 'product') {
+					$link = $wp_url . '/wp-admin/post.php?post=' . $wps_id . '&action=edit';
+				} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+					$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
+				}
+				
+				if ($link) {
+					print '<script>';
+					print '$(document).ready(function() {';
+					print '  $("table td").filter(function() { return $(this).text().trim() === "WPshop ID"; }).next("td").each(function() {';
+					print '    var txt = $(this).text().trim();';
+					print '    if (txt === "'.$wps_id.'") {';
+					print '      $(this).html("<a href=\''.$link.'\' target=\'_blank\' rel=\'noopener noreferrer\'>" + txt + "</a>");';
+					print '    }';
+					print '  });';
+					print '});';
+					print '</script>';
+				}
+			}
+		}
+
 		return 0;
 	}
 
