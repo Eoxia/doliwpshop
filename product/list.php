@@ -235,9 +235,6 @@ if ($resql)
 			$categoriesHtml .= '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
 		}
 		
-		if (!empty($user->rights->categorie->creer)) {
-			$categoriesHtml .= ' <a href="#" class="edit-tags-btn" data-productid="'.$obj->rowid.'" title="'.$langs->trans("Edit").'"><span class="fa fa-pencil"></span></a>';
-		}
 		$categoriesHtml .= '</div>';
 
 		// Edit mode (multiselect) hidden by default
@@ -248,7 +245,7 @@ if ($resql)
 			$categoriesHtml .= '</div>';
 		}
 
-		print '<td>'.$categoriesHtml.'</td>';
+		print '<td class="td-tag-area" data-productid="'.$obj->rowid.'" style="cursor: pointer;">'.$categoriesHtml.'</td>';
 		print '<td>'.price($obj->price, 1, $langs, 1, -1, -1, $conf->currency).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->_wps_status).'</td>';
 		
@@ -278,11 +275,18 @@ else
 ?>
 <script>
 $(document).ready(function() {
-	$('.edit-tags-btn').click(function(e) {
-		e.preventDefault();
+	$('.td-tag-area').click(function(e) {
+		// If clicking a link (badge filter) or if editor is already open, do nothing
+		if ($(e.target).is('a')) {
+			return true;
+		}
 		var pid = $(this).data('productid');
-		$('#tag-display-' + pid).hide();
-		$('#tag-editor-' + pid).show();
+		// Only if user has right to create categories (tag-editor div exists)
+		if ($('#tag-editor-' + pid).length > 0 && $('#tag-editor-' + pid).is(':hidden')) {
+			$('#tag-display-' + pid).hide();
+			$('#tag-editor-' + pid).show();
+			$('#categories_' + pid).select2('open');
+		}
 	});
 
 	$('.close-tags-btn').click(function(e) {
