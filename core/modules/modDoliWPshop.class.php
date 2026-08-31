@@ -125,6 +125,70 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Main menu entries
 		$this->menu = array();            // List of menus to add
+		$r = 0;
+		// Top menu
+		$this->menu[$r] = array(
+			'fk_menu' => 0,
+			'type' => 'top',
+			'titre' => 'WPShop',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => '',
+			'url' => '/doliwpshop/product/list.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 1000,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Catégories
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'type' => 'left',
+			'titre' => 'Categories',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_categories',
+			'url' => '/doliwpshop/categorie_list.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 100,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Produit
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'type' => 'left',
+			'titre' => 'Products',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_products',
+			'url' => '',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 200,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Produit -> Liste
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop,fk_leftmenu=doliwpshop_products',
+			'type' => 'left',
+			'titre' => 'List',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_products_list',
+			'url' => '/doliwpshop/product/list.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 201,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
 	}
 
 	/**
