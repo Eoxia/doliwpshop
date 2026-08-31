@@ -198,7 +198,14 @@ if ($resql)
 		print '<td>'.$categoriesHtml.'</td>';
 		print '<td>'.price($obj->price, 1, $langs, 1, -1, -1, $conf->currency).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->_wps_status).'</td>';
-		print '<td>'.dol_escape_htmltag($obj->_wps_id).'</td>';
+		
+		$wps_id_text = dol_escape_htmltag($obj->_wps_id);
+		if (!empty($conf->global->WPSHOP_URL_WORDPRESS) && $obj->_wps_id > 0) {
+			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
+			$wps_id_text = '<a href="'.$wp_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer">'.$wps_id_text.'</a>';
+		}
+		print '<td>'.$wps_id_text.'</td>';
+		
 		print '<td>'.$productstatic->LibStatut($obj->tosell, 5).'</td>';
 		print '<td></td>';
 		print '</tr>'."\n";
