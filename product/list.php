@@ -191,6 +191,9 @@ if ($resql)
 	print '</tr>'."\n";
 
 	$productstatic = new Product($db);
+	require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+	$extrafields = new ExtraFields($db);
+	$extralabels = $extrafields->fetch_name_optionals_label('product');
 
 	while ($i < min($num, $limit))
 	{
@@ -247,7 +250,11 @@ if ($resql)
 
 		print '<td class="td-tag-area" data-productid="'.$obj->rowid.'" style="cursor: pointer;">'.$categoriesHtml.'</td>';
 		print '<td>'.price($obj->price, 1, $langs, 1, -1, -1, $conf->currency).'</td>';
-		print '<td>'.dol_escape_htmltag($obj->_wps_status).'</td>';
+		
+		// Render WPShop status properly using ExtraFields if possible
+		$wps_status_html = $extrafields->showOutputField('_wps_status', $obj->_wps_status, '', 'product');
+		if (empty($wps_status_html)) $wps_status_html = dol_escape_htmltag($obj->_wps_status);
+		print '<td>'.$wps_status_html.'</td>';
 		
 		$wps_id_text = dol_escape_htmltag($obj->_wps_id);
 		if (!empty($conf->global->WPSHOP_URL_WORDPRESS) && $obj->_wps_id > 0) {
