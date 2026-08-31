@@ -205,29 +205,47 @@ if ($resql)
 		print '<td>'.$productstatic->getNomUrl(1).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->label).'</td>';
 		
+		$categoriesHtml = '<div class="tag-display" id="tag-display-'.$obj->rowid.'">';
 		$selected_cats = array();
 		if (!empty($obj->categories_data)) {
 			$cats = explode('||', $obj->categories_data);
+			$toprint = array();
 			foreach($cats as $catStr) {
 				list($cId, $cColor, $cLabel) = explode('::', $catStr);
 				$selected_cats[] = $cId;
-			}
-		}
-
-		$categoriesHtml = '';
-		if (!empty($user->rights->categorie->creer)) {
-			$categoriesHtml = $form->multiselectarray('categories_'.$obj->rowid, $catarray, $selected_cats, 0, 0, 'minwidth100 select2 tag-multiselect', 0, '100%');
-		} else {
-			// Readonly mode
-			$toprint = array();
-			if (!empty($obj->categories_data)) {
-				$cats = explode('||', $obj->categories_data);
-				foreach($cats as $catStr) {
-					list($cId, $cColor, $cLabel) = explode('::', $catStr);
-					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #'.($cColor ? $cColor : 'bbb').'; color: #fff;">'.dol_escape_htmltag($cLabel).'</li>';
+				
+				$url = $_SERVER["PHP_SELF"]."?search_category[]=".urlencode($cId);
+				if ($search_ref) $url .= '&search_ref=' . urlencode($search_ref);
+				if ($search_label) $url .= '&search_label=' . urlencode($search_label);
+				if ($search_wps_status) $url .= '&search_wps_status=' . urlencode($search_wps_status);
+				if ($search_wps_id) $url .= '&search_wps_id=' . urlencode($search_wps_id);
+				if ($search_status != '') $url .= '&search_status=' . urlencode($search_status);
+				
+				$sfortag = '<li class="select2-search-choice-dolibarr noborderoncategories'.(empty($toprint) ? ' nomarginleft' : '').'"' . ($cColor ? ' style="background: #' . $cColor . ';"' : ' style="background: #bbb;"') . '>';
+				
+				$forced_color = 'categtextwhite';
+				if ($cColor && function_exists('colorIsLight') && colorIsLight($cColor)) {
+					$forced_color = 'categtextblack';
 				}
-				$categoriesHtml = '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
+				
+				$sfortag .= '<a href="'.$url.'" class="'.$forced_color.'">'.dol_escape_htmltag($cLabel).'</a>';
+				$sfortag .= '</li>';
+				$toprint[] = $sfortag;
 			}
+			$categoriesHtml .= '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
+		}
+		
+		if (!empty($user->rights->categorie->creer)) {
+			$categoriesHtml .= ' <a href="#" class="edit-tags-btn" data-productid="'.$obj->rowid.'" title="'.$langs->trans("Edit").'"><span class="fa fa-pencil"></span></a>';
+		}
+		$categoriesHtml .= '</div>';
+
+		// Edit mode (multiselect) hidden by default
+		if (!empty($user->rights->categorie->creer)) {
+			$categoriesHtml .= '<div class="tag-editor" id="tag-editor-'.$obj->rowid.'" style="display:none; min-width: 200px;">';
+			$categoriesHtml .= $form->multiselectarray('categories_'.$obj->rowid, $catarray, $selected_cats, 0, 0, 'minwidth100 select2 tag-multiselect', 0, '100%');
+			$categoriesHtml .= ' <a href="#" class="close-tags-btn" data-productid="'.$obj->rowid.'" title="'.$langs->trans("Close").'"><span class="fa fa-times"></span></a>';
+			$categoriesHtml .= '</div>';
 		}
 
 		print '<td>'.$categoriesHtml.'</td>';
@@ -260,6 +278,20 @@ else
 ?>
 <script>
 $(document).ready(function() {
+	$('.edit-tags-btn').click(function(e) {
+		e.preventDefault();
+		var pid = $(this).data('productid');
+		$('#tag-display-' + pid).hide();
+		$('#tag-editor-' + pid).show();
+	});
+
+	$('.close-tags-btn').click(function(e) {
+		e.preventDefault();
+		var pid = $(this).data('productid');
+		$('#tag-editor-' + pid).hide();
+		$('#tag-display-' + pid).show();
+	});
+
 	$('.tag-multiselect').on('change', function(e) {
 		var select_name = $(this).attr('name');
 		// Handle select2 array name "categories_X[]"
@@ -279,7 +311,7 @@ $(document).ready(function() {
 					category_ids: category_ids
 				},
 				success: function(response) {
-					$.jnotify('<?php echo dol_escape_js($langs->trans("RecordSaved")); ?>', 'success');
+					window.location.reload();
 				},
 				error: function() {
 					$.jnotify('Error saving tags', 'error');
