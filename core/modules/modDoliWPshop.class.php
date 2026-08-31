@@ -139,7 +139,8 @@ class modDoliWPshop extends DolibarrModules {
 			'enabled' => '$conf->doliwpshop->enabled',
 			'perms' => '1',
 			'target' => '',
-			'user' => 2
+			'user' => 2,
+			'picto' => 'object_doliwpshop@doliwpshop'
 		);
 		$r++;
 		// Left menu : Catégories
