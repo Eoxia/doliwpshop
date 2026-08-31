@@ -135,7 +135,7 @@ class modDoliWPshop extends DolibarrModules {
 			'leftmenu' => '',
 			'url' => '/doliwpshop/product/list.php',
 			'langs' => 'doliwpshop@doliwpshop',
-			'position' => 1000,
+			'position' => 10000,
 			'enabled' => '$conf->doliwpshop->enabled',
 			'perms' => '1',
 			'target' => '',
