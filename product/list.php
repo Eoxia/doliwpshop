@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /* Copyright (C) 2019-2026 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ $title = $langs->trans('Products');
 
 $sql = "SELECT p.rowid, p.ref, p.label, p.price, p.price_base_type, p.tva_tx, p.tosell,";
 $sql.= " pe._wps_status, pe._wps_id,";
-$sql.= " (SELECT GROUP_CONCAT(c.label SEPARATOR ', ') FROM ".MAIN_DB_PREFIX."categorie_product as cp JOIN ".MAIN_DB_PREFIX."categorie as c ON c.rowid = cp.fk_categorie WHERE cp.fk_product = p.rowid) as categories";
+$sql.= " (SELECT GROUP_CONCAT(CONCAT(c.rowid, '::', IFNULL(c.color, ''), '::', c.label) SEPARATOR '||') FROM ".MAIN_DB_PREFIX."categorie_product as cp JOIN ".MAIN_DB_PREFIX."categorie as c ON c.rowid = cp.fk_categorie WHERE cp.fk_product = p.rowid) as categories_data";
 $sql.= " FROM ".MAIN_DB_PREFIX."product as p";
 $sql.= " INNER JOIN ".MAIN_DB_PREFIX."product_extrafields as pe ON p.rowid = pe.fk_object";
 $sql.= " WHERE pe._wps_id IS NOT NULL AND pe._wps_id != ''";
@@ -167,7 +167,35 @@ if ($resql)
 		print '<tr class="oddeven">';
 		print '<td>'.$productstatic->getNomUrl(1).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->label).'</td>';
-		print '<td>'.dol_escape_htmltag($obj->categories).'</td>';
+		$categoriesHtml = '';
+		if (!empty($obj->categories_data)) {
+			$cats = explode('||', $obj->categories_data);
+			$toprint = array();
+			foreach($cats as $catStr) {
+				list($cId, $cColor, $cLabel) = explode('::', $catStr);
+				
+				$url = $_SERVER["PHP_SELF"]."?search_category[]=".urlencode($cId);
+				if ($search_ref) $url .= '&search_ref=' . urlencode($search_ref);
+				if ($search_label) $url .= '&search_label=' . urlencode($search_label);
+				if ($search_wps_status) $url .= '&search_wps_status=' . urlencode($search_wps_status);
+				if ($search_wps_id) $url .= '&search_wps_id=' . urlencode($search_wps_id);
+				if ($search_status != '') $url .= '&search_status=' . urlencode($search_status);
+				
+				$sfortag = '<li class="select2-search-choice-dolibarr noborderoncategories'.(empty($toprint) ? ' nomarginleft' : '').'"' . ($cColor ? ' style="background: #' . $cColor . ';"' : ' style="background: #bbb;"') . '>';
+				
+				$forced_color = 'categtextwhite';
+				if ($cColor && function_exists('colorIsLight') && colorIsLight($cColor)) {
+					$forced_color = 'categtextblack';
+				}
+				
+				$sfortag .= '<a href="'.$url.'" class="'.$forced_color.'">'.dol_escape_htmltag($cLabel).'</a>';
+				$sfortag .= '</li>';
+				$toprint[] = $sfortag;
+			}
+			$categoriesHtml = '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
+		}
+
+		print '<td>'.$categoriesHtml.'</td>';
 		print '<td>'.price($obj->price, 1, $langs, 1, -1, -1, $conf->currency).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->_wps_status).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->_wps_id).'</td>';
