@@ -296,6 +296,11 @@ $(document).ready(function() {
 		$('#tag-display-' + pid).show();
 	});
 
+	// Auto-submit search form when tag filter changes
+	$('#search_category').on('change', function() {
+		$('#searchFormList').submit();
+	});
+
 	$('.tag-multiselect').on('change', function(e) {
 		var select_name = $(this).attr('name');
 		// Handle select2 array name "categories_X[]"
