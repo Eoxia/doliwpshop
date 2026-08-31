@@ -21,18 +21,38 @@ if (empty($user->rights->doliwpshop->read)) {
 
 $action = GETPOST('action', 'aZ09');
 
-if ($action == 'add_category' && !empty($user->rights->categorie->creer)) {
+if ($action == 'update_tags' && !empty($user->rights->categorie->creer)) {
 	$product_id = GETPOST('product_id', 'int');
-	$category_id = GETPOST('category_id', 'int');
-	if ($product_id > 0 && $category_id > 0) {
-		$cat = new Categorie($db);
-		$res = $cat->fetch($category_id);
-		if ($res > 0) {
-			$product = new Product($db);
-			$product->id = $product_id;
-			$product->element = 'product'; // Required for add_type if type is not provided
-			$cat->add_type($product, Categorie::TYPE_PRODUCT);
-			setEventMessages($langs->trans('TagAdded'), null, 'mesgs');
+	$category_ids = GETPOST('category_ids', 'array');
+	if ($product_id > 0) {
+		$product = new Product($db);
+		$product->id = $product_id;
+		$product->element = 'product'; 
+		
+		$catstatic = new Categorie($db);
+		$currents = $catstatic->containing($product_id, Categorie::TYPE_PRODUCT);
+		if (is_array($currents)) {
+			foreach($currents as $cc) {
+				$cc->del_type($product, Categorie::TYPE_PRODUCT);
+			}
+		}
+		
+		if (is_array($category_ids)) {
+			foreach ($category_ids as $catid) {
+				if ($catid > 0) {
+					$cat = new Categorie($db);
+					$cat->fetch($catid);
+					$cat->add_type($product, Categorie::TYPE_PRODUCT);
+				}
+			}
+		}
+		
+		if (GETPOST('ajax')) {
+			header('Content-Type: application/json');
+			echo json_encode(array('success' => true));
+			exit;
+		} else {
+			setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
 		}
 	}
 }
@@ -184,40 +204,30 @@ if ($resql)
 		print '<tr class="oddeven">';
 		print '<td>'.$productstatic->getNomUrl(1).'</td>';
 		print '<td>'.dol_escape_htmltag($obj->label).'</td>';
-		$categoriesHtml = '';
+		
+		$selected_cats = array();
 		if (!empty($obj->categories_data)) {
 			$cats = explode('||', $obj->categories_data);
-			$toprint = array();
 			foreach($cats as $catStr) {
 				list($cId, $cColor, $cLabel) = explode('::', $catStr);
-				
-				$url = $_SERVER["PHP_SELF"]."?search_category[]=".urlencode($cId);
-				if ($search_ref) $url .= '&search_ref=' . urlencode($search_ref);
-				if ($search_label) $url .= '&search_label=' . urlencode($search_label);
-				if ($search_wps_status) $url .= '&search_wps_status=' . urlencode($search_wps_status);
-				if ($search_wps_id) $url .= '&search_wps_id=' . urlencode($search_wps_id);
-				if ($search_status != '') $url .= '&search_status=' . urlencode($search_status);
-				
-				$sfortag = '<li class="select2-search-choice-dolibarr noborderoncategories'.(empty($toprint) ? ' nomarginleft' : '').'"' . ($cColor ? ' style="background: #' . $cColor . ';"' : ' style="background: #bbb;"') . '>';
-				
-				$forced_color = 'categtextwhite';
-				if ($cColor && function_exists('colorIsLight') && colorIsLight($cColor)) {
-					$forced_color = 'categtextblack';
-				}
-				
-				$sfortag .= '<a href="'.$url.'" class="'.$forced_color.'">'.dol_escape_htmltag($cLabel).'</a>';
-				$sfortag .= '</li>';
-				$toprint[] = $sfortag;
+				$selected_cats[] = $cId;
 			}
-			$categoriesHtml = '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
 		}
 
-		// Inline category addition UI
+		$categoriesHtml = '';
 		if (!empty($user->rights->categorie->creer)) {
-			$categoriesHtml .= '<div style="margin-top: 5px; display: flex; align-items: center;">';
-			$categoriesHtml .= $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'category_id_'.$obj->rowid, 64, 0, 0, 0, 'select2');
-			$categoriesHtml .= '<a href="#" class="btn-add-category" data-productid="'.$obj->rowid.'" style="margin-left: 5px; color: #444;" title="'.$langs->trans("Add").'"><span class="fa fa-plus-circle"></span></a>';
-			$categoriesHtml .= '</div>';
+			$categoriesHtml = $form->multiselectarray('categories_'.$obj->rowid, $catarray, $selected_cats, 0, 0, 'minwidth100 select2 tag-multiselect', 0, '100%');
+		} else {
+			// Readonly mode
+			$toprint = array();
+			if (!empty($obj->categories_data)) {
+				$cats = explode('||', $obj->categories_data);
+				foreach($cats as $catStr) {
+					list($cId, $cColor, $cLabel) = explode('::', $catStr);
+					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #'.($cColor ? $cColor : 'bbb').'; color: #fff;">'.dol_escape_htmltag($cLabel).'</li>';
+				}
+				$categoriesHtml = '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">' . implode(' ', $toprint) . '</ul></div>';
+			}
 		}
 
 		print '<td>'.$categoriesHtml.'</td>';
@@ -250,17 +260,31 @@ else
 ?>
 <script>
 $(document).ready(function() {
-	$('.btn-add-category').click(function(e) {
-		e.preventDefault();
-		var product_id = $(this).data('productid');
-		var category_id = $('#category_id_' + product_id).val();
-		if (category_id > 0) {
-			var param = '<?php echo dol_escape_js(ltrim($param, '&')); ?>';
-			var url = '<?php echo $_SERVER["PHP_SELF"]; ?>?action=add_category&product_id=' + product_id + '&category_id=' + category_id + '&token=<?php echo newToken(); ?>';
-			if (param.length > 0) {
-				url += '&' + param;
-			}
-			window.location.href = url;
+	$('.tag-multiselect').on('change', function(e) {
+		var select_name = $(this).attr('name');
+		// Handle select2 array name "categories_X[]"
+		var match = select_name.match(/categories_(\d+)/);
+		if (match) {
+			var product_id = match[1];
+			var category_ids = $(this).val() || [];
+			
+			$.ajax({
+				url: '<?php echo $_SERVER["PHP_SELF"]; ?>',
+				type: 'POST',
+				data: {
+					token: '<?php echo newToken(); ?>',
+					action: 'update_tags',
+					ajax: 1,
+					product_id: product_id,
+					category_ids: category_ids
+				},
+				success: function(response) {
+					$.jnotify('<?php echo dol_escape_js($langs->trans("RecordSaved")); ?>', 'success');
+				},
+				error: function() {
+					$.jnotify('Error saving tags', 'error');
+				}
+			});
 		}
 	});
 });
