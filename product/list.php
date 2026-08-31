@@ -215,7 +215,7 @@ if ($resql)
 		// Inline category addition UI
 		if (!empty($user->rights->categorie->creer)) {
 			$categoriesHtml .= '<div style="margin-top: 5px; display: flex; align-items: center;">';
-			$categoriesHtml .= $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'category_id_'.$obj->rowid, 64, 0, 1);
+			$categoriesHtml .= $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'category_id_'.$obj->rowid, 64, 0, 0, 0, 'select2');
 			$categoriesHtml .= '<a href="#" class="btn-add-category" data-productid="'.$obj->rowid.'" style="margin-left: 5px; color: #444;" title="'.$langs->trans("Add").'"><span class="fa fa-plus-circle"></span></a>';
 			$categoriesHtml .= '</div>';
 		}
