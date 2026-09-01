@@ -540,9 +540,6 @@ if ($mode == 'hierarchy') {
 	$newcardbutton .= dolGetButtonTitle($langs->trans('NewCategory'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/categories/card.php?action=create&type='.$type.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?type='.$type.$param).$param, '', $permissiontoadd);
 
 	$morehtmlrightbeforebutton = '';
-	if (!GETPOST('dol_openinpopup', 'aZ')) {
-		$morehtmlrightbeforebutton = '<a class="small paddingright marginrightonly" href="'.DOL_URL_ROOT.'/categories/index.php">'.$langs->trans("BackToCategoryTypes").'</a> &nbsp; ';
-	}
 
 	print_barre_liste($title, 0, $_SERVER["PHP_SELF"], $param, '', '', '', 0, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', 0, 0, 0, 1, $morehtmlrightbeforebutton);
 
@@ -591,17 +588,17 @@ if ($mode == 'hierarchy') {
 	print '    function filterCategories() {';
 	print '        var hideEmpty = $("#wpshop_show_only_not_empty").is(":checked");';
 	print '        localStorage.setItem("wpshop_show_only_not_empty", hideEmpty ? "1" : "0");';
+	print '        var $items = $("table.wpshop-cat-table").closest("li");';
 	print '        if (!hideEmpty) {';
-	print '            $("#treeData li").show();';
+	print '            $items.show();';
 	print '        } else {';
-	print '            $("#treeData li").each(function() {';
+	print '            $items.each(function() {';
 	print '                var $li = $(this);';
-	print '                var hasProducts = parseInt($li.find("> table.wpshop-cat-table").attr("data-nb-products")) > 0;';
 	print '                var hasChildWithProducts = false;';
 	print '                $li.find("table.wpshop-cat-table").each(function() {';
 	print '                    if (parseInt($(this).attr("data-nb-products")) > 0) hasChildWithProducts = true;';
 	print '                });';
-	print '                if (!hasProducts && !hasChildWithProducts) {';
+	print '                if (!hasChildWithProducts) {';
 	print '                    $li.hide();';
 	print '                } else {';
 	print '                    $li.show();';
@@ -708,9 +705,6 @@ if ($mode == 'hierarchy') {
 	$newcardbutton .= dolGetButtonTitle($langs->trans('NewCategory'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/categories/card.php?action=create&type='.$type.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?type='.$type.$param).$param, '', $permissiontoadd);
 
 	$morehtmlrightbeforebutton = '';
-	if (!GETPOST('dol_openinpopup', 'aZ')) {
-		$morehtmlrightbeforebutton = '<a class="small paddingright marginrightonly" href="'.DOL_URL_ROOT.'/categories/index.php">'.$langs->trans("BackToCategoryTypes").'</a> &nbsp; ';
-	}
 
 	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1, $morehtmlrightbeforebutton);
 
