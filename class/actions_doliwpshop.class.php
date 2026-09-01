@@ -100,6 +100,20 @@ class ActionsDoliWPshop
 			{
 				$categoryDoliWPshop->createCategoryOnWPshop($object); // This actually triggers a sync/pull from Dolibarr
 			}
+			
+			if ($action == 'recreatewp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				$categoryDoliWPshop->createCategoryOnWPshop($object);
+			}
+			
+			if ($action == 'unlinkwp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				setEventMessages('La catégorie a été déliée de WPShop.', null, 'mesgs');
+			}
 		}
 		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
