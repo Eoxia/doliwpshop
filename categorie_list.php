@@ -53,11 +53,8 @@ $toselect   = GETPOST('toselect', 'array:int'); // Array of ids of elements sele
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : str_replace('_', '', basename(dirname(__FILE__)).basename(__FILE__, '.php')); // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss  = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
-$mode       = GETPOST('mode', 'aZ'); // The display mode ('list', 'kanban', 'hierarchy', 'calendar', 'gantt', ...)
+$mode = 'hierarchy';
 $groupby = GETPOST('groupby', 'aZ09');	// Example: $groupby = 'p.fk_opp_status' or $groupby = 'p.fk_statut'
-if (empty($mode)) {
-	$mode = 'hierarchy';
-}
 
 $id = GETPOSTINT('id');
 $ref = GETPOST('ref', 'alpha');
@@ -529,9 +526,6 @@ if ($mode == 'hierarchy') {
 	llxHeader('', $title, '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 	$newcardbutton = '';
-	$newcardbutton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER["PHP_SELF"].'?mode=common'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ($mode == 'common' ? 2 : 1), array('morecss' => 'reposition'));
-	$newcardbutton .= dolGetButtonTitle($langs->trans('HierarchicView'), '', 'fa fa-stream paddingleft imgforviewmode', $_SERVER["PHP_SELF"].'?mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', (($mode == 'hierarchy') ? 2 : 1), array('morecss' => 'reposition'));
-	//$newcardbutton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-list imgforviewmode', $_SERVER["PHP_SELF"].'?mode=kanban'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ($mode == 'kanban' ? 2 : 1), array('morecss' => 'reposition'));
 	$newcardbutton .= dolGetButtonTitleSeparator();
 	$newcardbutton .= dolGetButtonTitle($langs->trans('NewCategory'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/categories/card.php?action=create&type='.$type.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?type='.$type.$param).$param, '', $permissiontoadd);
 
@@ -550,7 +544,7 @@ if ($mode == 'hierarchy') {
 	print '<td>';
 	print $langs->trans("Categories");
 	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-	print '<input type="checkbox" id="wpshop_show_all_categories" checked="checked"> <label for="wpshop_show_all_categories" style="color:red; font-weight:normal;">Affiches toutes les catégories</label>';
+	print '<input type="checkbox" id="wpshop_show_all_categories" checked="checked"> <label for="wpshop_show_all_categories" style="font-weight:normal;">Affiches toutes les catégories</label>';
 	print '</td>';
 	print '<td></td><td class="right">';
 	if ($morethan1level && !empty($conf->use_javascript_ajax)) {
@@ -586,6 +580,7 @@ if ($mode == 'hierarchy') {
 	print '$(document).ready(function() {';
 	print '    function filterCategories() {';
 	print '        var showAll = $("#wpshop_show_all_categories").is(":checked");';
+	print '        localStorage.setItem("wpshop_show_all_categories", showAll ? "1" : "0");';
 	print '        if (showAll) {';
 	print '            $("#iddivjstree li").show();';
 	print '        } else {';
@@ -601,8 +596,12 @@ if ($mode == 'hierarchy') {
 	print '            });';
 	print '        }';
 	print '    }';
-	print '    $("#wpshop_show_all_categories").change(function() { filterCategories(); });';
+	print '    $(document).on("change", "#wpshop_show_all_categories", function() { filterCategories(); });';
 	print '    // Initial state';
+	print '    var savedState = localStorage.getItem("wpshop_show_all_categories");';
+	print '    if (savedState === "0") {';
+	print '        $("#wpshop_show_all_categories").prop("checked", false);';
+	print '    }';
 	print '    filterCategories();';
 	print '});';
 	print '</script>';
@@ -692,10 +691,6 @@ if ($mode == 'hierarchy') {
 
 
 	$newcardbutton = '';
-	$newcardbutton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER["PHP_SELF"].'?mode=common'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ($mode == 'common' ? 2 : 1), array('morecss' => 'reposition'));
-	$newcardbutton .= dolGetButtonTitle($langs->trans('HierarchicView'), '', 'fa fa-stream paddingleft imgforviewmode', $_SERVER["PHP_SELF"].'?mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', (($mode == 'hierarchy') ? 2 : 1), array('morecss' => 'reposition'));
-
-	//$newcardbutton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-list imgforviewmode', $_SERVER["PHP_SELF"].'?mode=kanban'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ($mode == 'kanban' ? 2 : 1), array('morecss' => 'reposition'));
 	$newcardbutton .= dolGetButtonTitleSeparator();
 	$newcardbutton .= dolGetButtonTitle($langs->trans('NewCategory'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/categories/card.php?action=create&type='.$type.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?type='.$type.$param).$param, '', $permissiontoadd);
 
