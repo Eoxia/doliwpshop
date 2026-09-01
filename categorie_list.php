@@ -448,17 +448,23 @@ if ($mode == 'hierarchy') {
 
 		$wps_id_text = !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 'Aucun';
 		$has_wps_id = 0;
+		$wp_base_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
+		$img_wp = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-wordpress.jpg' : '';
+		$img_doli = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-dolibarr.jpg' : '';
+		
 		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 		
 		// ID Dolibarr en mauve
-		$wpshop_info .= '<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px; margin-right: 10px;" title="ID Dolibarr">'.$object->id.'</span>';
+		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
+		$wpshop_info .= '<div style="display:inline-flex; align-items:center; gap:5px; margin-right: 15px;" title="ID Dolibarr">'.$doli_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">#'.$object->id.'</span></div>';
 		
 		// Picto categorie : Id et lien vers wpshop OU picto + (creation)
+		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
 		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
 			$has_wps_id = 1;
 			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
 			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
-			$wpshop_info .= '<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none; margin-right: 15px;" title="Voir sur WPshop"><span class="fa fa-tags"></span> '.$wps_id_text.'</a>';
+			$wpshop_info .= '<div style="display:inline-flex; align-items:center; gap:5px; margin-right: 15px;" title="Voir sur WPshop">'.$wp_img_tag.'<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none;">#'.$wps_id_text.'</a></div>';
 		} else {
 			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
 			$wpshop_info .= '<a href="'.$create_link.'" style="color: #555; margin-right: 15px;" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
