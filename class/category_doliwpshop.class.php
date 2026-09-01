@@ -24,6 +24,8 @@
 /**
  * Class CategoryDoliWPshop
  */
+dol_include_once('/doliwpshop/lib/api_doliwpshop.class.php');
+
 class CategoryDoliWPshop {
 	/**
 	 * Constructor
