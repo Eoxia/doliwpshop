@@ -554,7 +554,7 @@ if ($mode == 'hierarchy') {
 	print '<td>';
 	print $langs->trans("Categories");
 	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-	print '<input type="checkbox" id="wpshop_show_all_categories" checked="checked"> <label for="wpshop_show_all_categories" style="font-weight:normal;">Affiches toutes les catégories</label>';
+	print '<input type="checkbox" id="wpshop_show_only_not_empty"> <label for="wpshop_show_only_not_empty" style="font-weight:normal;">Afficher uniquement les catégories non vides</label>';
 	print '</td>';
 	print '<td></td><td class="right">';
 	if ($morethan1level && !empty($conf->use_javascript_ajax)) {
@@ -589,9 +589,9 @@ if ($mode == 'hierarchy') {
 	print '<script>';
 	print '$(document).ready(function() {';
 	print '    function filterCategories() {';
-	print '        var showAll = $("#wpshop_show_all_categories").is(":checked");';
-	print '        localStorage.setItem("wpshop_show_all_categories", showAll ? "1" : "0");';
-	print '        if (showAll) {';
+	print '        var hideEmpty = $("#wpshop_show_only_not_empty").is(":checked");';
+	print '        localStorage.setItem("wpshop_show_only_not_empty", hideEmpty ? "1" : "0");';
+	print '        if (!hideEmpty) {';
 	print '            $("#treeData li").show();';
 	print '        } else {';
 	print '            $("#treeData li").each(function() {';
@@ -609,11 +609,11 @@ if ($mode == 'hierarchy') {
 	print '            });';
 	print '        }';
 	print '    }';
-	print '    $(document).on("change", "#wpshop_show_all_categories", function() { filterCategories(); });';
+	print '    $(document).on("change", "#wpshop_show_only_not_empty", function() { filterCategories(); });';
 	print '    // Initial state';
-	print '    var savedState = localStorage.getItem("wpshop_show_all_categories");';
-	print '    if (savedState === "0") {';
-	print '        $("#wpshop_show_all_categories").prop("checked", false);';
+	print '    var savedState = localStorage.getItem("wpshop_show_only_not_empty");';
+	print '    if (savedState === "1") {';
+	print '        $("#wpshop_show_only_not_empty").prop("checked", true);';
 	print '    }';
 	print '    filterCategories();';
 	print '});';
