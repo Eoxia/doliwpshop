@@ -467,13 +467,13 @@ if ($mode == 'hierarchy') {
 		$prod_link = DOL_URL_ROOT.'/custom/doliwpshop/product/list.php?catid='.$object->id;
 		$wpshop_info .= '<a href="'.$prod_link.'" target="_blank" rel="noopener noreferrer" style="color: #555;" title="Voir les produits liés"><span class="fa fa-cube"></span> '.$nb_products.'</a>';
 		
-		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'">';
+		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'" data-nb-products="'.$nb_products.'">';
 		$entry .= '<tr>';
 
 		// Force tools on right
 		$conf->main_checkbox_left_column = 0;
 
-		$entry .= '<td>';
+		$entry .= '<td class="tdoverflowmax300" style="padding-left: 5px;">';
 		$entry .= '<span class="noborderoncategories" '.$color.'>'.$li.'</span>';
 		$entry .= $wpshop_info;
 		if (!empty($conf->main_checkbox_left_column)) {
