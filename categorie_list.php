@@ -424,17 +424,24 @@ if ($mode == 'hierarchy') {
 		$object->color = $val['color'];
 		$object->type = $type;
 		$desc = dol_htmlcleanlastbr($val['description']);
+		$object->fetch_optionals();
+
+		$nb_products = 0;
+		$elements = $object->getObjectsInCateg($type, 1);
+		if (is_array($elements)) {
+			$nb_products = count($elements);
+		}
 
 		$counter = '';
 		if (getDolGlobalString('CATEGORY_SHOW_COUNTS')) {
-			// we need only a count of the elements, so it is enough to consume only the id's from the database
-			$elements = $object->getObjectsInCateg($type, 1);
-
-			$counter = "<td class='left' width='40px;'>".(is_array($elements) ? count($elements) : '0')."</td>";
+			$counter = "<td class='left' width='40px;'>".$nb_products."</td>";
 		}
 
 		$color = $object->color ? ' style="background: #'.sprintf("%06s", $object->color).';"' : ' style="background: #bbb"';
 		$li = $object->getNomUrl(1, '', 60, '&backtolist='.urlencode($_SERVER["PHP_SELF"].'?'.$param));
+
+		$wps_id_text = !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 'Aucun';
+		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;">idWP: '.$wps_id_text.' | '.$nb_products.' produits</span>';
 
 		$entry = '<table class="nobordernopadding centpercent">';
 		$entry .= '<tr>';
@@ -444,6 +451,7 @@ if ($mode == 'hierarchy') {
 
 		$entry .= '<td>';
 		$entry .= '<span class="noborderoncategories" '.$color.'>'.$li.'</span>';
+		$entry .= $wpshop_info;
 		if (!empty($conf->main_checkbox_left_column)) {
 			if ($user->hasRight('categorie', 'creer')) {
 				$entry .= ' &nbsp; <a class="editfielda" href="' . DOL_URL_ROOT . '/categories/edit.php?id=' . ((int) $val['id']) . $param . '&backtopage=' . urlencode($_SERVER["PHP_SELF"].'?type='.urlencode($type).'&'.$param) . '">' . img_edit() . '</a>';
