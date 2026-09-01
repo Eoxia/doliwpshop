@@ -458,7 +458,6 @@ if ($mode == 'hierarchy') {
 		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
 		$wpshop_info .= '<div style="display:inline-flex; align-items:center; gap:5px; margin-right: 15px;" title="ID Dolibarr">'.$doli_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">#'.$object->id.'</span></div>';
 		
-		// Picto categorie : Id et lien vers wpshop OU picto + (creation)
 		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
 		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
 			$has_wps_id = 1;
@@ -470,7 +469,7 @@ if ($mode == 'hierarchy') {
 			$wpshop_info .= '<a href="'.$create_link.'" style="color: #555; margin-right: 15px;" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
 		}
 		// Picto product : Nombre et lien vers la liste des produits
-		$prod_link = DOL_URL_ROOT.'/custom/doliwpshop/product/list.php?catid='.$object->id;
+		$prod_link = DOL_URL_ROOT.'/custom/doliwpshop/product/list.php?search_category[]='.$object->id;
 		$wpshop_info .= '<a href="'.$prod_link.'" target="_blank" rel="noopener noreferrer" style="color: #555;" title="Voir les produits liés"><span class="fa fa-cube"></span> '.$nb_products.'</a>';
 		
 		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'" data-nb-products="'.$nb_products.'">';
