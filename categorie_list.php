@@ -441,6 +441,12 @@ if ($mode == 'hierarchy') {
 		$li = $object->getNomUrl(1, '', 60, '&backtolist='.urlencode($_SERVER["PHP_SELF"].'?'.$param));
 
 		$wps_id_text = !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 'Aucun';
+		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
+			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
+			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
+			$wps_id_text = '<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="color: red;">'.$wps_id_text.'</a>';
+		}
+		
 		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;">idWP: '.$wps_id_text.' | '.$nb_products.' produits</span>';
 
 		$entry = '<table class="nobordernopadding centpercent">';
@@ -1045,6 +1051,33 @@ if ($mode == 'hierarchy') {
 
 		print $formfile->showdocuments('massfilesarea_'.$object->module, '', $filedir, $urlsource, 0, $delallowed, '', 1, 1, 0, 48, 1, $param, $title, '', '', '', null, $hidegeneratedfilelistifempty);
 	}
+}
+
+// Inject JS to make WPshop ID clickable in list mode (targets the native extrafield column)
+if ($mode != 'hierarchy') {
+	print '<script>';
+	print '$(document).ready(function() {';
+	print '    var colIndex = -1;';
+	print '    $("table.liste tr.liste_titre td").each(function(index) {';
+	print '        if ($(this).text().trim() === "WPshop ID") {';
+	print '            colIndex = index;';
+	print '            return false;';
+	print '        }';
+	print '    });';
+	print '    if (colIndex !== -1) {';
+	print '        var wpUrl = "'.(!empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '').'";';
+	print '        if (wpUrl) {';
+	print '            $("table.liste tr.oddeven").each(function() {';
+	print '                var td = $(this).find("td").eq(colIndex);';
+	print '                var val = td.text().trim();';
+	print '                if (val && parseInt(val) > 0) {';
+	print '                    td.html("<a href=\'" + wpUrl + "/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=" + val + "&post_type=wps-product\' target=\'_blank\' rel=\'noopener noreferrer\'>" + val + "</a>");';
+	print '                }';
+	print '            });';
+	print '        }';
+	print '    }';
+	print '});';
+	print '</script>';
 }
 
 // End of page
