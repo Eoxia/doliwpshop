@@ -552,6 +552,7 @@ if ($mode == 'hierarchy') {
 	print $langs->trans("Categories");
 	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 	print '<input type="checkbox" id="wpshop_show_only_not_empty"> <label for="wpshop_show_only_not_empty" style="font-weight:normal;">Afficher uniquement les catégories non vides</label>';
+	print ' <a href="#" id="btn_wpshop_filter_cats" class="button" style="padding: 2px 5px; margin-left: 10px;" title="Filtrer"><span class="fa fa-search"></span></a>';
 	print '</td>';
 	print '<td></td><td class="right">';
 	if ($morethan1level && !empty($conf->use_javascript_ajax)) {
@@ -583,6 +584,10 @@ if ($mode == 'hierarchy') {
 
 	print "</table>";
 
+	print '<style>';
+	print '.wpshop-hide-empty { display: none !important; }';
+	print '</style>';
+
 	print '<script>';
 	print '$(document).ready(function() {';
 	print '    function filterCategories() {';
@@ -590,7 +595,7 @@ if ($mode == 'hierarchy') {
 	print '        localStorage.setItem("wpshop_show_only_not_empty", hideEmpty ? "1" : "0");';
 	print '        var $items = $("table.wpshop-cat-table").closest("li");';
 	print '        if (!hideEmpty) {';
-	print '            $items.show();';
+	print '            $items.removeClass("wpshop-hide-empty");';
 	print '        } else {';
 	print '            $items.each(function() {';
 	print '                var $li = $(this);';
@@ -599,14 +604,15 @@ if ($mode == 'hierarchy') {
 	print '                    if (parseInt($(this).attr("data-nb-products")) > 0) hasChildWithProducts = true;';
 	print '                });';
 	print '                if (!hasChildWithProducts) {';
-	print '                    $li.hide();';
+	print '                    $li.addClass("wpshop-hide-empty");';
 	print '                } else {';
-	print '                    $li.show();';
+	print '                    $li.removeClass("wpshop-hide-empty");';
 	print '                }';
 	print '            });';
 	print '        }';
 	print '    }';
 	print '    $(document).on("change", "#wpshop_show_only_not_empty", function() { filterCategories(); });';
+	print '    $(document).on("click", "#btn_wpshop_filter_cats", function(e) { e.preventDefault(); filterCategories(); });';
 	print '    // Initial state';
 	print '    var savedState = localStorage.getItem("wpshop_show_only_not_empty");';
 	print '    if (savedState === "1") {';
