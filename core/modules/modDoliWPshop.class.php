@@ -195,11 +195,11 @@ class modDoliWPshop extends DolibarrModules {
 		$this->menu[$r] = array(
 			'fk_menu' => 'fk_mainmenu=doliwpshop',
 			'type' => 'left',
-			'titre' => 'Setup',
+			'titre' => 'SetupWPshop',
 			'mainmenu' => 'doliwpshop',
 			'leftmenu' => 'doliwpshop_admin',
 			'url' => '/doliwpshop/admin/doliwpshop.php',
-			'langs' => 'admin',
+			'langs' => 'doliwpshop@doliwpshop',
 			'position' => 1000,
 			'enabled' => '$conf->doliwpshop->enabled',
 			'perms' => '$user->admin',
