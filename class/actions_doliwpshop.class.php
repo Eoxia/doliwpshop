@@ -186,7 +186,7 @@ class ActionsDoliWPshop
 						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 						$wps_id = $object->array_options['options__wps_id'];
 						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
-						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
+						print '<tr><td>'.$langs->trans("WPshop Slug").' <span style="font-size: 0.85em; color: #888;">(via WP API)</span></td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
 					}
 				}
 			}
