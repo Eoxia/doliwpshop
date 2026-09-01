@@ -100,6 +100,20 @@ class ActionsDoliWPshop
 			{
 				$categoryDoliWPshop->createCategoryOnWPshop($object); // This actually triggers a sync/pull from Dolibarr
 			}
+			
+			if ($action == 'recreatewp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				$categoryDoliWPshop->createCategoryOnWPshop($object);
+			}
+			
+			if ($action == 'unlinkwp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				setEventMessages('La catégorie a été déliée de WPShop.', null, 'mesgs');
+			}
 		}
 		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
@@ -159,6 +173,7 @@ class ActionsDoliWPshop
 	{
 		global $langs;
 
+		$sync_status_html = "";
 		if (in_array('categorycard', explode(':', $parameters['context']))) {
 			if (!empty($object->array_options['options__wps_id'])) {
 				$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
@@ -172,7 +187,11 @@ class ActionsDoliWPshop
 						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 						$wps_id = $object->array_options['options__wps_id'];
 						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
-						print '<tr><td>'.$langs->trans("WPshop Slug").'</td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
+						print '<tr><td>'.$langs->trans("WPshop Slug").' <span style="font-size: 0.85em; color: #888;">(via WP API)</span></td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
+						
+						$sync_status_html = '<tr><td>Synchronisation</td><td colspan="3"><span style="color: #008700; font-weight: 500;">OK</span></td></tr>';
+					} else {
+						$sync_status_html = '<tr><td>Synchronisation</td><td colspan="3"><span style="color: #e53935; font-weight: 500;">Erreur (introuvable sur WordPress)</span></td></tr>';
 					}
 				}
 			}
@@ -198,6 +217,11 @@ class ActionsDoliWPshop
 					print '    var txt = $(this).text().trim();';
 					print '    if (txt === "'.$wps_id.'") {';
 					print '      $(this).html("<a href=\''.$link.'\' target=\'_blank\' rel=\'noopener noreferrer\'>" + txt + "</a>");';
+					if (!empty($sync_status_html)) {
+						print '      if ($(this).closest("tr").next().find("td").first().text().trim() !== "Synchronisation") {';
+						print '        $(this).closest("tr").after(\''.addslashes($sync_status_html).'\');';
+						print '      }';
+					}
 					print '    }';
 					print '  });';
 					print '});';

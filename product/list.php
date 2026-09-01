@@ -71,6 +71,7 @@ if (! $sortorder) $sortorder = "ASC";
 $search_ref = GETPOST('search_ref', 'alpha');
 $search_label = GETPOST('search_label', 'alpha');
 $search_category = GETPOST('search_category', 'array');
+$search_doli_id = GETPOST('search_doli_id', 'alpha');
 $search_wps_status = GETPOST('search_wps_status', 'alpha');
 $search_wps_id = GETPOST('search_wps_id', 'alpha');
 $search_status = GETPOST('search_status', 'int');
@@ -91,6 +92,7 @@ $sql.= " WHERE pe._wps_id IS NOT NULL AND pe._wps_id != ''";
 
 if ($search_ref) $sql .= natural_search('p.ref', $search_ref);
 if ($search_label) $sql .= natural_search('p.label', $search_label);
+if ($search_doli_id) $sql .= natural_search('p.rowid', $search_doli_id, 1);
 if ($search_wps_status) $sql .= natural_search('pe._wps_status', $search_wps_status);
 if ($search_wps_id) $sql .= natural_search('pe._wps_id', $search_wps_id);
 if ($search_status != '' && $search_status >= 0) $sql .= " AND p.tosell = " . ((int) $search_status);
@@ -116,6 +118,7 @@ if ($resql)
 	$param = '';
 	if ($search_ref) $param .= '&search_ref=' . urlencode($search_ref);
 	if ($search_label) $param .= '&search_label=' . urlencode($search_label);
+	if ($search_doli_id) $param .= '&search_doli_id=' . urlencode($search_doli_id);
 	if ($search_wps_status) $param .= '&search_wps_status=' . urlencode($search_wps_status);
 	if ($search_wps_id) $param .= '&search_wps_id=' . urlencode($search_wps_id);
 	if ($search_status != '') $param .= '&search_status=' . urlencode($search_status);
@@ -166,6 +169,9 @@ if ($resql)
 	print '<input class="flat" size="6" type="text" name="search_wps_status" value="'.dol_escape_htmltag($search_wps_status).'">';
 	print '</td>';
 	print '<td class="liste_titre">';
+	print '<input class="flat" size="4" type="text" name="search_doli_id" value="'.dol_escape_htmltag($search_doli_id).'">';
+	print '</td>';
+	print '<td class="liste_titre">';
 	print '<input class="flat" size="4" type="text" name="search_wps_id" value="'.dol_escape_htmltag($search_wps_id).'">';
 	print '</td>';
 	
@@ -185,6 +191,7 @@ if ($resql)
 	print_liste_field_titre('Categories', $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre('SellingPrice', $_SERVER["PHP_SELF"], 'p.price', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre('WPshopStatus', $_SERVER["PHP_SELF"], 'pe._wps_status', '', $param, '', $sortfield, $sortorder);
+	print_liste_field_titre('Doli ID', $_SERVER["PHP_SELF"], 'p.rowid', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre('WPshop ID', $_SERVER["PHP_SELF"], 'pe._wps_id', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre('Status', $_SERVER["PHP_SELF"], 'p.tosell', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre('', $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder); // Empty column for search button space
@@ -220,6 +227,7 @@ if ($resql)
 				$url = $_SERVER["PHP_SELF"]."?search_category[]=".urlencode($cId);
 				if ($search_ref) $url .= '&search_ref=' . urlencode($search_ref);
 				if ($search_label) $url .= '&search_label=' . urlencode($search_label);
+				if ($search_doli_id) $url .= '&search_doli_id=' . urlencode($search_doli_id);
 				if ($search_wps_status) $url .= '&search_wps_status=' . urlencode($search_wps_status);
 				if ($search_wps_id) $url .= '&search_wps_id=' . urlencode($search_wps_id);
 				if ($search_status != '') $url .= '&search_status=' . urlencode($search_status);
@@ -256,10 +264,20 @@ if ($resql)
 		if (empty($wps_status_html)) $wps_status_html = dol_escape_htmltag($obj->_wps_status);
 		print '<td>'.$wps_status_html.'</td>';
 		
-		$wps_id_text = dol_escape_htmltag($obj->_wps_id);
-		if (!empty($conf->global->WPSHOP_URL_WORDPRESS) && $obj->_wps_id > 0) {
-			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
-			$wps_id_text = '<a href="'.$wp_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer">'.$wps_id_text.'</a>';
+		$wp_base_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
+		$img_wp = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-wordpress.jpg' : '';
+		$img_doli = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-dolibarr.jpg' : '';
+
+		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" style="width:18px; height:18px; border-radius:50%;" /> ' : '';
+		$doli_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$doli_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">#'.$obj->rowid.'</span></div>';
+		print '<td>'.$doli_id_text.'</td>';
+		
+		$wps_id_val = dol_escape_htmltag($obj->_wps_id);
+		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" style="width:18px; height:18px; border-radius:50%;" /> ' : '';
+		if ($wp_base_url && $obj->_wps_id > 0) {
+			$wps_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$wp_img_tag.'<a href="'.$wp_base_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none;">#'.$wps_id_val.'</a></div>';
+		} else {
+			$wps_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$wp_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px;">#'.$wps_id_val.'</span></div>';
 		}
 		print '<td>'.$wps_id_text.'</td>';
 		

@@ -140,7 +140,7 @@ class modDoliWPshop extends DolibarrModules {
 			'perms' => '1',
 			'target' => '',
 			'user' => 2,
-			'picto' => 'object_doliwpshop@doliwpshop'
+			'picto' => 'doliwpshop@doliwpshop'
 		);
 		$r++;
 		// Left menu : Catégories
@@ -190,6 +190,23 @@ class modDoliWPshop extends DolibarrModules {
 			'target' => '',
 			'user' => 2
 		);
+		$r++;
+		// Left menu : Setup
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'type' => 'left',
+			'titre' => 'SetupWPshop',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_admin',
+			'url' => '/doliwpshop/admin/doliwpshop.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 1000,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '$user->admin',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
 	}
 
 	/**
@@ -228,7 +245,8 @@ class modDoliWPshop extends DolibarrModules {
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields( $this->db );
 		
-		$extra_fields->addExtraField( '_wps_status', $langs->trans("WPshopStatus"), 'select', 999, '', 'product', 0, 0, 'publish', array('options' => array('publish'=> 'publish', 'draft' => 'draft') ) );
+		$default_status = !empty($conf->global->WPSHOP_DEFAULT_PRODUCT_STATUS) ? $conf->global->WPSHOP_DEFAULT_PRODUCT_STATUS : 'draft';
+		$extra_fields->addExtraField( '_wps_status', $langs->trans("WPshopStatus"), 'select', 999, '', 'product', 0, 0, $default_status, array('options' => array('publish'=> 'publish', 'draft' => 'draft') ) );
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'product', 1, 0,'','', 0,'','1' );
 
 		$extra_fields->addExtraField( 'firstname', 'Firstname', 'varchar', 2, '255', 'thirdparty' );
