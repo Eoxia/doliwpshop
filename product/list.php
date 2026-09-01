@@ -264,12 +264,15 @@ if ($resql)
 		if (empty($wps_status_html)) $wps_status_html = dol_escape_htmltag($obj->_wps_status);
 		print '<td>'.$wps_status_html.'</td>';
 		
-		print '<td>'.$obj->rowid.'</td>';
+		$doli_id_text = '<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">'.$obj->rowid.'</span>';
+		print '<td>'.$doli_id_text.'</td>';
 		
-		$wps_id_text = dol_escape_htmltag($obj->_wps_id);
+		$wps_id_val = dol_escape_htmltag($obj->_wps_id);
 		if (!empty($conf->global->WPSHOP_URL_WORDPRESS) && $obj->_wps_id > 0) {
 			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
-			$wps_id_text = '<a href="'.$wp_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer">'.$wps_id_text.'</a>';
+			$wps_id_text = '<a href="'.$wp_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none;">'.$wps_id_val.'</a>';
+		} else {
+			$wps_id_text = '<span style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px;">'.$wps_id_val.'</span>';
 		}
 		print '<td>'.$wps_id_text.'</td>';
 		

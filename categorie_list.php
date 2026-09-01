@@ -448,25 +448,25 @@ if ($mode == 'hierarchy') {
 
 		$wps_id_text = !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 'Aucun';
 		$has_wps_id = 0;
-		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #555; font-size: 0.95em;">';
+		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+		
+		// ID Dolibarr en mauve
+		$wpshop_info .= '<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px; margin-right: 10px;" title="ID Dolibarr">'.$object->id.'</span>';
 		
 		// Picto categorie : Id et lien vers wpshop OU picto + (creation)
 		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
 			$has_wps_id = 1;
 			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
 			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
-			$wpshop_info .= '<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="color: #555; margin-right: 15px;" title="Voir sur WPshop"><span class="fa fa-tags"></span> '.$wps_id_text.'</a>';
+			$wpshop_info .= '<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none; margin-right: 15px;" title="Voir sur WPshop"><span class="fa fa-tags"></span> '.$wps_id_text.'</a>';
 		} else {
 			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
 			$wpshop_info .= '<a href="'.$create_link.'" style="color: #555; margin-right: 15px;" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
 		}
-
 		// Picto product : Nombre et lien vers la liste des produits
 		$prod_link = DOL_URL_ROOT.'/custom/doliwpshop/product/list.php?catid='.$object->id;
 		$wpshop_info .= '<a href="'.$prod_link.'" target="_blank" rel="noopener noreferrer" style="color: #555;" title="Voir les produits liés"><span class="fa fa-cube"></span> '.$nb_products.'</a>';
 		
-		$wpshop_info .= '</span>';
-
 		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'">';
 		$entry .= '<tr>';
 
