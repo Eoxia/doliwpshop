@@ -232,11 +232,20 @@ if (empty($reshook)) {
 
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 
-	// You can add more action here
-	// if ($action == 'xxx' && $permissiontoxxx) ...
+	// WPShop Actions
+	if ($action == 'createwp' && !empty($id)) {
+		dol_include_once('/doliwpshop/class/category_doliwpshop.class.php');
+		$res = $object->fetch($id);
+		if ($res > 0) {
+			$object->fetch_optionals();
+			if (empty($object->array_options['options__wps_id'])) {
+				$categoryDoliWPshop = new CategoryDoliWPshop();
+				$categoryDoliWPshop->createCategoryOnWPshop($object);
+			}
+		}
+		$action = 'list';
+	}
 }
-
-
 
 /*
  * View
@@ -441,7 +450,9 @@ if ($mode == 'hierarchy') {
 		$li = $object->getNomUrl(1, '', 60, '&backtolist='.urlencode($_SERVER["PHP_SELF"].'?'.$param));
 
 		$wps_id_text = !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 'Aucun';
+		$has_wps_id = 0;
 		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
+			$has_wps_id = 1;
 			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
 			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
 			$wps_id_text = '<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="color: red;">'.$wps_id_text.'</a>';
@@ -449,7 +460,12 @@ if ($mode == 'hierarchy') {
 		
 		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;">idWP: '.$wps_id_text.' | '.$nb_products.' produits</span>';
 
-		$entry = '<table class="nobordernopadding centpercent">';
+		if ($has_wps_id == 0) {
+			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
+			$wpshop_info .= ' <a href="'.$create_link.'" style="color: red; margin-left: 20px;">Création sur WPshop</a>';
+		}
+
+		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'">';
 		$entry .= '<tr>';
 
 		// Force tools on right
@@ -524,8 +540,14 @@ if ($mode == 'hierarchy') {
 
 	print '<div class="fichecenter">';
 
-	print '<table class="liste nohover centpercent noborder">';
-	print '<tr class="liste_titre"><td>'.$langs->trans("Categories").'</td><td></td><td class="right">';
+	print '<table class="liste nohover centpercent noborder" id="wpshop_category_tree">';
+	print '<tr class="liste_titre">';
+	print '<td>';
+	print $langs->trans("Categories");
+	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	print '<input type="checkbox" id="wpshop_show_all_categories" checked="checked"> <label for="wpshop_show_all_categories" style="color:red; font-weight:normal;">Affiches toutes les catégories</label>';
+	print '</td>';
+	print '<td></td><td class="right">';
 	if ($morethan1level && !empty($conf->use_javascript_ajax)) {
 		print '<div id="iddivjstreecontrol">';
 		print '<a class="notasortlink" href="#">'.img_picto('', 'folder', 'class="paddingright"').'<span class="hideonsmartphone">'.$langs->trans("UndoExpandAll").'</span></a>';
@@ -554,6 +576,31 @@ if ($mode == 'hierarchy') {
 	}
 
 	print "</table>";
+
+	print '<script>';
+	print '$(document).ready(function() {';
+	print '    function filterCategories() {';
+	print '        var showAll = $("#wpshop_show_all_categories").is(":checked");';
+	print '        if (showAll) {';
+	print '            $("#iddivjstree li").show();';
+	print '        } else {';
+	print '            $("#iddivjstree li").each(function() {';
+	print '                var $li = $(this);';
+	print '                var hasId = $li.find("> table.wpshop-cat-table").attr("data-has-wps-id") === "1";';
+	print '                var hasChildWithId = $li.find("table.wpshop-cat-table[data-has-wps-id=\'1\']").length > 0;';
+	print '                if (!hasId && !hasChildWithId) {';
+	print '                    $li.hide();';
+	print '                } else {';
+	print '                    $li.show();';
+	print '                }';
+	print '            });';
+	print '        }';
+	print '    }';
+	print '    $("#wpshop_show_all_categories").change(function() { filterCategories(); });';
+	print '    // Initial state';
+	print '    filterCategories();';
+	print '});';
+	print '</script>';
 
 	print '</div>';
 } else {
