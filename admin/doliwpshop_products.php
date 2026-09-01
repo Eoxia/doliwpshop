@@ -59,7 +59,7 @@ if ($action == 'update' && !GETPOST("cancel", 'alpha'))
 		// Update extrafield default value
 		require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields($db);
-		$extra_fields->updateExtraField('_wps_status', 'WPshopStatus', 'select', 999, '', 'product', 0, 0, '', $default_status, array('options' => array('publish'=> 'publish', 'draft' => 'draft')));
+		$extra_fields->updateExtraField('_wps_status', 'WPshopStatus', 'select', 999, '', 'product', 0, 0, $default_status, array('options' => array('publish'=> 'publish', 'draft' => 'draft')));
 	}
 
 	header("Location: ".$_SERVER["PHP_SELF"]);
