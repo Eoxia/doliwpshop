@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $res = @include("../main.inc.php");
 if (! $res) {
 	$res = @include("../../main.inc.php");
@@ -31,6 +31,8 @@ $res = $db->query($sql);
 $obj = $db->fetch_object($res);
 $sync_products = $obj->nb;
 
+$percent = ($total_products > 0) ? round(($sync_products / $total_products) * 100, 2) : 0;
+
 print "<div class=\"fichecenter\">";
 print "<div class=\"twocolumns\">";
 print "<div class=\"firstcolumn\">";
@@ -46,6 +48,10 @@ print "</tr>";
 print "<tr class=\"oddevent\">";
 print "<td>Produits/services synchronisés sur WPshop</td>";
 print "<td class=\"right\">" . $sync_products . "</td>";
+print "</tr>";
+print "<tr class=\"oddevent\">";
+print "<td>Pourcentage de produits en vente sur le shop</td>";
+print "<td class=\"right\">" . $percent . " %</td>";
 print "</tr>";
 print "</table>";
 
