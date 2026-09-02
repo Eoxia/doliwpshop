@@ -71,22 +71,18 @@ print load_fiche_titre($langs->trans("DoliWpshopSetup"), $linkback, "title_setup
 $head = doliwpshopAdminPrepareHead();
 dol_fiche_head($head, "users", $langs->trans("ModuleDoliWPshopName"), -1, "doliwpshop@doliwpshop");
 
-print "<span class=\"opacitymedium\">" . "Page de configuration des utilisateurs et droits du module DoliWPshop" . "</span><br><br>\n";
-
 require_once DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php";
 $form = new Form($db);
 
 print "<form method=\"POST\" action=\"" . $_SERVER["PHP_SELF"] . "\">\n";
 print "<input type=\"hidden\" name=\"token\" value=\"" . newToken() . "\">\n";
 
-print "<div class=\"info\">\n";
-print "<strong>Création rapide :</strong> Vous pouvez créer automatiquement un utilisateur système dédié à l'API (login: <code>wpshopapi</code>) qui recevra tous les droits nécessaires.<br><br>\n";
-print "<button type=\"submit\" name=\"action\" value=\"create_api_user\" class=\"button\">Créer l'utilisateur WPShopAPI et lui affecter les droits</button>\n";
-print "</div><br>\n";
-
-print "<strong>Ou sélectionner un utilisateur existant pour lui appliquer les droits requis :</strong><br>\n";
+print "<strong>sélectionner un utilisateur existant pour lui appliquer les droits requis :</strong><br>\n";
 print $form->select_dolusers($fuserid, "fuserid", 1);
-print " <button type=\"submit\" name=\"action\" value=\"apply_rights\" class=\"button button-save\">Appliquer les droits</button>\n";
+print " <button type=\"submit\" name=\"action\" value=\"apply_rights\" class=\"button\">APPLIQUER LES DROITS</button>\n";
+print " <button type=\"submit\" name=\"action\" value=\"create_api_user\" class=\"button\">CRÉER WPSHOPAPI</button>\n";
+print "<br>\n";
+print "<span class=\"opacitymedium\">Création rapide : Vous pouvez créer automatiquement un utilisateur système dédié à l'API (login: <code>wpshopapi</code>) qui recevra tous les droits nécessaires.</span>\n";
 print "</form><br><br>\n";
 
 // Render the rights table
