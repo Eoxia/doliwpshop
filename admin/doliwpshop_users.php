@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $res = @include("../../main.inc.php");
 if (! $res) {
 	$res = @include("../../../main.inc.php");
@@ -27,26 +27,17 @@ dol_fiche_head($head, "users", $langs->trans("ModuleDoliWPshopName"), -1, "doliw
 
 print "<span class=\"opacitymedium\">" . "Page de configuration des utilisateurs et droits du module DoliWPshop" . "</span><br><br>\n";
 
-print "<form method=\"POST\" action=\"" . $_SERVER["PHP_SELF"] . "\">\n";
-print "<input type=\"hidden\" name=\"token\" value=\"" . newToken() . "\">\n";
-print "<input type=\"hidden\" name=\"action\" value=\"update\">\n";
-
-print "<table class=\"noborder centpercent\">\n";
-print "<tr class=\"liste_titre\">\n";
-print "<td>" . $langs->trans("Parameter") . "</td>\n";
-print "<td>" . $langs->trans("Value") . "</td>\n";
-print "</tr>\n";
-
-print "<tr class=\"oddevent\">\n";
-print "<td colspan=\"2\" class=\"center\"><em>Aucun paramètre pour le moment</em></td>\n";
-print "</tr>\n";
-
-print "</table>\n";
-
-print "<div class=\"center\">\n";
-print "<input type=\"submit\" class=\"button button-save\" value=\"" . $langs->trans("Save") . "\">\n";
+print "<div class=\"info\">\n";
+print "<strong>" . $langs->trans("Droits requis pour DoliWPshop") . "</strong><br><br>\n";
+print "Pour que le module puisse synchroniser correctement les données entre Dolibarr et WordPress, les utilisateurs concernés (ou l'utilisateur API/Cron) doivent disposer des permissions natives suivantes dans Dolibarr :<br>\n";
+print "<ul>\n";
+print "<li><strong>DoliWPshop</strong> : Lire, Créer/Modifier, Supprimer</li>\n";
+print "<li><strong>Produits/Services</strong> : Lire, Créer/Modifier</li>\n";
+print "<li><strong>Tags/Catégories</strong> : Lire, Créer/Modifier</li>\n";
+print "<li><strong>Tiers (Clients)</strong> : Lire, Créer/Modifier</li>\n";
+print "</ul>\n";
+print "<em>Note : Assurez-vous également que la configuration de l'API REST de WordPress autorise l'utilisateur lié à la clé API WPShop à lire et modifier les données (Produits, Catégories, etc.) sur votre boutique.</em>\n";
 print "</div>\n";
-print "</form>\n";
 
 dol_fiche_end();
 llxFooter();
