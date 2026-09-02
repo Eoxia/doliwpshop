@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,8 +50,14 @@ function doliwpshopAdminPrepareHead()
 	$head[$h][2] = 'categories';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_users.php", 1);
+	$head[$h][1] = "Utilisateurs/droits";
+	$head[$h][2] = 'users';
+	$h++;
+
 	$object = null;
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
 
 	return $head;
 }
+
