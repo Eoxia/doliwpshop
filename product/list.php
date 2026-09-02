@@ -136,7 +136,8 @@ if ($resql)
 	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 	print '<input type="hidden" name="page" value="'.$page.'">';
 
-	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $num, 'title_products', 0, '', '', $limit);
+	$newcardbutton = dolGetButtonTitle($langs->trans('NewProduct'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/product/list.php', '', 1, array('morecss'=>'reposition marginleftonly'));
+	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $num, 'title_products', 0, $newcardbutton, '', $limit);
 	
 	print '<div class="div-table-responsive">';
 	print '<table class="tagtable liste">'."\n";
