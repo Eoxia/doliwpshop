@@ -145,14 +145,14 @@ class modDoliWPshop extends DolibarrModules {
 		$r++;
 		// Left menu : Catégories
 		$this->menu[$r] = array(
-			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'fk_menu' => 'fk_mainmenu=doliwpshop,fk_leftmenu=doliwpshop_products',
 			'type' => 'left',
 			'titre' => 'Categories',
 			'mainmenu' => 'doliwpshop',
 			'leftmenu' => 'doliwpshop_categories',
 			'url' => '/doliwpshop/categorie_list.php',
 			'langs' => 'doliwpshop@doliwpshop',
-			'position' => 130,
+			'position' => 122,
 			'enabled' => '$conf->doliwpshop->enabled',
 			'perms' => '1',
 			'target' => '',
