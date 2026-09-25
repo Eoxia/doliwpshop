@@ -7,7 +7,10 @@
  * (at your option) any later version.
  */
 
-require '../../../main.inc.php';
+$res = @include("../../main.inc.php"); // From htdocs directory
+if (! $res) {
+	$res = @include("../../../main.inc.php"); // From "custom" directory
+}
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
