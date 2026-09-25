@@ -21,10 +21,10 @@
  * \brief   Hook on new actions for connected Dolibarr and WPshop
  */
 
-dol_include_once('/custom/doliwpshop/lib/api_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/product_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/thirdparty_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/category_doliwpshop.class.php');
+dol_include_once('/doliwpshop/lib/api_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/product_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/thirdparty_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/category_doliwpshop.class.php');
 
 /**
  * Class ActionsDoliWPshop
