@@ -48,7 +48,7 @@ class modDoliWPshop extends DolibarrModules {
 		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '1.2.0';
+		$this->version         = '23.0.0';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
@@ -81,8 +81,9 @@ class modDoliWPshop extends DolibarrModules {
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
-		$this->phpmin                  = array(5, 4);
-		$this->need_dolibarr_version   = array(4, 0);
+		$this->phpmin                  = array(7, 4);
+		$this->need_dolibarr_version   = array(23, 0); // Minimum version of Dolibarr required by module
+		$this->max_dolibarr_version    = array(24, 0); // Maximum version of Dolibarr supported by module
 		$this->warnings_activation     = array();
 		$this->warnings_activation_ext = array();
 		//$this->automatic_activation = array('FR'=>'WPshopWasAutomaticallyActivatedBecauseOfYourCountryChoice');
@@ -125,6 +126,88 @@ class modDoliWPshop extends DolibarrModules {
 
 		// Main menu entries
 		$this->menu = array();            // List of menus to add
+		$r = 0;
+		// Top menu
+		$this->menu[$r] = array(
+			'fk_menu' => 0,
+			'type' => 'top',
+			'titre' => 'WPShop',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => '',
+			'url' => '/doliwpshop/index.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 10000,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2,
+			'picto' => 'doliwpshop@doliwpshop'
+		);
+		$r++;
+		// Left menu : Catégories
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop,fk_leftmenu=doliwpshop_products',
+			'type' => 'left',
+			'titre' => 'Categories',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_categories',
+			'url' => '/doliwpshop/categorie_list.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 122,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Produit
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'type' => 'left',
+			'titre' => 'Products',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_products',
+			'url' => '/doliwpshop/index.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 120,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Produit -> Liste
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop,fk_leftmenu=doliwpshop_products',
+			'type' => 'left',
+			'titre' => 'List',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_products_list',
+			'url' => '/doliwpshop/product/list.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 121,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '1',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
+		// Left menu : Setup
+		$this->menu[$r] = array(
+			'fk_menu' => 'fk_mainmenu=doliwpshop',
+			'type' => 'left',
+			'titre' => 'SetupWPshop',
+			'mainmenu' => 'doliwpshop',
+			'leftmenu' => 'doliwpshop_admin',
+			'url' => '/doliwpshop/admin/doliwpshop.php',
+			'langs' => 'doliwpshop@doliwpshop',
+			'position' => 1000,
+			'enabled' => '$conf->doliwpshop->enabled',
+			'perms' => '$user->admin',
+			'target' => '',
+			'user' => 2
+		);
+		$r++;
 	}
 
 	/**
@@ -137,24 +220,26 @@ class modDoliWPshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		global $conf, $langs;
+		global $conf, $langs, $user;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
 
 		$this->_load_tables('/doliwpshop/sql/');
 
-		if ( $conf->global->DOLIWPSHOP_USERAPI_SET ==  0 ) {
+		if ( !isset($conf->global->DOLIWPSHOP_USERAPI_SET) || $conf->global->DOLIWPSHOP_USERAPI_SET == 0 ) {
 			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
-			$user = new User($this->db);
-			$user->lastname  = 'API';
-			$user->firstname = 'REST';
-			$user->login     = 'USERAPI';
-			$user->setPassword($user, 'test');
-			$user->api_key = getRandomPassword(true);
+			$usertmp = new User($this->db);
+			$usertmp->lastname  = 'API';
+			$usertmp->firstname = 'REST';
+			$usertmp->login     = 'USERAPI';
+			$usertmp->entity    = $conf->entity;
+			$usertmp->email     = '';
+			$usertmp->setPassword($user);
+			$usertmp->api_key = getRandomPassword(true);
 
-			$user_id = $user->create($user);
+			$user_id = $usertmp->create($user);
 
 			dolibarr_set_const($this->db, 'DOLIWPSHOP_USERAPI_SET', $user_id, 'integer', 0, '', $conf->entity);
 		}
@@ -163,20 +248,21 @@ class modDoliWPshop extends DolibarrModules {
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields( $this->db );
 		
-		$extra_fields->addExtraField( '_wps_status', $langs->trans("WPshopStatus"), 'select', 999, '', 'product', 0, 0, 'publish', array('options' => array('publish'=> 'publish', 'draft' => 'draft') ) );
+		$default_status = !empty($conf->global->WPSHOP_DEFAULT_PRODUCT_STATUS) ? $conf->global->WPSHOP_DEFAULT_PRODUCT_STATUS : 'draft';
+		$extra_fields->addExtraField( '_wps_status', $langs->trans("WPshopStatus"), 'select', 999, '', 'product', 0, 0, $default_status, array('options' => array('publish'=> 'publish', 'draft' => 'draft') ) );
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'product', 1, 0,'','', 0,'','1' );
 
 		$extra_fields->addExtraField( 'firstname', 'Firstname', 'varchar', 2, '255', 'thirdparty' );
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'thirdparty', 1, 0,'','', 0,'','1' );
 
 		$extra_fields->addExtraField( '_wps_id', 'WPshop ID', 'int', 1000, '', 'categorie', 1, 0,'','', 0,'','1' );
-		$extra_fields->addExtraField( '_wps_slug', 'WPshop Slug', 'varchar', 1001, '', 'categorie', 2, 0,'','', 0,'','1' );
+		$extra_fields->delete( '_wps_slug', 'categorie' );
 
 		$extra_fields->addExtraField( 'wpshopidtradmultilangs', 'WPshop_ID_trad_multilangs', 'int', 100, '10', 'product_lang', 1, 0,'','', 0,'','5' );
 		$extra_fields->addExtraField( 'wpshopurltradmultilangs', 'WPshop_Url_trad_multilangs', 'url', 101, '', 'product_lang', 1, 0,'','', 0,'','5' );
 		$extra_fields->addExtraField( 'language_code', 'WPML_code', 'varchar', 102, '10', 'product_lang', 1, 1,'','', 0,'','1' );
 
-		return $this->_init(null);
+		return $this->_init(array());
 	}
 
 	/**
@@ -190,6 +276,6 @@ class modDoliWPshop extends DolibarrModules {
 	 *
 	 */
 	public function remove( $options = '' ) {
-		return $this->_remove(null);
+		return $this->_remove(array());
 	}
 }

@@ -21,10 +21,10 @@
  * \brief   Hook on new actions for connected Dolibarr and WPshop
  */
 
-dol_include_once('/custom/doliwpshop/lib/api_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/product_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/thirdparty_doliwpshop.class.php');
-dol_include_once('/custom/doliwpshop/class/category_doliwpshop.class.php');
+dol_include_once('/doliwpshop/lib/api_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/product_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/thirdparty_doliwpshop.class.php');
+dol_include_once('/doliwpshop/class/category_doliwpshop.class.php');
 
 /**
  * Class ActionsDoliWPshop
@@ -96,6 +96,24 @@ class ActionsDoliWPshop
 				$categoryDoliWPshop->createCategoryOnWPshop($object);
 			}
 
+			if ($action == 'updatewp' && $connected === true && ! empty($object->array_options['options__wps_id']))
+			{
+				$categoryDoliWPshop->createCategoryOnWPshop($object); // This actually triggers a sync/pull from Dolibarr
+			}
+			
+			if ($action == 'recreatewp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				$categoryDoliWPshop->createCategoryOnWPshop($object);
+			}
+			
+			if ($action == 'unlinkwp' && $connected === true)
+			{
+				$object->array_options['options__wps_id'] = '';
+				$object->insertExtraFields();
+				setEventMessages('La catégorie a été déliée de WPShop.', null, 'mesgs');
+			}
 		}
 		if (in_array('thirdpartycard', explode(':', $parameters['context'])))
 		{
@@ -151,6 +169,70 @@ class ActionsDoliWPshop
  	return 0;
 	}
 
+	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+
+		$sync_status_html = "";
+		if (in_array('categorycard', explode(':', $parameters['context']))) {
+			if (!empty($object->array_options['options__wps_id'])) {
+				$connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
+				if ($connected) {
+					$url = '/wp-json/wpshop/v2/category/' . $object->array_options['options__wps_id'];
+					$response = WPshopAPI::get($url);
+					
+					if (!empty($response) && isset($response->slug)) {
+						global $conf;
+						$slug = $response->slug;
+						$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
+						$wps_id = $object->array_options['options__wps_id'];
+						$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
+						print '<tr><td>'.$langs->trans("WPshop Slug").' <span style="font-size: 0.85em; color: #888;">(via WP API)</span></td><td colspan="3"><a href="'.$link.'" target="_blank">'.$slug.'</a></td></tr>';
+						
+						$sync_status_html = '<tr><td>Synchronisation</td><td colspan="3"><span style="color: #008700; font-weight: 500;">OK</span></td></tr>';
+					} else {
+						$sync_status_html = '<tr><td>Synchronisation</td><td colspan="3"><span style="color: #e53935; font-weight: 500;">Erreur (introuvable sur WordPress)</span></td></tr>';
+					}
+				}
+			}
+		}
+
+		// Inject JS to make WPshop ID extrafield clickable across all object cards
+		if (!empty($object->array_options['options__wps_id'])) {
+			global $conf;
+			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
+			if ($wp_url) {
+				$wps_id = $object->array_options['options__wps_id'];
+				$link = '';
+				if ($object->element == 'product') {
+					$link = $wp_url . '/wp-admin/post.php?post=' . $wps_id . '&action=edit';
+				} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+					$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id . '&post_type=wps-product';
+				}
+				
+				if ($link) {
+					print '<script>';
+					print '$(document).ready(function() {';
+					print '  $("table td").filter(function() { return $(this).text().trim() === "WPshop ID"; }).next("td").each(function() {';
+					print '    var txt = $(this).text().trim();';
+					print '    if (txt === "'.$wps_id.'") {';
+					print '      $(this).html("<a href=\''.$link.'\' target=\'_blank\' rel=\'noopener noreferrer\'>" + txt + "</a>");';
+					if (!empty($sync_status_html)) {
+						print '      if ($(this).closest("tr").next().find("td").first().text().trim() !== "Synchronisation") {';
+						print '        $(this).closest("tr").after(\''.addslashes($sync_status_html).'\');';
+						print '      }';
+					}
+					print '    }';
+					print '  });';
+					print '});';
+					print '</script>';
+				}
+			}
+		}
+
+		return 0;
+	}
+
 	/**
 	 * Add new actions buttons on CommonObject
 	 *
@@ -169,28 +251,39 @@ class ActionsDoliWPshop
 			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableDolibarr").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
 			return;
 		}
+
+		if ( isset( $_SERVER['HTTPS'] ) ) {
+			if ( $_SERVER['HTTPS'] == 'on' ) {
+			  $server_protocol = 'https';
+			} else {
+			  $server_protocol = 'http';
+			} 
+		} else {
+			$server_protocol = 'http';
+		}
 		
 		if (empty($object->array_options['options__wps_id'])) {
-
-			if ( isset( $_SERVER['HTTPS'] ) ) {
-				if ( $_SERVER['HTTPS'] == 'on' ) {
-				  $server_protocol = 'https';
-				} else {
-				  $server_protocol = 'http';
-				} 
-			} else {
-				$server_protocol = 'http';
-			  }
-		
 			$actual_link = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			$actual_link .= '&action=createwp';
+			$actual_link .= '&action=createwp&token='.newToken();
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $actual_link . '">'.$langs->trans("CreateOnWPshop").'</a></div>';
 
 		} else {
+			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 			if ($object->element == 'product' ) {
-				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $conf->global->WPSHOP_URL_WORDPRESS . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+			} elseif ($object->element == 'societe') {
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/admin.php?page=wps-third-party&id=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+			} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '&post_type=wps-product" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
-			print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
+
+			if (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
+				$actual_link_update = $server_protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$actual_link_update .= '&action=updatewp&token='.newToken();
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("UpdateOnWPshop").'" href="'.$actual_link_update.'">'.$langs->trans("UpdateOnWPshop").'</a></div>';
+			} else {
+				print '<div class="inline-block divButAction"><a class="butActionRefused" title="'.$langs->trans("NotAvailableObject").'" href="#">'.$langs->trans("CreateOnWPshop").'</a></div>';
+			}
 		}
 	}
 }

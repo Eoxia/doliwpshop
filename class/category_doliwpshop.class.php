@@ -24,6 +24,8 @@
 /**
  * Class CategoryDoliWPshop
  */
+dol_include_once('/doliwpshop/lib/api_doliwpshop.class.php');
+
 class CategoryDoliWPshop {
 	/**
 	 * Constructor
@@ -84,12 +86,13 @@ class CategoryDoliWPshop {
 		$response = WPshopAPI::post($url, array(
 			'doli_id' => $object->id,
 			'type'    => 'wps-product-cat',
+			'wp_id'   => !empty($object->array_options['options__wps_id']) ? $object->array_options['options__wps_id'] : 0,
         ));
 		
-		if ($response['status']) {
+		if ($response['status'] && !empty($response['data']['wp_object']['data']['id'])) {
             $object->array_options['options__wps_id'] = $response['data']['wp_object']['data']['id'];
-            $object->array_options['options__wps_slug'] = $response['data']['wp_object']['data']['slug'];
-            $result = $object->update( $user,$object->id, 1, 'update', true);
+
+            $result = $object->insertExtraFields();
 			
 			if (!$result) {
 				setEventMessages($langs->trans("ErrorUpdateObject") . $object->id, null, 'errors');
@@ -100,7 +103,15 @@ class CategoryDoliWPshop {
 				return 0;
 			}
 		} else {
-			setEventMessages($langs->trans("ErrorPostRequest") . $url . ' "' . $response['error_message'] . '"', null, 'errors');
+			$error_msg = isset($response['error_message']) ? $response['error_message'] : (isset($response['data']['message']) ? $response['data']['message'] : 'Invalid response');
+			
+			if (isset($response['data']['wp_error']['errors']['term_deleted'][0])) {
+				$error_msg = $response['data']['wp_error']['errors']['term_deleted'][0];
+				$error_msg .= '<br><br>Souhaitez vous la créer à nouveau &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreatewp&type='.GETPOST('type', 'aZ').'&token='.newToken().'">Oui</a> &nbsp; / &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unlinkwp&type='.GETPOST('type', 'aZ').'&token='.newToken().'">Non</a>';
+				setEventMessages($error_msg, null, 'errors');
+			} else {
+				setEventMessages($langs->trans("ErrorPostRequest") . $url . ' "' . $error_msg . '"', null, 'errors');
+			}
 			return -1;
 		}
 		

@@ -17,8 +17,6 @@
 
 use Luracast\Restler\RestException;
 
-require_once DOL_DOCUMENT_ROOT.'/main.inc.php';
-
 require_once DOL_DOCUMENT_ROOT .'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/product/modules_product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
@@ -72,6 +70,50 @@ class DoliWPshop extends DolibarrApi
 	}
 
 	/**
+	 * Check if the API key has permissions and the module is responsive
+	 *
+	 * @url GET /checkPermissions
+	 */
+	public function checkPermissions() {
+		$permissions = [
+			'commande'  => ['read', 'write'],
+			'facture'   => ['read', 'write'],
+			'propale'   => ['read', 'write'],
+			'produit'   => ['read'],
+			'categorie' => ['read'],
+			'societe'   => ['contact' => ['read', 'write']],
+		];
+
+		foreach ($permissions as $module => $level1Permissions) {
+			foreach ($level1Permissions as $key => $level1Permission) {
+				if (is_array($level1Permission)) {
+					foreach ($level1Permission as $level2Permission) {
+						if (!DolibarrApiAccess::$user->hasRight($module, $key, $level2Permission)) {
+							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $key . ' with action: ' . $level2Permission);
+						}
+					}
+				} else {
+					if (!DolibarrApiAccess::$user->hasRight($module, $level1Permission)) {
+						throw new RestException(403, 'Access denied for resource: ' . $module . ' with action: ' . $level1Permission);
+					}
+				}
+			}
+		}
+
+		return array(
+			'success' => array(
+				'code' => 200,
+				'message' => 'OK',
+				'user' => array(
+					'id' => \DolibarrApiAccess::$user->id,
+					'login' => \DolibarrApiAccess::$user->login,
+					'name' => \DolibarrApiAccess::$user->getFullName(null)
+				)
+			)
+		);
+	}
+
+	/**
 	 * @param integer $wp_id
 	 * @param integer $doli_id
 	 *
@@ -103,6 +145,12 @@ class DoliWPshop extends DolibarrApi
 		return $result;
 	}
 
+	/**
+	 * @param integer $wp_id
+	 * @param integer $doli_id
+	 *
+	 * @url GET /associatecategory
+	 */
 	public function associateCategory($wp_id, $doli_id) {
 		$result = $this->category->fetch($doli_id);
 		
@@ -189,6 +237,7 @@ class DoliWPshop extends DolibarrApi
 
 		return $url;
 	}
+
 }
 
 

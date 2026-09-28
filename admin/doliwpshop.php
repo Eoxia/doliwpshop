@@ -50,38 +50,38 @@ $userapi = new User($db);
 $userapi->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
 $userapi->getrights();
 //Rights invoices
-$userapi->rights->facture->lire ? 1 : $userapi->addrights(11);
-$userapi->rights->facture->creer ? 1 : $userapi->addrights(12);
-$userapi->rights->facture->paiment ? 1 : $userapi->addrights(16);
+empty($userapi->rights->facture->lire) ? $userapi->addrights(11) : 1;
+empty($userapi->rights->facture->creer) ? $userapi->addrights(12) : 1;
+empty($userapi->rights->facture->paiment) ? $userapi->addrights(16) : 1;
 //Rights propals
-$userapi->rights->propale->lire ? 1 : $userapi->addrights(21);
-$userapi->rights->propale->creer ? 1 : $userapi->addrights(22);
-$userapi->rights->propale->cloturer ? 1 : $userapi->addrights(26);
+empty($userapi->rights->propale->lire) ? $userapi->addrights(21) : 1;
+empty($userapi->rights->propale->creer) ? $userapi->addrights(22) : 1;
+empty($userapi->rights->propale->cloturer) ? $userapi->addrights(26) : 1;
 //Rights products
-$userapi->rights->produit->lire ? 1 : $userapi->addrights(31);
-$userapi->rights->produit->creer ? 1 : $userapi->addrights(32);
+empty($userapi->rights->produit->lire) ? $userapi->addrights(31) : 1;
+empty($userapi->rights->produit->creer) ? $userapi->addrights(32) : 1;
 //Rights orders
-$userapi->rights->commande->lire ? 1 : $userapi->addrights(81);
-$userapi->rights->commande->creer ? 1 : $userapi->addrights(82);
+empty($userapi->rights->commande->lire) ? $userapi->addrights(81) : 1;
+empty($userapi->rights->commande->creer) ? $userapi->addrights(82) : 1;
 //Rights tiers
-$userapi->rights->societe->lire ? 1 : $userapi->addrights(121);
-$userapi->rights->societe->creer ? 1 : $userapi->addrights(122);
-$userapi->rights->societe->supprimer ? 1 : $userapi->addrights(125);
-$userapi->rights->societe->exporter ? 1 : $userapi->addrights(126);
-$userapi->rights->societe->client->voir ? 1 : $userapi->addrights(262);
-$userapi->rights->societe->contact->lire ? 1 : $userapi->addrights(281);
+empty($userapi->rights->societe->lire) ? $userapi->addrights(121) : 1;
+empty($userapi->rights->societe->creer) ? $userapi->addrights(122) : 1;
+empty($userapi->rights->societe->supprimer) ? $userapi->addrights(125) : 1;
+empty($userapi->rights->societe->exporter) ? $userapi->addrights(126) : 1;
+empty($userapi->rights->societe->client->voir) ? $userapi->addrights(262) : 1;
+empty($userapi->rights->societe->contact->lire) ? $userapi->addrights(281) : 1;
 //Rights tags
-$userapi->rights->categorie->lire ? 1 : $userapi->addrights(241);
-$userapi->rights->categorie->creer ? 1 : $userapi->addrights(242);
+empty($userapi->rights->categorie->lire) ? $userapi->addrights(241) : 1;
+empty($userapi->rights->categorie->creer) ? $userapi->addrights(242) : 1;
 //Rights services
-$userapi->rights->service->lire ? 1 : $userapi->addrights(531);
-$userapi->rights->service->creer ? 1 : $userapi->addrights(532);
+empty($userapi->rights->service->lire) ? $userapi->addrights(531) : 1;
+empty($userapi->rights->service->creer) ? $userapi->addrights(532) : 1;
 //Rights stocks
-$userapi->rights->stock->lire ? 1 : $userapi->addrights(1001);
+empty($userapi->rights->stock->lire) ? $userapi->addrights(1001) : 1;
 //Rights events
-$userapi->rights->agenda->myactions->read ? 1 : $userapi->addrights(2401);
-$userapi->rights->propale->myactions->create  ? 1 : $userapi->addrights(2402);
-$userapi->rights->propale->myactions->delete  ? 1 : $userapi->addrights(2403);
+empty($userapi->rights->agenda->myactions->read) ? $userapi->addrights(2401) : 1;
+empty($userapi->rights->propale->myactions->create)  ? $userapi->addrights(2402) : 1;
+empty($userapi->rights->propale->myactions->delete)  ? $userapi->addrights(2403) : 1;
 
 /*
  * Actions
@@ -115,6 +115,11 @@ $connected = WPshopAPI::get('/wp-json/wpshop/v2/statut');
  * View
  */
 $page_name = "DoliWPshopSetup";
+
+if (!function_exists('curl_init')) {
+	setEventMessages('Attention : l\'extension PHP cURL est nécessaire pour le fonctionnement de DoliWPshop.', null, 'warnings');
+}
+
 llxHeader('', $langs->trans($page_name));
 
 // Subheader
@@ -138,13 +143,14 @@ if ($action == 'edit') {
 	print '<tr class="liste_titre"><td class="titlefield">'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';
 
 	foreach($arrayofparameters as $key => $val) {
+		$value = isset($conf->global->$key) ? $conf->global->$key : '';
 		print '<tr class="oddeven"><td>';
 		print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
-		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $conf->global->$key . '"></td></tr>';
+		print '</td><td><input name="'.$key.'"  class="flat '.(empty($val['css'])?'minwidth200':$val['css']).'" value="' . $value . '"></td></tr>';
 	}
 
 	print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
-	print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').'';
+	print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.(!empty($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION) ? ' checked=""' : '').'';
 	print '</td></tr>';
 
 
@@ -162,9 +168,10 @@ if ($action == 'edit') {
 		print '<tr class="liste_titre"><td class="titlefield">'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';
 
 		foreach($arrayofparameters as $key => $val)	{
+			$value = isset($conf->global->$key) ? $conf->global->$key : '';
 			print '<tr class="oddeven"><td>';
 			print $form->textwithpicto($langs->trans($key),$langs->trans($key.'Tooltip'));
-			print '</td><td>' . $conf->global->$key . '</td></tr>';
+			print '</td><td>' . $value . '</td></tr>';
 		}
 
 		print '<tr class="oddevent"><td>'.$langs->trans("CommunicationWordPress").'</td><td>';
@@ -177,7 +184,7 @@ if ($action == 'edit') {
 		print '</td></tr>';
 
 		print '<tr><td>'.$langs->trans("DataArchiveOnDeletion").'</td><td>';
-		print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION ? ' checked=""' : '').' disabled>';
+		print '<input type="checkbox" id="data_archive_on_deletion" name="data_archive_on_deletion" '.(!empty($conf->global->WPSHOP_DATA_ARCHIVE_ON_DELETION) ? ' checked=""' : '').' disabled>';
 		print '</td></tr>';
 
 		print '<tr><td>'.$langs->trans("ActivateTranslateLink").'</td><td>';

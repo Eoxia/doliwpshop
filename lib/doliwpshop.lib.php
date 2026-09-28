@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,8 +39,30 @@ function doliwpshopAdminPrepareHead()
 	$head[$h][1] = $langs->trans("Parameters");
 	$head[$h][2] = 'settings';
 	$h++;
+	
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_products.php", 1);
+	$head[$h][1] = "Produits/services"; // We can hardcode or use translation
+	$head[$h][2] = 'products';
+	$h++;
+	
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_categories.php", 1);
+	$head[$h][1] = "Catégories";
+	$head[$h][2] = 'categories';
+	$h++;
 
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/doliwpshop_users.php", 1);
+	$head[$h][1] = "Utilisateurs/droits";
+	$head[$h][2] = 'users';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/doliwpshop/admin/stockmanagement.php", 1);
+	$head[$h][1] = $langs->trans("StockManagement");
+	$head[$h][2] = 'stock';
+	$h++;
+
+	$object = null;
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
 
 	return $head;
 }
+
