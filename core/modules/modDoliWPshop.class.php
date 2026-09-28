@@ -48,7 +48,7 @@ class modDoliWPshop extends DolibarrModules {
 		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '1.2.0';
+		$this->version         = '23.0.0';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
@@ -81,8 +81,9 @@ class modDoliWPshop extends DolibarrModules {
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
-		$this->phpmin                  = array(5, 4);
-		$this->need_dolibarr_version   = array(4, 0);
+		$this->phpmin                  = array(7, 4);
+		$this->need_dolibarr_version   = array(23, 0); // Minimum version of Dolibarr required by module
+		$this->max_dolibarr_version    = array(24, 0); // Maximum version of Dolibarr supported by module
 		$this->warnings_activation     = array();
 		$this->warnings_activation_ext = array();
 		//$this->automatic_activation = array('FR'=>'WPshopWasAutomaticallyActivatedBecauseOfYourCountryChoice');
