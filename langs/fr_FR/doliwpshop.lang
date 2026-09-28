@@ -39,6 +39,15 @@ ConnectedWordPress = Connectée à WordPress ✔
 FailureWordPress = Echec de la connexion ❌
 DataArchiveOnDeletion = Archivage des données lors de la suppression d'une traduction sur un produit
 ActivateTranslateLink = Lien pour configurer l'activation de la traduction multilangues
+StockManagement = Gestion des stocks
+StockManagementConfiguration = Configuration de la gestion des stocks
+AutoUnStock = Déstockage automatique
+AutoUnStockDescription = Active le déstockage automatique
+UnstockOnOrderValidation = Déstockage automatique lors de la validation de la commande
+UnstockOnOrderValidationDescription = Active le déstockage automatique à la validation d'une commande
+UnstockOnInvoiceCreation = Déstockage automatique lors de la création de la facture
+UnstockOnInvoiceCreationDescription = Active le déstockage automatique à la création d'une facture
+
 
 #
 # Page À propos

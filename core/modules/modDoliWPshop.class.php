@@ -219,7 +219,7 @@ class modDoliWPshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		global $conf, $langs;
+		global $conf, $langs, $user;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
@@ -229,14 +229,16 @@ class modDoliWPshop extends DolibarrModules {
 		if ( !isset($conf->global->DOLIWPSHOP_USERAPI_SET) || $conf->global->DOLIWPSHOP_USERAPI_SET == 0 ) {
 			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
-			$user = new User($this->db);
-			$user->lastname  = 'API';
-			$user->firstname = 'REST';
-			$user->login     = 'USERAPI';
-			$user->setPassword($user, 'test');
-			$user->api_key = getRandomPassword(true);
+			$usertmp = new User($this->db);
+			$usertmp->lastname  = 'API';
+			$usertmp->firstname = 'REST';
+			$usertmp->login     = 'USERAPI';
+			$usertmp->entity    = $conf->entity;
+			$usertmp->email     = '';
+			$usertmp->setPassword($user);
+			$usertmp->api_key = getRandomPassword(true);
 
-			$user_id = $user->create($user);
+			$user_id = $usertmp->create($user);
 
 			dolibarr_set_const($this->db, 'DOLIWPSHOP_USERAPI_SET', $user_id, 'integer', 0, '', $conf->entity);
 		}

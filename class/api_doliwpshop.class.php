@@ -75,6 +75,31 @@ class DoliWPshop extends DolibarrApi
 	 * @url GET /checkPermissions
 	 */
 	public function checkPermissions() {
+		$permissions = [
+			'commande'  => ['read', 'write'],
+			'facture'   => ['read', 'write'],
+			'propale'   => ['read', 'write'],
+			'produit'   => ['read'],
+			'categorie' => ['read'],
+			'societe'   => ['contact' => ['read', 'write']],
+		];
+
+		foreach ($permissions as $module => $level1Permissions) {
+			foreach ($level1Permissions as $key => $level1Permission) {
+				if (is_array($level1Permission)) {
+					foreach ($level1Permission as $level2Permission) {
+						if (!DolibarrApiAccess::$user->hasRight($module, $key, $level2Permission)) {
+							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $key . ' with action: ' . $level2Permission);
+						}
+					}
+				} else {
+					if (!DolibarrApiAccess::$user->hasRight($module, $level1Permission)) {
+						throw new RestException(403, 'Access denied for resource: ' . $module . ' with action: ' . $level1Permission);
+					}
+				}
+			}
+		}
+
 		return array(
 			'success' => array(
 				'code' => 200,
@@ -212,6 +237,7 @@ class DoliWPshop extends DolibarrApi
 
 		return $url;
 	}
+
 }
 
 

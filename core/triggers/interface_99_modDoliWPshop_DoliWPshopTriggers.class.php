@@ -91,7 +91,7 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 
 		switch ($action) {
 			case 'PAYMENTONLINE_PAYMENT_OK' :
-				if ((float) DOL_VERSION >= 12 && (float) DOL_VERSION < 14) {
+				if ((float) DOL_VERSION >= 12 && (float) DOL_VERSION < 15) {
 					dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 
 					require_once DOL_DOCUMENT_ROOT . '/stripe/class/stripe.class.php';    // This also set $stripearrayofkeysbyenv
@@ -267,11 +267,14 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 							$this->db->commit();
 						}
 					}
-				} elseif ((float) DOL_VERSION >= 14 ) {
+				} elseif ((float) DOL_VERSION >= 15 ) {
 					dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
 					$object->fetchObjectLinked($object->id, 'commande', null, 'facture');
-					$invoice_id = array_shift(array_values($object->linkedObjectsIds['facture']));
+					if (!is_array($object->linkedObjectsIds['facture']) || empty($object->linkedObjectsIds['facture'])) {
+						break;
+					}
+					$invoice_id  = reset($object->linkedObjectsIds['facture']);
 					$invoice = new Facture($this->db);
 					$invoice->fetch($invoice_id);
 
@@ -303,11 +306,13 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 				$lastArrayProductLangsData['wpshop_id'] = $object->array_options['options__wps_id'];
 				$lastArrayProductLangsData['language_code'] = $lastArrayProductLangs->array_options['options_language_code'];
 
-				$arrayProductLangs = $productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product' => $object->id), '');
-				foreach ($arrayProductLangs as $arrayProductLang) {
-					$result[] = $arrayProductLang->array_options['options_language_code'];
+				$arrayProductLangsCheck = $productLang->fetchAll('', 't.rowid', 0, 0, array('t.fk_product' => $object->id), '');
+				foreach ($arrayProductLangsCheck as $arrayProductLang) {
+					if ($arrayProductLang->array_options['options_language_code'] != $lastArrayProductLangs->array_options['options_language_code']){
+						$result[] = $arrayProductLang->array_options['options_language_code'];
+					}
 				}
-				
+
 				if (in_array($lastArrayProductLangsData['language_code'],$result)) {
 					setEventMessages($langs->trans("ErrorLanguageCode") . ' '. $lastArrayProductLangsData['language_code'], null, 'errors');
 					return -1;
