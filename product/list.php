@@ -18,7 +18,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 $langs->loadLangs(array('doliwpshop@doliwpshop', 'products', 'categories'));
 
 // Security check
-if (empty($user->rights->doliwpshop->read)) {
+if (!$user->hasRight('doliwpshop', 'read')) {
 	accessforbidden();
 }
 

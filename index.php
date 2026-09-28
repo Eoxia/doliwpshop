@@ -8,7 +8,9 @@ require_once "lib/doliwpshop.lib.php";
 
 $langs->loadLangs(array("admin", "doliwpshop@doliwpshop"));
 
-if (! $user->rights->doliwpshop->read) accessforbidden();
+if (!$user->hasRight('doliwpshop', 'read')) {
+	accessforbidden();
+}
 
 $title = "Tableau de bord WPshop";
 

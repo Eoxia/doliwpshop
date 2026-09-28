@@ -61,8 +61,8 @@ if ($user->socid) {
     $socid = $user->socid;
 }
 
+$objectProduct = new Product($db);
 if ($id > 0 || !empty($ref)) {
-    $objectProduct = new Product($db);
     $objectProduct->fetch($id, $ref);
 	$objectProduct->multilangs = getMultiLangs($objectProduct);
 }
@@ -156,7 +156,7 @@ if (empty($reshook)) {
         $objectProduct->fetch($id);
         $current_lang = $langs->getDefaultLang();
 
-        foreach ($objectProduct->multilangs as $key => $value) { // enregistrement des nouvelles valeurs dans l'objet
+        foreach ((is_array($objectProduct->multilangs) ? $objectProduct->multilangs : []) as $key => $value) { // enregistrement des nouvelles valeurs dans l'objet
             if ($key == $current_lang) {
                 $objectProduct->label = GETPOST("libelle-" . $key);
                 $objectProduct->description = dol_htmlcleanlastbr(GETPOST("desc-" . $key, 'restricthtml'));
@@ -225,7 +225,7 @@ $picto = ($objectProduct->type == Product::TYPE_SERVICE ? 'service' : 'product')
 
 // Calculate $cnt_trans
 $cnt_trans = 0;
-if (!empty($objectProduct->multilangs)) {
+if (is_array($objectProduct->multilangs)) {
     foreach ($objectProduct->multilangs as $key => $value) {
         $cnt_trans++;
     }
@@ -275,7 +275,7 @@ if ($action == 'edit') {
     print '<input type="hidden" name="action" value="vedit">';
     print '<input type="hidden" name="id" value="' . $objectProduct->id . '">';
 
-    if (!empty($objectProduct->multilangs)) {
+    if (is_array($objectProduct->multilangs)) {
         $i = 0;
         foreach ($objectProduct->multilangs as $key => $value) {
             $i++;
@@ -316,7 +316,7 @@ if ($action == 'edit') {
 
     print '</form>';
 } elseif ($action != 'add') {
-    if (!empty($objectProduct->multilangs)) {
+    if (is_array($objectProduct->multilangs)) {
         $i = 0;
 
         foreach ($objectProduct->multilangs as $key => $value) {
