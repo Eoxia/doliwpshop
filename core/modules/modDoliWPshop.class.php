@@ -48,7 +48,7 @@ class modDoliWPshop extends DolibarrModules {
 		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '1.2.0';
+		$this->version         = '23.0.0';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
@@ -81,8 +81,9 @@ class modDoliWPshop extends DolibarrModules {
 		$this->requiredby   = array();
 		$this->conflictwith = array();
 		$this->langfiles    = array("doliwpshop@doliwpshop");
-		$this->phpmin                  = array(5, 4);
-		$this->need_dolibarr_version   = array(4, 0);
+		$this->phpmin                  = array(7, 4);
+		$this->need_dolibarr_version   = array(23, 0); // Minimum version of Dolibarr required by module
+		$this->max_dolibarr_version    = array(24, 0); // Maximum version of Dolibarr supported by module
 		$this->warnings_activation     = array();
 		$this->warnings_activation_ext = array();
 		//$this->automatic_activation = array('FR'=>'WPshopWasAutomaticallyActivatedBecauseOfYourCountryChoice');
@@ -219,7 +220,7 @@ class modDoliWPshop extends DolibarrModules {
 	 * @return     int                1 if OK, 0 if KO
 	 */
 	public function init( $options = '' ) {
-		global $conf, $langs;
+		global $conf, $langs, $user;
 
 		// Translations
 		$langs->load("doliwpshop@doliwpshop");
@@ -229,14 +230,16 @@ class modDoliWPshop extends DolibarrModules {
 		if ( !isset($conf->global->DOLIWPSHOP_USERAPI_SET) || $conf->global->DOLIWPSHOP_USERAPI_SET == 0 ) {
 			require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
-			$user = new User($this->db);
-			$user->lastname  = 'API';
-			$user->firstname = 'REST';
-			$user->login     = 'USERAPI';
-			$user->setPassword($user, 'test');
-			$user->api_key = getRandomPassword(true);
+			$usertmp = new User($this->db);
+			$usertmp->lastname  = 'API';
+			$usertmp->firstname = 'REST';
+			$usertmp->login     = 'USERAPI';
+			$usertmp->entity    = $conf->entity;
+			$usertmp->email     = '';
+			$usertmp->setPassword($user);
+			$usertmp->api_key = getRandomPassword(true);
 
-			$user_id = $user->create($user);
+			$user_id = $usertmp->create($user);
 
 			dolibarr_set_const($this->db, 'DOLIWPSHOP_USERAPI_SET', $user_id, 'integer', 0, '', $conf->entity);
 		}

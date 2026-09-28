@@ -616,7 +616,7 @@ if ($mode == 'hierarchy') {
 	print '    }';
 	print '    $(document).on("change", "#wpshop_show_only_not_empty", function() { filterCategories(); });';
 	print '    $(document).on("click", "#btn_wpshop_filter_cats", function(e) { e.preventDefault(); filterCategories(); });';
-	print '    // Initial state';
+	print '    /* Initial state */';
 	print '    var savedState = localStorage.getItem("wpshop_show_only_not_empty");';
 	print '    if (savedState === "1") {';
 	print '        $("#wpshop_show_only_not_empty").prop("checked", true);';

@@ -271,6 +271,8 @@ class ActionsDoliWPshop
 			$wp_url = !empty($conf->global->WPSHOP_URL_WORDPRESS) ? rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/') : '';
 			if ($object->element == 'product' ) {
 				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/?post_type=wps-product&p=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
+			} elseif ($object->element == 'societe') {
+				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/admin.php?page=wps-third-party&id=' . $object->array_options['options__wps_id'] . '" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			} elseif (isset($object->element) && ($object->element == 'category' || $object->element == 'categorie')) {
 				print '<div class="inline-block divButAction"><a class="butAction" title="'.$langs->trans("ViewOnWPshop").'" href="' . $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $object->array_options['options__wps_id'] . '&post_type=wps-product" target="_blank" >'.$langs->trans("ViewOnWPshop").'</a></div>';
 			}
