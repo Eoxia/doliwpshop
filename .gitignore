@@ -3,3 +3,6 @@
 .editorconfig
 test
 scratch/
+
+/vendor
+/.github/tmp/phpstan
