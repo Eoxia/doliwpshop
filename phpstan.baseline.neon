@@ -1,0 +1,913 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 6 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$conf might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$error might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$form might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 23
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 6 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: admin/doliwpshop_categories.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop_categories.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: admin/doliwpshop_categories.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop_categories.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 6 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: admin/doliwpshop_products.php
+
+		-
+			message: '#^Variable \$conf might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: admin/doliwpshop_products.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: admin/doliwpshop_products.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: admin/doliwpshop_products.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop_products.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 6 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Parameter \#1 \$id of method User\:\:fetch\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Variable \$conf might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 11
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: admin/doliwpshop_users.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: admin/product_lang_extrafields.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: admin/product_lang_extrafields.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: admin/product_lang_extrafields.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/product_lang_extrafields.php
+
+		-
+			message: '#^Variable \$form might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: admin/stockmanagement.php
+
+		-
+			message: '#^Cannot access property \$nbtotalofrecords on object\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \!\= between ''hierarchy'' and ''hierarchy'' will always evaluate to false\.$#'
+			identifier: notEqual.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \!\= between ''product'' and '''' will always evaluate to true\.$#'
+			identifier: notEqual.alwaysTrue
+			count: 2
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \!\= between \*NEVER\* and ''kanban'' will always evaluate to true\.$#'
+			identifier: notEqual.alwaysTrue
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between ''hierarchy'' and ''hierarchy'' will always evaluate to true\.$#'
+			identifier: equal.alwaysTrue
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between ''product'' and ''bank_account'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between ''product'' and ''member'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between ''product'' and ''project'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between ''product'' and ''user'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Loose comparison using \=\= between \*NEVER\* and ''kanban'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Offset ''helplist'' does not exist on array\{type\: string, label\: string, langfile\?\: string, enabled\: int\<0, 2\>\|string, position\: int, notnull\?\: int, visible\: int\<\-6, 6\>\|string, alwayseditable\?\: int\<0, 1\>\|string, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Parameter \#3 \$selected of method Form\:\:multiselectarray\(\) expects array\<string\>, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Path in include\(\) "\.\./main\.inc\.php" is not a file or it does not exist\.$#'
+			identifier: include.fileNotFound
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\{type\: string, label\: string, langfile\?\: string, enabled\: int\<0, 2\>\|string, position\: int, notnull\?\: int, visible\: int\<\-6, 6\>\|string, alwayseditable\?\: int\<0, 1\>\|string, \.\.\.\} and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: categorie_list.php
+
+		-
+			message: '#^Cannot access property \$slug on array\|true\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:addMoreActionsButtons\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:addMoreActionsButtons\(\) has parameter \$action with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:addMoreActionsButtons\(\) has parameter \$parameters with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:doActions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:formObjectOptions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:formObjectOptions\(\) has parameter \$action with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:formObjectOptions\(\) has parameter \$hookmanager with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:formObjectOptions\(\) has parameter \$object with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Method ActionsDoliWPshop\:\:formObjectOptions\(\) has parameter \$parameters with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int                             \< 0 on error, 0 on success,\)\: Unexpected token "on", expected ''\>'' at offset 367 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_shift is passed by reference, so it expects variables only\.$#'
+			identifier: argument.byRef
+			count: 1
+			path: class/actions_doliwpshop.class.php
+
+		-
+			message: '#^Access to an undefined property DoliWPshop\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 8
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Access to an undefined property DoliWPshop\:\:\$order\.$#'
+			identifier: property.notFound
+			count: 5
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Access to an undefined property DoliWPshop\:\:\$societe\.$#'
+			identifier: property.notFound
+			count: 7
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method DoliWPshop\:\:associateCategory\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method DoliWPshop\:\:associateProduct\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method DoliWPshop\:\:associateThirdparty\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method DoliWPshop\:\:checkPermissions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method DoliWPshop\:\:getOnlinePaymentUrl\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @property has invalid value \(DoliDB db\)\: Unexpected token "db", expected variable at offset 64 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Parameter \#1 \$langs of method User\:\:getFullName\(\) expects Translate, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Variable \$url might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: class/api_doliwpshop.class.php
+
+		-
+			message: '#^Method CategoryDoliWPshop\:\:createCategoryOnWPshop\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/category_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, category object create if OK \: 0\)\: Unexpected token "if", expected ''\>'' at offset 134 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/category_doliwpshop.class.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: class/category_doliwpshop.class.php
+
+		-
+			message: '#^Method ProductDoliWPshop\:\:checkProductExistOnWPshop\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/product_doliwpshop.class.php
+
+		-
+			message: '#^Method ProductDoliWPshop\:\:createProductOnWPshop\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/product_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, product object create if OK \: 0\)\: Unexpected token "if", expected ''\>'' at offset 132 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/product_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, product object exist if OK \: 0\)\: Unexpected token "if", expected ''\>'' at offset 142 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/product_doliwpshop.class.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: class/product_doliwpshop.class.php
+
+		-
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Method ProductLang\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Method ProductLang\:\:delete\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Method ProductLang\:\:fetch\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Method ProductLang\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, \>0 if OK\)\: Unexpected token "if", expected ''\>'' at offset 209 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, \>0 if OK\)\: Unexpected token "if", expected ''\>'' at offset 212 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, Id of created object if OK\)\: Unexpected token "if", expected ''\>'' at offset 211 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int         \<0 if KO, 0 if not found, \>0 if OK\)\: Unexpected token "if", expected ''\>'' at offset 156 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc type array of property ProductLang\:\:\$fields is not covariant with PHPDoc type array\<string, array\{type\: string, label\: string, langfile\?\: string, enabled\: int\<0, 2\>\|string, position\: int, notnull\?\: int, visible\: int\<\-6, 6\>\|string, alwayseditable\?\: int\<0, 1\>\|string, \.\.\.\}\> of overridden property CommonObject\:\:\$fields\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc type int of property ProductLang\:\:\$isextrafieldmanaged is not covariant with PHPDoc type int\<0, 1\> of overridden property CommonObject\:\:\$isextrafieldmanaged\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^PHPDoc type int of property ProductLang\:\:\$ismultientitymanaged is not covariant with PHPDoc type int\<0, 1\>\|string\|null of overridden property CommonObject\:\:\$ismultientitymanaged\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Parameter \#2 \$notrigger of method CommonObject\:\:createCommon\(\) expects int\<0, 1\>, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Parameter \#2 \$notrigger of method CommonObject\:\:deleteCommon\(\) expects int\<0, 1\>, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Parameter \#2 \$notrigger of method CommonObject\:\:updateCommon\(\) expects int\<0, 1\>, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Property ProductLang\:\:\$description has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Property ProductLang\:\:\$fk_product has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Property ProductLang\:\:\$label has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Property ProductLang\:\:\$lang has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Property ProductLang\:\:\$rowid has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/productlang.class.php
+
+		-
+			message: '#^Method ThirdPartyDoliWPshop\:\:checkThirdPartyExistOnWPshop\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/thirdparty_doliwpshop.class.php
+
+		-
+			message: '#^Method ThirdPartyDoliWPshop\:\:createThirdPartyOnWPshop\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: class/thirdparty_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, third party object create if OK \: 0\)\: Unexpected token "if", expected ''\>'' at offset 140 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/thirdparty_doliwpshop.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int             \<0 if KO, third party object exist if OK \: 0\)\: Unexpected token "if", expected ''\>'' at offset 150 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: class/thirdparty_doliwpshop.class.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: class/thirdparty_doliwpshop.class.php
+
+		-
+			message: '#^Property DolibarrModules\:\:\$menu \(1\|array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\>\) does not accept non\-empty\-array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\|array\{fk_menu\: 0, type\: ''top'', titre\: ''WPShop'', mainmenu\: ''doliwpshop'', leftmenu\: '''', url\: ''/doliwpshop/index…'', langs\: ''doliwpshop…'', position\: 10000, \.\.\.\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: core/modules/modDoliWPshop.class.php
+
+		-
+			message: '#^Comparison operation "\<" between \*NEVER\* and 15 results in an error\.$#'
+			identifier: smaller.invalid
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 12 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 0\.0 and 15 is always false\.$#'
+			identifier: greaterOrEqual.alwaysFalse
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Function confirmPayment not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Function getDetails not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int              		\<0 if KO, 0 if no triggered ran, \>0 if OK\)\: Unexpected token "if", expected ''\>'' at offset 404 on line 11$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Parameter \#1 \$db of function dol_print_error expects DoliDB\|null, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Parameter \#2 \$notrigger of method Facture\:\:update\(\) expects int, false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Parameter \#3 \$ident of function dol_syslog expects int\<\-1, 1\>, ''_payment'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$TRANSACTIONID might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$bankaccountid might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$data might not be defined\.$#'
+			identifier: variable.undefined
+			count: 19
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$paymentmethod might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$ref might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$result might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Variable \$source might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: core/triggers/interface_99_modDoliWPshop_DoliWPshopTriggers.class.php
+
+		-
+			message: '#^Path in include\(\) "\.\./main\.inc\.php" is not a file or it does not exist\.$#'
+			identifier: include.fileNotFound
+			count: 1
+			path: index.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: index.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: index.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: index.php
+
+		-
+			message: '#^Method WPshopAPI\:\:autoloader\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: lib/api_doliwpshop.class.php
+
+		-
+			message: '#^Method WPshopAPI\:\:register_autoloader\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: lib/api_doliwpshop.class.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/api_doliwpshop.class.php
+
+		-
+			message: '#^Property WPshopAPI\:\:\$base has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: lib/api_doliwpshop.class.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|true and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: lib/api_doliwpshop.class.php
+
+		-
+			message: '#^File begins with UTF\-8 BOM character\. This may cause problems when running the code in the web browser\.$#'
+			identifier: whitespace.bom
+			count: 1
+			path: lib/doliwpshop.lib.php
+
+		-
+			message: '#^Deprecated in PHP 8\.0\: Required parameter \$objectProduct follows optional parameter \$extrafields_value\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function getMultiLangs\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function getMultiLangs\(\) has parameter \$objectProduct with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function setMultiLangsByLangs\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function setMultiLangsByLangs\(\) has parameter \$extrafields_value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function setMultiLangsByLangs\(\) has parameter \$lang_code with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function setMultiLangsByLangs\(\) has parameter \$objectProduct with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Function setMultiLangsByLangs\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int        \<0 if KO, \>0 if OK\)\: Unexpected token "if", expected ''\>'' at offset 66 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: lib/doliwpshop_function.lib.php
+
+		-
+			message: '#^Binary operation "\-" between string and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: product/list.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Categorie\:\:containing\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: product/list.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Categorie\:\:fetch\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: product/list.php
+
+		-
+			message: '#^Property CommonObject\:\:\$id \(int\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: product/list.php
+
+		-
+			message: '#^Variable \$conf might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: product/list.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 16
+			path: product/list.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 9
+			path: product/list.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: product/list.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Offset ''object'' does not exist on array\{label\: string, description\: string, note\?\: string, other\?\: string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 8
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Product\:\:fetch\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 6
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Parameter \#4 \$filter of method FormAdmin\:\:select_language\(\) expects array\<string\>, array\<string, array\<string, string\>\>\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$conf might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$db might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$extrafields_value might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$hookmanager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$langs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 39
+			path: traduction_doliwpshop.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 21
+			path: traduction_doliwpshop.php
