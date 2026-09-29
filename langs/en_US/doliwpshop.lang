@@ -61,7 +61,4 @@ Draft = draft
 #
 # config
 #
-ReadRight = Consult myobject of WPshop
-CreateRight = Create/Update myobject of WPshop
-DeleteRight = Delete myobject of WPshop
 SetupWPshop=WPshop Setup
