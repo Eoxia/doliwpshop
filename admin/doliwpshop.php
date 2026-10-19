@@ -52,7 +52,7 @@ $userapi->getrights();
 //Rights invoices
 empty($userapi->rights->facture->lire) ? $userapi->addrights(11) : 1;
 empty($userapi->rights->facture->creer) ? $userapi->addrights(12) : 1;
-empty($userapi->rights->facture->paiment) ? $userapi->addrights(16) : 1;
+empty($userapi->rights->facture->paiement) ? $userapi->addrights(16) : 1;
 //Rights propals
 empty($userapi->rights->propale->lire) ? $userapi->addrights(21) : 1;
 empty($userapi->rights->propale->creer) ? $userapi->addrights(22) : 1;
@@ -67,7 +67,7 @@ empty($userapi->rights->commande->creer) ? $userapi->addrights(82) : 1;
 empty($userapi->rights->societe->lire) ? $userapi->addrights(121) : 1;
 empty($userapi->rights->societe->creer) ? $userapi->addrights(122) : 1;
 empty($userapi->rights->societe->supprimer) ? $userapi->addrights(125) : 1;
-empty($userapi->rights->societe->exporter) ? $userapi->addrights(126) : 1;
+empty($userapi->rights->societe->export) ? $userapi->addrights(126) : 1;
 empty($userapi->rights->societe->client->voir) ? $userapi->addrights(262) : 1;
 empty($userapi->rights->societe->contact->lire) ? $userapi->addrights(281) : 1;
 //Rights tags
@@ -80,8 +80,8 @@ empty($userapi->rights->service->creer) ? $userapi->addrights(532) : 1;
 empty($userapi->rights->stock->lire) ? $userapi->addrights(1001) : 1;
 //Rights events
 empty($userapi->rights->agenda->myactions->read) ? $userapi->addrights(2401) : 1;
-empty($userapi->rights->propale->myactions->create)  ? $userapi->addrights(2402) : 1;
-empty($userapi->rights->propale->myactions->delete)  ? $userapi->addrights(2403) : 1;
+empty($userapi->rights->agenda->myactions->create) ? $userapi->addrights(2402) : 1;
+empty($userapi->rights->agenda->myactions->delete) ? $userapi->addrights(2403) : 1;
 
 /*
  * Actions
