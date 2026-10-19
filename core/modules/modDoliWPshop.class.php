@@ -48,7 +48,7 @@ class modDoliWPshop extends DolibarrModules {
 		$this->descriptionlong = $langs->trans("ModuleDoliWPshopDescLong");
 		$this->editor_name     = 'Eoxia';
 		$this->editor_url      = 'https://eoxia.com';
-		$this->version         = '23.0.0';
+		$this->version         = '23.0.1';
 		$this->const_name      = 'MAIN_MODULE_' . strtoupper( $this->name );
 		$this->picto           = 'doliwpshop@doliwpshop';
 
