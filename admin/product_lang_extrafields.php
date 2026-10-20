@@ -38,6 +38,8 @@ if (!$res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
+require_once __DIR__.'/../lib/doliwpshop.lib.php';
+
 // Load translation files required by the page
 $langs->loadLangs(array('companies', 'admin', 'products'));
 
@@ -83,7 +85,7 @@ if (empty($conf->product->enabled)) {
 }
 
 $help_url = '';
-llxHeader('', $title, $help_url);
+llxHeader('', $title, $help_url, '', 0, 0, '', doliwpshop_header_css(), '', doliwpshop_body_classes());
 
 
 $linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1">'.$langs->trans("BackToModuleList").'</a>';
