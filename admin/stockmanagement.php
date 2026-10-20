@@ -71,7 +71,7 @@ if (preg_match('/set_([a-z0-9_\-]+)/i', $action, $reg)) {
 
 $title    = $langs->trans("StockManagement");
 
-llxHeader('', $title);
+llxHeader('', $title, '', '', 0, 0, '', doliwpshop_header_css(), '', doliwpshop_body_classes());
 
 // Subheader
 $linkback = '<a href="'.($backtopage?:DOL_URL_ROOT .'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
