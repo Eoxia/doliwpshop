@@ -42,6 +42,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
+require_once __DIR__ . '/lib/doliwpshop.lib.php';
 require_once __DIR__ . '/lib/doliwpshop_function.lib.php';
 
 require_once __DIR__ . '/class/productlang.class.php';
@@ -213,7 +214,7 @@ if (GETPOST("type") == '1' || ($objectProduct->type == Product::TYPE_SERVICE)) {
     $helpurl = 'EN:Module_Services_En|FR:Module_Services|ES:M&oacute;dulo_Servicios';
 }
 
-llxHeader('', $title, $helpurl);
+llxHeader('', $title, $helpurl, '', 0, 0, '', doliwpshop_header_css(), '', doliwpshop_body_classes());
 
 $form = new Form($db);
 $formadmin = new FormAdmin($db);
@@ -284,7 +285,7 @@ if ($action == 'edit') {
             print ($i > 1 ? "<br>" : "") . ($s ? $s . ' ' : '') . ' <div class="inline-block margintop marginbottomonly"><b>' . $langs->trans('Language_' . $key) . '</b></div><div class="inline-block floatright"><a href="' . $_SERVER["PHP_SELF"] . '?id=' . $objectProduct->id . '&action=delete&token=' . newToken() . '&langtodelete=' . $key . '">' . img_delete('', 'class="valigntextbottom marginrightonly"') . '</a></div>';
 
             print '<div class="underbanner clearboth"></div>';
-            print '<table class="border centpercent">';
+            print '<table class="border centpercent doliwpshop-translation">';
             print '<tr><td class="tdtop titlefieldcreate fieldrequired">' . $langs->trans('Label') . '</td><td><input name="libelle-' . $key . '" size="40" value="' . dol_escape_htmltag($value["object"]->label) . '"></td></tr>';
             print '<tr><td class="tdtop">' . $langs->trans('Description') . '</td><td>';
             $doleditor = new DolEditor("desc-$key", $value["object"]->description, '', 160, 'dolibarr_notes', '', false, true, $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC, ROWS_3, '90%');
@@ -326,7 +327,7 @@ if ($action == 'edit') {
 
 			print '<div class="fichecenter">';
 			print '<div class="underbanner clearboth"></div>';
-			print '<table class="border centpercent">';
+			print '<table class="border centpercent doliwpshop-translation">';
 			print '<tr><td class="titlefieldcreate">' . $langs->trans('Label') . '</td><td>' . $value["object"]->label . '</td></tr>';
 			print '<tr><td class="tdtop">' . $langs->trans('Description') . '</td><td>' . $value["object"]->description . '</td></tr>';
 			if (!empty($conf->global->PRODUCT_USE_OTHER_FIELD_IN_TRANSLATION)) {

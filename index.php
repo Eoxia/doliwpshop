@@ -17,7 +17,7 @@ $title = "Tableau de bord WPshop";
 $mainmenu = "doliwpshop";
 $leftmenu = "doliwpshop_products";
 
-llxHeader("", $title);
+llxHeader("", $title, "", "", 0, 0, "", doliwpshop_header_css(), "", doliwpshop_body_classes());
 
 print load_fiche_titre($title, "", "object_doliwpshop@doliwpshop");
 
@@ -39,7 +39,7 @@ print "<div class=\"fichecenter\">";
 print "<div class=\"twocolumns\">";
 print "<div class=\"firstcolumn\">";
 
-print "<table class=\"noborder centpercent\">";
+print "<table class=\"noborder centpercent doliwpshop-indicators\">";
 print "<tr class=\"liste_titre\">";
 print "<th colspan=\"2\">Indicateurs Produits/Services</th>";
 print "</tr>";

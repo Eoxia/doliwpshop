@@ -72,7 +72,7 @@ if (!function_exists('curl_init')) {
 	setEventMessages('Attention : l\'extension PHP cURL est nécessaire pour le fonctionnement de DoliWPshop.', null, 'warnings');
 }
 
-llxHeader('', $langs->trans($page_name));
+llxHeader('', $langs->trans($page_name), '', '', 0, 0, '', doliwpshop_header_css(), '', doliwpshop_body_classes());
 
 // Subheader
 $linkback = '<a href="'.($backtopage?$backtopage:DOL_URL_ROOT .'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';

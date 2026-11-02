@@ -33,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/treeview.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+require_once __DIR__.'/lib/doliwpshop.lib.php';
 
 /**
  * @var Conf $conf
@@ -458,23 +459,23 @@ if ($mode == 'hierarchy') {
 		$wpshop_info = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 		
 		// ID Dolibarr en mauve
-		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
-		$wpshop_info .= '<div style="display:inline-flex; align-items:center; gap:5px; margin-right: 15px;" title="ID Dolibarr">'.$doli_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">#'.$object->id.'</span></div>';
-		
-		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" style="width:18px; height:18px; border-radius:50%;" />' : '';
+		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" class="doliwpshop-id-logo" />' : '';
+		$wpshop_info .= '<div class="doliwpshop-id" title="ID Dolibarr">'.$doli_img_tag.'<span class="doliwpshop-id-badge doliwpshop-id-badge-dolibarr">#'.$object->id.'</span></div>';
+
+		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" class="doliwpshop-id-logo" />' : '';
 		$create_button_html = '';
 		if ($wps_id_text != 'Aucun' && !empty($conf->global->WPSHOP_URL_WORDPRESS)) {
 			$has_wps_id = 1;
 			$wp_url = rtrim($conf->global->WPSHOP_URL_WORDPRESS, '/');
 			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
-			$wpshop_info .= '<div style="display:inline-flex; align-items:center; gap:5px; margin-right: 15px;" title="Voir sur WPshop">'.$wp_img_tag.'<a href="'.$link.'" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none;">#'.$wps_id_text.'</a></div>';
+			$wpshop_info .= '<div class="doliwpshop-id" title="Voir sur WPshop">'.$wp_img_tag.'<a href="'.$link.'" target="_blank" rel="noopener noreferrer" class="doliwpshop-id-badge doliwpshop-id-badge-wpshop">#'.$wps_id_text.'</a></div>';
 		} else {
 			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
-			$create_button_html = '<a href="'.$create_link.'" style="color: #0073aa; margin-right: 5px; font-size: 1.1em;" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
+			$create_button_html = '<a href="'.$create_link.'" class="doliwpshop-cat-create" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
 		}
 		// Picto product : Nombre et lien vers la liste des produits
 		$prod_link = DOL_URL_ROOT.'/custom/doliwpshop/product/list.php?search_category[]='.$object->id;
-		$wpshop_info .= '<a href="'.$prod_link.'" target="_blank" rel="noopener noreferrer" style="color: #555;" title="Voir les produits liés"><span class="fa fa-cube"></span> '.$nb_products.'</a>';
+		$wpshop_info .= '<a href="'.$prod_link.'" target="_blank" rel="noopener noreferrer" class="doliwpshop-cat-products" title="Voir les produits liés"><span class="fa fa-cube"></span> '.$nb_products.'</a>';
 		
 		$entry = '<table class="nobordernopadding centpercent wpshop-cat-table" data-has-wps-id="'.$has_wps_id.'" data-nb-products="'.$nb_products.'">';
 		$entry .= '<tr>';
@@ -482,7 +483,7 @@ if ($mode == 'hierarchy') {
 		// Force tools on right
 		$conf->main_checkbox_left_column = 0;
 
-		$entry .= '<td class="tdoverflowmax300" style="padding-left: 5px;">';
+		$entry .= '<td class="tdoverflowmax300 doliwpshop-cat-label">';
 		$entry .= '<span class="noborderoncategories" '.$color.'>'.$li.'</span>';
 		$entry .= $wpshop_info;
 		if (!empty($conf->main_checkbox_left_column)) {
@@ -536,7 +537,7 @@ if ($mode == 'hierarchy') {
 
 	$nbtotalofrecords = $nbofentries;
 
-	llxHeader('', $title, '', '', 0, 0, $arrayofjs, $arrayofcss);
+	llxHeader('', $title, '', '', 0, 0, $arrayofjs, doliwpshop_header_css($arrayofcss), '', doliwpshop_body_classes());
 
 	$newcardbutton = '';
 	$newcardbutton .= dolGetButtonTitleSeparator();
@@ -554,8 +555,8 @@ if ($mode == 'hierarchy') {
 	print '<td>';
 	print $langs->trans("Categories");
 	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-	print '<input type="checkbox" id="wpshop_show_only_not_empty"> <label for="wpshop_show_only_not_empty" style="font-weight:normal;">Afficher uniquement les catégories non vides</label>';
-	print ' <a href="#" id="btn_wpshop_filter_cats" class="button" style="padding: 2px 5px; margin-left: 10px;" title="Filtrer"><span class="fa fa-search"></span></a>';
+	print '<input type="checkbox" id="wpshop_show_only_not_empty"> <label for="wpshop_show_only_not_empty" class="doliwpshop-cat-filter-label">Afficher uniquement les catégories non vides</label>';
+	print ' <a href="#" id="btn_wpshop_filter_cats" class="button doliwpshop-cat-filter-button" title="Filtrer"><span class="fa fa-search"></span></a>';
 	print '</td>';
 	print '<td></td><td class="right">';
 	if ($morethan1level && !empty($conf->use_javascript_ajax)) {
@@ -586,10 +587,6 @@ if ($mode == 'hierarchy') {
 	}
 
 	print "</table>";
-
-	print '<style>';
-	print '.wpshop-hide-empty { display: none !important; }';
-	print '</style>';
 
 	print '<script>';
 	print '$(document).ready(function() {';
@@ -629,7 +626,7 @@ if ($mode == 'hierarchy') {
 } else {
 	// Mode list
 
-	llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', 'mod-acategory page-list bodyforlist');	// Can use also classforhorizontalscrolloftabs instead of bodyforlist for a horizontal scroll in the table instead of page
+	llxHeader('', $title, $help_url, '', 0, 0, $morejs, doliwpshop_header_css($morecss), '', doliwpshop_body_classes('mod-acategory page-list bodyforlist'));	// Can use also classforhorizontalscrolloftabs instead of bodyforlist for a horizontal scroll in the table instead of page
 
 	$arrayofselected = is_array($toselect) ? $toselect : array();
 
