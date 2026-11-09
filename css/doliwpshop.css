@@ -1,0 +1,310 @@
+/* DoliWPshop: stylesheet of the module back office pages, loaded by doliwpshop_header_css() (never from the
+   module descriptor, so that it does not reach the other Dolibarr pages).
+
+   1. Base: the rules that replace the inline styles of the module markup. They keep the look the pages had
+      before, so that DoliWPshop renders the same without Saturne.
+   2. Modern back office theme: restyle of the module components when Saturne is enabled. Saturne puts the
+      saturne-theme class on the body (see doliwpshop_body_classes()) and exposes its design tokens as
+      --saturne-* custom properties on that scope. Every rule of this part is scoped by
+      body#mainbody.saturne-theme.mod-doliwpshop. */
+
+
+/* ==================================================================================================== */
+/* 1. Base                                                                                              */
+/* ==================================================================================================== */
+
+/* Dolibarr and WPshop identifiers of a product (product list) or of a category (category tree) */
+.doliwpshop-id {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.doliwpshop-id-logo {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+}
+
+.doliwpshop-id-badge,
+a.doliwpshop-id-badge:link,
+a.doliwpshop-id-badge:visited,
+a.doliwpshop-id-badge:hover,
+a.doliwpshop-id-badge:active {
+	display: inline-block;
+	padding: 2px 6px;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 11px;
+	text-decoration: none;
+}
+
+.doliwpshop-id-badge-dolibarr {
+	background: #855b8e;
+}
+
+.doliwpshop-id-badge-wpshop {
+	background: #0073aa;
+}
+
+/* Category tree (categorie_list.php). The tree sits in a table.liste and its label cell is a .tdoverflowmax300:
+   the list-cell reset of saturne.min.css (loaded when Saturne is enabled) turns the divs of such a cell inline
+   and hides its images, hence the id selector */
+#wpshop_category_tree td.doliwpshop-cat-label .doliwpshop-id {
+	display: inline-flex;
+	margin-right: 15px;
+}
+
+#wpshop_category_tree td.doliwpshop-cat-label .doliwpshop-id-logo {
+	display: inline-block;
+}
+
+table.wpshop-cat-table td.doliwpshop-cat-label {
+	padding-left: 5px;
+}
+
+a.doliwpshop-cat-create:link,
+a.doliwpshop-cat-create:visited {
+	margin-right: 5px;
+	color: #0073aa;
+	font-size: 1.1em;
+}
+
+a.doliwpshop-cat-products:link,
+a.doliwpshop-cat-products:visited {
+	color: #555;
+}
+
+label.doliwpshop-cat-filter-label {
+	font-weight: normal;
+}
+
+#wpshop_category_tree a.doliwpshop-cat-filter-button {
+	margin-left: 10px;
+	padding: 2px 5px;
+}
+
+/* Categories hidden by the "non empty categories only" filter */
+.wpshop-hide-empty {
+	display: none !important;
+}
+
+
+/* ==================================================================================================== */
+/* 2. Modern back office theme (Saturne enabled)                                                        */
+/* ==================================================================================================== */
+
+/* ---- Identifiers, as tinted pills: Dolibarr keeps its purple, WPshop takes the Saturne blue ---- */
+
+body#mainbody.saturne-theme.mod-doliwpshop .doliwpshop-id {
+	gap: 6px;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop .doliwpshop-id-logo {
+	box-shadow: 0 0 0 1px var(--saturne-border);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop .doliwpshop-id-badge,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge:link,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge:visited,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge:hover,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge:active {
+	padding: 2px 9px;
+	border: 1px solid transparent;
+	border-radius: var(--saturne-radius-pill);
+	font-size: 11.5px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0.01em;
+	line-height: 1.4;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop .doliwpshop-id-badge-dolibarr {
+	border-color: rgba(133, 91, 142, 0.3);
+	background: rgba(133, 91, 142, 0.12);
+	color: #6b4774;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop .doliwpshop-id-badge-wpshop,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge-wpshop:link,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge-wpshop:visited {
+	border-color: rgba(13, 138, 255, 0.3);
+	background: var(--saturne-primary-soft);
+	color: var(--saturne-primary-strong);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-id-badge-wpshop:hover {
+	border-color: var(--saturne-primary);
+	background: rgba(13, 138, 255, 0.18);
+	color: var(--saturne-primary-strong);
+}
+
+/* ---- Dashboard (index.php): the indicators read like the rows of the Saturne dashboard widgets ---- */
+
+body#mainbody.saturne-theme.mod-doliwpshop table.doliwpshop-indicators > tbody > tr:not(.liste_titre) > td:first-child {
+	color: var(--saturne-text-soft);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop table.doliwpshop-indicators > tbody > tr:not(.liste_titre) > td.right {
+	width: 1%;
+	color: var(--saturne-text);
+	font-size: 15px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/* ---- Admin pages: checkbox switches of the stock rules (ajax_constantonoff in checkbox mode) ---- */
+
+body#mainbody.saturne-theme.mod-doliwpshop table.noborder td a > .far.fa-square {
+	color: var(--saturne-faint);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop table.noborder td a > .far.fa-check-square {
+	color: var(--saturne-primary);
+}
+
+/* ---- Category tree (categorie_list.php) ---- */
+
+/* Filter of the header row: the checkbox label keeps a normal case in the uppercase header */
+body#mainbody.saturne-theme.mod-doliwpshop label.doliwpshop-cat-filter-label {
+	margin-left: 2px;
+	color: var(--saturne-text-soft);
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: normal;
+	text-transform: none;
+	cursor: pointer;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree a.button.doliwpshop-cat-filter-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 30px;
+	min-width: 30px;
+	height: 30px;
+	margin: 0 0 0 8px;
+	padding: 0;
+	border: 1px solid var(--saturne-border);
+	border-radius: var(--saturne-radius-sm);
+	background: var(--saturne-surface);
+	box-shadow: var(--saturne-shadow-sm);
+	color: var(--saturne-text-soft) !important;
+	font-size: 12px;
+	vertical-align: middle;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree a.button.doliwpshop-cat-filter-button:hover {
+	border-color: var(--saturne-primary);
+	color: var(--saturne-primary) !important;
+}
+
+/* Each category line becomes a row with a hover, like the lines of the lists */
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree table.wpshop-cat-table {
+	border-radius: var(--saturne-radius-sm);
+	transition: background-color 0.15s ease;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree table.wpshop-cat-table:hover {
+	background: var(--saturne-surface-soft);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree table.wpshop-cat-table td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree table.wpshop-cat-table td:last-child {
+	padding-right: 8px;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree span.noborderoncategories {
+	padding: 3px 9px;
+	font-weight: 600;
+}
+
+/* Number of products of the category */
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-products:link,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-products:visited {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 9px;
+	border-radius: var(--saturne-radius-pill);
+	background: var(--saturne-bg);
+	color: var(--saturne-text-soft);
+	font-size: 12px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	vertical-align: middle;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-products .fa-cube {
+	color: var(--saturne-faint);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-products:hover {
+	background: var(--saturne-primary-soft);
+	color: var(--saturne-primary-strong);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-products:hover .fa-cube {
+	color: var(--saturne-primary);
+}
+
+/* Line tools: create on WPshop, edit, delete */
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-create:link,
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-create:visited {
+	color: var(--saturne-primary);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop a.doliwpshop-cat-create:hover {
+	color: var(--saturne-primary-strong);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree .wpshop-cat-table :is(.pictoedit, .pictodelete) {
+	color: var(--saturne-faint);
+	opacity: 1;
+	transition: color 0.15s ease;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree .wpshop-cat-table a:hover .pictoedit {
+	color: var(--saturne-primary);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop #wpshop_category_tree .wpshop-cat-table a:hover .pictodelete {
+	color: var(--saturne-danger);
+}
+
+/* ---- Translations of a product (traduction_doliwpshop.php), as white cards like the Saturne field tables ---- */
+
+body#mainbody.saturne-theme.mod-doliwpshop table.border.doliwpshop-translation {
+	box-sizing: border-box;
+	margin-bottom: 16px;
+	border: 1px solid var(--saturne-border) !important;
+	border-collapse: separate !important;
+	border-spacing: 0;
+	border-radius: var(--saturne-radius-lg);
+	background: var(--saturne-surface);
+	box-shadow: var(--saturne-shadow-sm);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop table.border.doliwpshop-translation > tbody > tr > td {
+	padding: 9px 14px !important;
+	border-top: none !important;
+	border-bottom: 1px solid var(--saturne-border-soft) !important;
+	color: var(--saturne-text);
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop table.border.doliwpshop-translation > tbody > tr:last-child > td {
+	border-bottom: none !important;
+}
+
+body#mainbody.saturne-theme.mod-doliwpshop table.border.doliwpshop-translation > tbody > tr > td:first-child:not(:only-child) {
+	color: var(--saturne-muted);
+	font-weight: 500;
+}

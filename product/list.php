@@ -14,6 +14,7 @@ if (! $res) {
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+require_once __DIR__.'/../lib/doliwpshop.lib.php';
 
 $langs->loadLangs(array('doliwpshop@doliwpshop', 'products', 'categories'));
 
@@ -82,7 +83,7 @@ $search_status = GETPOST('search_status', 'int');
 $mainmenu = 'doliwpshop';
 $leftmenu = 'doliwpshop_products_list';
 
-llxHeader('', $langs->trans('Products'));
+llxHeader('', $langs->trans('Products'), '', '', 0, 0, '', doliwpshop_header_css(), '', doliwpshop_body_classes());
 
 $title = $langs->trans('Products');
 
@@ -140,7 +141,7 @@ if ($resql)
 	print '<input type="hidden" name="page" value="'.$page.'">';
 
 	$newcardbutton = dolGetButtonTitle($langs->trans('NewProduct'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/product/list.php', '', 1, array('morecss'=>'reposition marginleftonly'));
-	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $num, 'title_products', 0, $newcardbutton, '', $limit);
+	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $num, 'product', 0, $newcardbutton, '', $limit);
 	
 	print '<div class="div-table-responsive">';
 	print '<table class="tagtable liste">'."\n";
@@ -272,16 +273,16 @@ if ($resql)
 		$img_wp = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-wordpress.jpg' : '';
 		$img_doli = $wp_base_url ? $wp_base_url . '/wp-content/plugins/wpshop/core/asset/image/logo-dolibarr.jpg' : '';
 
-		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" style="width:18px; height:18px; border-radius:50%;" /> ' : '';
-		$doli_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$doli_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #855b8e; color: #fff; border-radius: 3px; font-size: 11px;">#'.$obj->rowid.'</span></div>';
+		$doli_img_tag = $img_doli ? '<img src="'.$img_doli.'" class="doliwpshop-id-logo" /> ' : '';
+		$doli_id_text = '<div class="doliwpshop-id">'.$doli_img_tag.'<span class="doliwpshop-id-badge doliwpshop-id-badge-dolibarr">#'.$obj->rowid.'</span></div>';
 		print '<td>'.$doli_id_text.'</td>';
 		
 		$wps_id_val = dol_escape_htmltag($obj->_wps_id);
-		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" style="width:18px; height:18px; border-radius:50%;" /> ' : '';
+		$wp_img_tag = $img_wp ? '<img src="'.$img_wp.'" class="doliwpshop-id-logo" /> ' : '';
 		if ($wp_base_url && $obj->_wps_id > 0) {
-			$wps_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$wp_img_tag.'<a href="'.$wp_base_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px; text-decoration: none;">#'.$wps_id_val.'</a></div>';
+			$wps_id_text = '<div class="doliwpshop-id">'.$wp_img_tag.'<a href="'.$wp_base_url.'/wp-admin/post.php?post='.urlencode($obj->_wps_id).'&action=edit" target="_blank" rel="noopener noreferrer" class="doliwpshop-id-badge doliwpshop-id-badge-wpshop">#'.$wps_id_val.'</a></div>';
 		} else {
-			$wps_id_text = '<div style="display:inline-flex; align-items:center; gap:5px;">'.$wp_img_tag.'<span style="display:inline-block; padding: 2px 6px; background: #0073aa; color: #fff; border-radius: 3px; font-size: 11px;">#'.$wps_id_val.'</span></div>';
+			$wps_id_text = '<div class="doliwpshop-id">'.$wp_img_tag.'<span class="doliwpshop-id-badge doliwpshop-id-badge-wpshop">#'.$wps_id_val.'</span></div>';
 		}
 		print '<td>'.$wps_id_text.'</td>';
 		

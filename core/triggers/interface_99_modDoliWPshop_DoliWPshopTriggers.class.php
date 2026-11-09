@@ -52,7 +52,7 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 		$this->name = preg_replace('/^Interface/i', '', get_class($this));
 		$this->family = "demo";
 		$this->description = "Doliwpshop triggers.";
-		$this->version = '23.0.0';
+		$this->version = '23.0.1';
 		$this->picto = 'doliwpshop@doliwpshop';
 	}
 

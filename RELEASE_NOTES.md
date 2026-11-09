@@ -1,32 +1,15 @@
-# [DoliWPshop] [23.0.0] - Gestion du stock - API sécurisée - Reprise de la ligne de version
+# [DoliWPshop] [23.0.1] - Slugs des catégories préservés - Droits de l'utilisateur d'API
 
-Description : Première version publiée depuis la **1.2.0 de septembre 2021**. Elle rassemble les deux lignes de développement qui avaient divergé, apporte la **configuration de la gestion et des mouvements de stock**, un **contrôle des droits sur l'API**, et aligne la numérotation du module sur le reste du parc : le numéro majeur suit désormais la version majeure de Dolibarr, d'où le passage de 1.2.0 à **23.0.0**.
+Description : Version corrective de la **23.0.0**. Elle rend la montée depuis la 1.2.0 sûre pour les boutiques dont le plugin WordPress lit encore le slug des catégories, et corrige la vérification des droits de l'utilisateur d'API.
 
-**Le module demande désormais Dolibarr 23 au minimum et 24 au maximum.** Il déclarait jusqu'ici Dolibarr 4 et PHP 5.4, qui ne correspondaient plus à rien.
-
-## Nouvelles fonctionnalités et innovations
-
-### Stock
-
-* Une page d'administration dédiée permet de configurer la **méthode de gestion du stock** et les **paramètres des mouvements de stock**.
-
-### API
-
-* L'appel `checkPermissions` **vérifie réellement les droits** de la clé d'API sur les commandes, factures, propositions, produits, catégories et contacts de tiers, et refuse l'accès avec un code 403 explicite au lieu de laisser passer.
-* La documentation des routes est complétée.
-
-### Interface
-
-* Bouton **« voir dans WPshop »** sur la fiche d'un tiers, à côté de ceux déjà présents sur les produits et les catégories.
+**Si vous êtes en 1.2.0, passez directement en 23.0.1 plutôt qu'en 23.0.0.**
 
 ## Améliorations & corrections
 
-* **Fatale à l'initialisation du module** corrigée.
-* Le trigger ne tombe plus en erreur quand `linkedObjectsIds['facture']` n'est pas un tableau.
-* Création et adresse de courriel de l'utilisateur d'API corrigées.
-* Le contrôle sur les codes de langue du trigger est revu.
-* Les classes du module sont incluses par `dol_include_once` sans préfixe `/custom`, et les points d'entrée chargent l'environnement Dolibarr avec deux tentatives : les deux motifs pour lesquels le contrôle de paquet du Dolistore refusait le zip.
+* **Les slugs des catégories ne sont plus supprimés à l'activation du module.** La 23.0.0 retirait le champ `_wps_slug` des catégories, et avec lui les slugs déjà enregistrés. Or le plugin WordPress WPshop 2.6.1 les lit encore pour synchroniser les catégories. Le module n'écrit plus ce champ et affiche le slug depuis WordPress, mais il ne le détruit plus (#86).
+* **Droits de l'utilisateur d'API** : la page de configuration vérifiait quatre droits sous un nom erroné (paiement des factures, export des tiers, création et suppression de ses événements d'agenda). Elle les réattribuait donc à chaque affichage. Les noms sont corrigés (#84).
+* Le paquet de la release n'embarque plus l'outillage du dépôt (`.github`) (#77).
 
-## Note sur la numérotation
+## Note pour les instances déjà en 23.0.0
 
-Le module passe de `1.2.0` à `23.0.0`. Ce n'est pas un saut de vingt-deux versions de travail, mais un alignement : tous les modules du parc Evarisk portent un numéro majeur égal à la version majeure de Dolibarr qu'ils visent. La branche `1.3.0`, qui portait une partie des nouveautés ci-dessus, est fusionnée et devient caduque.
+Sur une instance où la 23.0.0 a déjà été activée, le champ `_wps_slug` a déjà été supprimé : cette version ne le recrée pas.

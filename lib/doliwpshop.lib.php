@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /* Copyright (C) 2019-2020 Eoxia <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -64,5 +64,43 @@ function doliwpshopAdminPrepareHead()
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'doliwpshop');
 
 	return $head;
+}
+
+/**
+ *  Stylesheets of the DoliWPshop back office pages, to pass to llxHeader()
+ *
+ *  The module stylesheet is always loaded. DoliWPshop does not depend on Saturne: only when Saturne is enabled
+ *  are its stylesheet and the modern back office theme it carries added (see doliwpshop_body_classes()).
+ *
+ *  @param  array $arrayofcss Stylesheets already needed by the page
+ *  @return array             Stylesheets to pass to llxHeader()
+ */
+function doliwpshop_header_css(array $arrayofcss = array()): array
+{
+	if (isModEnabled('saturne')) {
+		$arrayofcss[] = '/saturne/css/saturne.min.css';
+	}
+	$arrayofcss[] = '/doliwpshop/css/doliwpshop.css';
+
+	return $arrayofcss;
+}
+
+/**
+ *  Body classes of the DoliWPshop back office pages, to pass to llxHeader() as $morecssonbody
+ *
+ *  mod-doliwpshop scopes the module stylesheet. saturne-theme, added only when Saturne is enabled, turns on the
+ *  modern back office theme shared by the Saturne modules.
+ *
+ *  @param  string $morecssonbody Body classes already needed by the page
+ *  @return string                Body classes to pass to llxHeader()
+ */
+function doliwpshop_body_classes(string $morecssonbody = ''): string
+{
+	$classes = trim($morecssonbody . ' mod-doliwpshop');
+	if (isModEnabled('saturne')) {
+		$classes .= ' saturne-theme';
+	}
+
+	return $classes;
 }
 
