@@ -470,7 +470,7 @@ if ($mode == 'hierarchy') {
 			$link = $wp_url . '/wp-admin/term.php?taxonomy=wps-product-cat&tag_ID=' . $wps_id_text . '&post_type=wps-product';
 			$wpshop_info .= '<div class="doliwpshop-id" title="Voir sur WPshop">'.$wp_img_tag.'<a href="'.$link.'" target="_blank" rel="noopener noreferrer" class="doliwpshop-id-badge doliwpshop-id-badge-wpshop">#'.$wps_id_text.'</a></div>';
 		} else {
-			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
+			$create_link = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createwp&token='.newToken().'&mode=hierarchy'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param);
 			$create_button_html = '<a href="'.$create_link.'" class="doliwpshop-cat-create" title="Création sur WPshop"><span class="fa fa-plus-circle"></span></a>';
 		}
 		// Picto product : Nombre et lien vers la liste des produits
