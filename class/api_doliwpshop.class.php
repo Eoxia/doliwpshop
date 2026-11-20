@@ -112,7 +112,8 @@ class DoliWPshop extends DolibarrApi
 	public function associateProduct($wp_id, $doli_id) {
 		$result = $this->product->fetch($doli_id);
 
-		if (!$result) {
+		// fetch() returns 0 when not found, -1 on error.
+		if ($result <= 0) {
 			throw new RestException(404, 'Product not found');
 		}
 
@@ -143,8 +144,9 @@ class DoliWPshop extends DolibarrApi
 	 */
 	public function associateCategory($wp_id, $doli_id) {
 		$result = $this->category->fetch($doli_id);
-		
-		if (!$result) {
+
+		// fetch() returns 0 when not found, -1 on error.
+		if ($result <= 0) {
 			throw new RestException(404, 'Category not found');
 		}
 
@@ -152,17 +154,13 @@ class DoliWPshop extends DolibarrApi
 			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
 
-		$oldcategory = dol_clone($this->category, 0);
-
 		$this->category->array_options['options__wps_id'] = $wp_id;
 
-		$updatetype = false;
-
-		if ($this->category->type != $oldcategory->type && ($this->category->isCategory())) {
-			$updatetype = true;
+		// Categorie::update(User $user, $notrigger = 0) also saves the extrafields.
+		$result = $this->category->update(DolibarrApiAccess::$user);
+		if ($result < 0) {
+			throw new RestException(500, 'Error when updating category: '.$this->category->error);
 		}
-
-		$result = $this->category->update($doli_id, DolibarrApiAccess::$user, 1, 'update', $updatetype);
 
 		return $result;
 	}
