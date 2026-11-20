@@ -62,3 +62,20 @@ Draft = draft
 # config
 #
 SetupWPshop=WPshop Setup
+
+#
+# API user rights
+#
+DoliWPshopRightsSelectUser = Select an existing user to grant the required rights:
+DoliWPshopRightsApply = Grant the rights
+DoliWPshopRightsCreateUser = Create wpshopapi
+DoliWPshopRightsCreateUserHelp = Quick creation: creates a system user dedicated to the API (login: <code>wpshopapi</code>) with every required right. Then generate its API key on its user card.
+DoliWPshopRightsTitle = Rights required by DoliWPshop (user: %s)
+DoliWPshopRightsNoUser = Select a user and click on "Grant the rights" to see and grant its rights.
+DoliWPshopRightsApplied = Rights granted to user %s.
+DoliWPshopRightsNotApplied = %s right(s) could not be granted to user %s.
+DoliWPshopRightsDisabledModules = Some modules used by WPshop are disabled, so their rights cannot be granted: %s. Enable them, then grant the rights again.
+DoliWPshopRightsActive = Granted
+DoliWPshopRightsMissing = Missing
+DoliWPshopRightsModuleDisabled = Module disabled
+DoliWPshopRightsNotEnforced = Not needed (advanced permissions off)

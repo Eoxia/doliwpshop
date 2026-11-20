@@ -18,20 +18,13 @@ if ((float) DOL_VERSION >= 6) {
 
 $fuserid = GETPOST("fuserid", "int");
 
-$required_rights = array(
-	"doliwpshop" => array(8000000, 8000001, 8000002),
-	"produit" => array(31, 32, 34),
-	"categorie" => array(241, 242, 243),
-	"societe" => array(121, 122, 125, 281, 282, 283)
-);
-
 // Actions
 if ($action == "create_api_user" || $action == "apply_rights") {
 	$db->begin();
 	$error = 0;
-	
+
+	$targetUser = new User($db);
 	if ($action == "create_api_user") {
-		$targetUser = new User($db);
 		$targetUser->fetch("", "wpshopapi");
 		if ($targetUser->id <= 0) {
 			$targetUser->login = "wpshopapi";
@@ -46,20 +39,25 @@ if ($action == "create_api_user" || $action == "apply_rights") {
 			}
 		}
 		$fuserid = $targetUser->id;
-	} else {
-		$targetUser = new User($db);
+	} elseif ($fuserid > 0) {
 		$targetUser->fetch($fuserid);
 	}
-	
+
 	if (!$error && $targetUser->id > 0) {
-		foreach ($required_rights as $module => $rights) {
-			foreach ($rights as $rid) {
-				$targetUser->addrights($rid);
-			}
+		$failed = doliwpshop_apply_required_rights($targetUser);
+		if ($failed > 0) {
+			setEventMessages($langs->trans("DoliWPshopRightsNotApplied", $failed, $targetUser->login), null, "errors");
+			$error++;
+		} else {
+			setEventMessages($langs->trans("DoliWPshopRightsApplied", $targetUser->login), null, "mesgs");
 		}
-		setEventMessages("Droits appliqués avec succès à l'utilisateur " . $targetUser->login, null, "mesgs");
 	}
-	$db->commit();
+
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+	}
 }
 
 $page_name = "Utilisateurs/droits";
@@ -74,60 +72,63 @@ dol_fiche_head($head, "users", $langs->trans("ModuleDoliWPshopName"), -1, "doliw
 require_once DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php";
 $form = new Form($db);
 
+// Rights of a disabled module cannot be granted: the module must be enabled first.
+$disabled_modules = doliwpshop_get_disabled_modules();
+if (!empty($disabled_modules)) {
+	print info_admin($langs->trans("DoliWPshopRightsDisabledModules", implode(", ", $disabled_modules)), 0, 0, "warning");
+}
+
 print "<form method=\"POST\" action=\"" . $_SERVER["PHP_SELF"] . "\">\n";
 print "<input type=\"hidden\" name=\"token\" value=\"" . newToken() . "\">\n";
 
-print "<strong>sélectionner un utilisateur existant pour lui appliquer les droits requis :</strong><br>\n";
+print "<strong>" . $langs->trans("DoliWPshopRightsSelectUser") . "</strong><br>\n";
 print $form->select_dolusers($fuserid, "fuserid", 1);
-print " <button type=\"submit\" name=\"action\" value=\"apply_rights\" class=\"button\">APPLIQUER LES DROITS</button>\n";
-print " <button type=\"submit\" name=\"action\" value=\"create_api_user\" class=\"button\">CRÉER WPSHOPAPI</button>\n";
+print " <button type=\"submit\" name=\"action\" value=\"apply_rights\" class=\"button\">" . $langs->trans("DoliWPshopRightsApply") . "</button>\n";
+print " <button type=\"submit\" name=\"action\" value=\"create_api_user\" class=\"button\">" . $langs->trans("DoliWPshopRightsCreateUser") . "</button>\n";
 print "<br>\n";
-print "<span class=\"opacitymedium\">Création rapide : Vous pouvez créer automatiquement un utilisateur système dédié à l'API (login: <code>wpshopapi</code>) qui recevra tous les droits nécessaires.</span>\n";
+print "<span class=\"opacitymedium\">" . $langs->trans("DoliWPshopRightsCreateUserHelp") . "</span>\n";
 print "</form><br><br>\n";
 
 // Render the rights table
 if ($fuserid > 0) {
 	$targetUser = new User($db);
 	$targetUser->fetch($fuserid);
-	
-	print load_fiche_titre("Droits requis pour DoliWPshop (Utilisateur : " . $targetUser->login . ")", "", "");
-	
+	$targetUser->getrights();
+
+	$advanced_perms = getDolGlobalString("MAIN_USE_ADVANCED_PERMS");
+
+	print load_fiche_titre($langs->trans("DoliWPshopRightsTitle", $targetUser->login), "", "");
+
 	print "<table class=\"noborder centpercent\">\n";
-	
-	foreach ($required_rights as $module => $rights) {
+
+	foreach (doliwpshop_get_required_rights() as $module => $definition) {
+		$enabled = isModEnabled($module);
+
 		print "<tr class=\"liste_titre\">\n";
-		print "<td>" . ucfirst($module) . "</td>\n";
-		print "<td class=\"center\">État</td>\n";
+		print "<td>" . $langs->trans($definition["label"]) . "</td>\n";
+		print "<td class=\"center\">" . $langs->trans("Status") . "</td>\n";
 		print "</tr>\n";
-		
-		foreach ($rights as $rid) {
-			$sql = "SELECT id, libelle FROM " . MAIN_DB_PREFIX . "rights_def WHERE id = " . $rid;
-			$res = $db->query($sql);
-			if ($res) {
-				$obj = $db->fetch_object($res);
-				if ($obj) {
-					$sql2 = "SELECT fk_id FROM " . MAIN_DB_PREFIX . "user_rights WHERE fk_user = " . $targetUser->id . " AND fk_id = " . $rid;
-					$res2 = $db->query($sql2);
-					$has_right = ($db->num_rows($res2) > 0);
-					
-					print "<tr class=\"oddevent\">\n";
-					print "<td>" . $langs->trans($obj->libelle) . "</td>\n";
-					if ($has_right) {
-						print "<td class=\"center\"><span class=\"badge badge-success\">Actif</span></td>\n";
-					} else {
-						print "<td class=\"center\"><span class=\"badge badge-warning\">Manquant</span></td>\n";
-					}
-					print "</tr>\n";
-				}
+
+		foreach ($definition["rights"] as $id => $right) {
+			print "<tr class=\"oddeven\">\n";
+			print "<td>" . dol_escape_htmltag(doliwpshop_get_right_label($id, $right)) . " <span class=\"opacitymedium\">(" . $id . ")</span></td>\n";
+			if (!$enabled) {
+				print "<td class=\"center\"><span class=\"badge badge-danger\">" . $langs->trans("DoliWPshopRightsModuleDisabled") . "</span></td>\n";
+			} elseif (doliwpshop_user_has_right($targetUser, $module, $right)) {
+				print "<td class=\"center\"><span class=\"badge badge-success\">" . $langs->trans("DoliWPshopRightsActive") . "</span></td>\n";
+			} elseif ($right["advanced"] && !$advanced_perms) {
+				print "<td class=\"center\"><span class=\"badge badge-secondary\">" . $langs->trans("DoliWPshopRightsNotEnforced") . "</span></td>\n";
+			} else {
+				print "<td class=\"center\"><span class=\"badge badge-warning\">" . $langs->trans("DoliWPshopRightsMissing") . "</span></td>\n";
 			}
+			print "</tr>\n";
 		}
 	}
 	print "</table>\n";
 } else {
-	print "<div class=\"opacitymedium\">Sélectionnez un utilisateur et cliquez sur 'Appliquer les droits' pour voir et attribuer ses droits.</div>\n";
+	print "<div class=\"opacitymedium\">" . $langs->trans("DoliWPshopRightsNoUser") . "</div>\n";
 }
 
 dol_fiche_end();
 llxFooter();
 $db->close();
-
