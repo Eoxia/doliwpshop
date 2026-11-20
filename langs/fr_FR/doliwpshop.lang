@@ -91,3 +91,20 @@ TranslateProductArchive = Traduction du produit archivé
 ErrorLanguageCode = WPML language code déjà utilisé :
 UpdateOnWPshop = Mettre à jour sur WPshop
 SetupWPshop=Configuration WPshop
+
+#
+# Droits de l'utilisateur API
+#
+DoliWPshopRightsSelectUser = Sélectionnez un utilisateur existant pour lui attribuer les droits requis :
+DoliWPshopRightsApply = Appliquer les droits
+DoliWPshopRightsCreateUser = Créer wpshopapi
+DoliWPshopRightsCreateUserHelp = Création rapide : crée un utilisateur système dédié à l'API (identifiant : <code>wpshopapi</code>) avec tous les droits nécessaires. Générez ensuite sa clé API depuis sa fiche utilisateur.
+DoliWPshopRightsTitle = Droits requis par DoliWPshop (utilisateur : %s)
+DoliWPshopRightsNoUser = Sélectionnez un utilisateur et cliquez sur « Appliquer les droits » pour voir et attribuer ses droits.
+DoliWPshopRightsApplied = Droits appliqués à l'utilisateur %s.
+DoliWPshopRightsNotApplied = %s droit(s) n'ont pas pu être appliqués à l'utilisateur %s.
+DoliWPshopRightsDisabledModules = Des modules utilisés par WPshop sont désactivés, leurs droits ne peuvent pas être attribués : %s. Activez-les, puis appliquez à nouveau les droits.
+DoliWPshopRightsActive = Actif
+DoliWPshopRightsMissing = Manquant
+DoliWPshopRightsModuleDisabled = Module désactivé
+DoliWPshopRightsNotEnforced = Non requis (droits avancés désactivés)

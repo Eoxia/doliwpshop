@@ -72,32 +72,22 @@ class DoliWPshop extends DolibarrApi
 	/**
 	 * Check if the API key has permissions and the module is responsive
 	 *
+	 * Checks every right of doliwpshop_get_required_rights() and lists all the missing ones at once, in the form
+	 * "Missing rights: 81 commande->lire (Read customers orders); 82 commande->creer (...)", read by WPshop.
+	 *
 	 * @url GET /checkPermissions
 	 */
 	public function checkPermissions() {
-		$permissions = [
-			'commande'  => ['read', 'write'],
-			'facture'   => ['read', 'write'],
-			'propale'   => ['read', 'write'],
-			'produit'   => ['read'],
-			'categorie' => ['read'],
-			'societe'   => ['contact' => ['read', 'write']],
-		];
+		require_once __DIR__ . '/../lib/doliwpshop.lib.php';
 
-		foreach ($permissions as $module => $level1Permissions) {
-			foreach ($level1Permissions as $key => $level1Permission) {
-				if (is_array($level1Permission)) {
-					foreach ($level1Permission as $level2Permission) {
-						if (!DolibarrApiAccess::$user->hasRight($module, $key, $level2Permission)) {
-							throw new RestException(403, 'Access denied for resource: ' . $module . ':' . $key . ' with action: ' . $level2Permission);
-						}
-					}
-				} else {
-					if (!DolibarrApiAccess::$user->hasRight($module, $level1Permission)) {
-						throw new RestException(403, 'Access denied for resource: ' . $module . ' with action: ' . $level1Permission);
-					}
-				}
+		$missing = doliwpshop_get_missing_rights(DolibarrApiAccess::$user);
+
+		if (!empty($missing)) {
+			$list = array();
+			foreach ($missing as $id => $description) {
+				$list[] = $id . ' ' . $description;
 			}
+			throw new RestException(403, 'Missing rights: ' . implode('; ', $list));
 		}
 
 		return array(

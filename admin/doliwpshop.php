@@ -47,41 +47,16 @@ $arrayofparameters = array(
 );
 
 $userapi = new User($db);
-$userapi->fetch($conf->global->DOLIWPSHOP_USERAPI_SET,'', '',0,$conf->entity);
-$userapi->getrights();
-//Rights invoices
-empty($userapi->rights->facture->lire) ? $userapi->addrights(11) : 1;
-empty($userapi->rights->facture->creer) ? $userapi->addrights(12) : 1;
-empty($userapi->rights->facture->paiement) ? $userapi->addrights(16) : 1;
-//Rights propals
-empty($userapi->rights->propale->lire) ? $userapi->addrights(21) : 1;
-empty($userapi->rights->propale->creer) ? $userapi->addrights(22) : 1;
-empty($userapi->rights->propale->cloturer) ? $userapi->addrights(26) : 1;
-//Rights products
-empty($userapi->rights->produit->lire) ? $userapi->addrights(31) : 1;
-empty($userapi->rights->produit->creer) ? $userapi->addrights(32) : 1;
-//Rights orders
-empty($userapi->rights->commande->lire) ? $userapi->addrights(81) : 1;
-empty($userapi->rights->commande->creer) ? $userapi->addrights(82) : 1;
-//Rights tiers
-empty($userapi->rights->societe->lire) ? $userapi->addrights(121) : 1;
-empty($userapi->rights->societe->creer) ? $userapi->addrights(122) : 1;
-empty($userapi->rights->societe->supprimer) ? $userapi->addrights(125) : 1;
-empty($userapi->rights->societe->export) ? $userapi->addrights(126) : 1;
-empty($userapi->rights->societe->client->voir) ? $userapi->addrights(262) : 1;
-empty($userapi->rights->societe->contact->lire) ? $userapi->addrights(281) : 1;
-//Rights tags
-empty($userapi->rights->categorie->lire) ? $userapi->addrights(241) : 1;
-empty($userapi->rights->categorie->creer) ? $userapi->addrights(242) : 1;
-//Rights services
-empty($userapi->rights->service->lire) ? $userapi->addrights(531) : 1;
-empty($userapi->rights->service->creer) ? $userapi->addrights(532) : 1;
-//Rights stocks
-empty($userapi->rights->stock->lire) ? $userapi->addrights(1001) : 1;
-//Rights events
-empty($userapi->rights->agenda->myactions->read) ? $userapi->addrights(2401) : 1;
-empty($userapi->rights->agenda->myactions->create) ? $userapi->addrights(2402) : 1;
-empty($userapi->rights->agenda->myactions->delete) ? $userapi->addrights(2403) : 1;
+if (getDolGlobalInt('DOLIWPSHOP_USERAPI_SET') > 0) {
+	$userapi->fetch(getDolGlobalInt('DOLIWPSHOP_USERAPI_SET'), '', '', 0, $conf->entity);
+}
+if ($userapi->id > 0) {
+	$userapi->getrights();
+	// Grants the rights WPshop needs (single list, see doliwpshop_get_required_rights()), only when one is missing.
+	if (!empty(doliwpshop_get_missing_rights($userapi))) {
+		doliwpshop_apply_required_rights($userapi);
+	}
+}
 
 /*
  * Actions
