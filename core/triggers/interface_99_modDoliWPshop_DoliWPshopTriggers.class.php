@@ -335,7 +335,9 @@ class InterfaceDoliWPshopTriggers extends DolibarrTriggers
 				}
 
 			default:
-				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				// Every event of the instance comes through here, also those sent with an object that is not a CommonObject
+				// (webobserver, ExternalAccess) and may have no id
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".(isset($object->id) ? $object->id : ''));
 				break;
 		}
 
